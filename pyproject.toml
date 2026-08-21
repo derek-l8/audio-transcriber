@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "npu-scribe"
+version = "0.1.0"
+description = "Local-first Windows speech transcription and dictation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dependencies = ["platformdirs==4.3.6"]
+
+[project.optional-dependencies]
+desktop = ["PySide6==6.8.2.1", "sounddevice==0.5.1", "numpy==2.2.3"]
+inference = ["openvino==2026.3.0", "openvino-genai==2026.3.0.0"]
+dev = ["pytest==8.3.5", "pytest-cov==6.0.0", "hypothesis==6.127.3", "ruff==0.9.10", "mypy==1.15.0"]
+
+[project.scripts]
+npu-scribe = "npu_scribe.cli:main"
+npu-scribe-desktop = "npu_scribe.desktop:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/npu_scribe"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["npu_scribe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = ["endurance: long bounded-memory checks", "windows: owner-run Windows checks"]
+
