@@ -20,9 +20,11 @@ def test_atomic_layers_and_recovery(tmp_path: Path, silent_wav: Path) -> None:
     )
     assert result.status == "ready"
     raw = json.loads((tmp_path / "data/lectures/session-1/raw-transcript.json").read_text())
-    cleaned = json.loads((tmp_path / "data/lectures/session-1/cleaned-transcript.json").read_text())
+    balanced = json.loads(
+        (tmp_path / "data/lectures/session-1/balanced-transcript.json").read_text()
+    )
     assert raw["segments"][0]["text"] == "um hello hello"
-    assert cleaned["segments"][0]["text"] == "Hello."
+    assert balanced["segments"][0]["text"] == "Hello."
     with pytest.raises(FileExistsError):
         run_lecture(session, store, MockSpeechEngine(), silent_wav)
 

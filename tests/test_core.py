@@ -9,7 +9,7 @@ from npu_scribe.cleanup import deterministic_cleanup, process_text, spoken_forma
 from npu_scribe.config import propose_windows_data_location
 from npu_scribe.devices import Benchmark, choose_device
 from npu_scribe.dictionary import DictionaryEntry, PersonalDictionary
-from npu_scribe.engines import MockSpeechEngine, inspect_pcm_wav
+from npu_scribe.engines import MockSpeechEngine, inspect_audio
 from npu_scribe.export import markdown, plain_text, srt, structured_json
 from npu_scribe.insertion import FocusTarget, SafeInserter
 from npu_scribe.metrics import cer, wer
@@ -63,7 +63,7 @@ def test_exports_and_metrics() -> None:
 
 
 def test_mock_engine_inspects_audio(silent_wav: Path) -> None:
-    assert inspect_pcm_wav(silent_wav).duration == 1
+    assert inspect_audio(silent_wav).duration == 1
     assert MockSpeechEngine().transcribe(silent_wav).provenance.actual_device == "MOCK"
 
 
