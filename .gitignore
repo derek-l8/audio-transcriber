@@ -23,3 +23,6 @@ failed-dictation-audio/
 *.bin
 *.blob
 host-validation/reports/
+
+.stubs/
+.scratch*

@@ -1,42 +1,56 @@
 # Implementation status
 
-Updated: 2026-08-21 UTC
+Updated: 2026-08-26 UTC
 
-Current milestone: Milestone 0 sandbox gate met; partial Milestones 1–5 implemented.
+Current milestone: Milestone 1 (CLI batch transcription vertical slice)
+implemented and committed as `ac0394b` ("Complete batch transcription core")
+on branch `feature/batch-transcription-core`. The working tree must not be
+described as clean unless `git status` genuinely shows it clean at check time.
+`.git` was never modified by agent passes.
 
-## Evidence and decisions
+## What exists now
 
-- Read the complete 804-line PRD at `docs/NPU-SCRIBE-PRD.md`.
-- Chose a provisional Python/PySide/OpenVINO architecture; see `DECISIONS.md`.
-- Added contracts and initial implementations for speech engines, immutable storage,
-  exports, metrics, cleanup, dictionary, device policy, and lecture orchestration.
-- OpenVINO 2026.3 CPU proof loaded and executed pinned Whisper tiny.en INT4 from scratch;
-  exact single-run evidence is in `MODEL_EVALUATION.md`. Only CPU was enumerated.
-- Added initial desktop entry point, insertion/OneDrive contracts, PyInstaller/Inno Setup
-  definitions, and round-one PowerShell validation. These are host-unverified.
-- `/workspace` is correct. No startup boundary-failure report was present.
-- Git branch `main` has no commits and all starting files were untracked. Owner explicitly
-  directed continuation; `.git` remains untouched. Packaging diffs may be unreliable.
-- Sandbox Python is 3.11.2. Root package directories are read-only; `python3-venv`, FFmpeg,
-  PowerShell, .NET, and Rust are absent. Pip was bootstrapped into `/agent/scratch` only.
+- Full CLI: `models list|download`, `devices`, `transcribe`, `resume`,
+  `export`, `evaluate` — with stable machine-readable session output
+  (`actual_device:`, `requested_device:`, `chunks_completed:`,
+  `fallback_events:`, `inference_seconds:`).
+- Secure model acquisition with a bundled manifest of two verified-checksum
+  models (tiny.en proof, base.en candidate); real download verified earlier in
+  the sandbox and re-runnable only behind the opt-in `live` test marker
+  (`NPU_SCRIBE_RUN_LIVE=1 pytest -m live`).
+- Media-decoder boundary; direct PCM WAV plus FFmpeg adapter (stub-tested;
+  FFmpeg not bundled).
+- Bounded chunking, absolute timestamps parsed from the pinned OpenVINO GenAI
+  result structure, overlap dedup, atomic checkpoints, explicit resume with
+  mismatch refusal, immutable raw + deterministic Balanced layers, four export
+  formats, manifest-driven evaluation harness, measured device benchmarks with
+  fallback provenance.
 
-## Commands and results
+## Evidence quality labels used everywhere
 
-- `rg --files -uu ...`, PRD chunk reads, source inspection: passed.
-- `apt-get update`: failed because `/var/lib/apt/lists` is read-only.
-- Scratch pip bootstrap: succeeded; checksum recorded in `.agent/SOURCES.md`.
-- `ruff format --check .` and `ruff check .`: passed after fixes.
-- `mypy src`: passed in strict mode across 14 source files.
-- `pytest --cov=npu_scribe`: 10 passed, 80% total coverage.
-- `python3 -m compileall -q src`: passed.
-- Large-file scan: no repository files over 5 MB.
+- **verified-sandbox**: executed here (Linux CPU container) with recorded results.
+- **implemented-unverified**: implemented and unit/static-tested with mocks or
+  stubs; needs a real Windows run for evidence.
+- **pending**: designed or planned only.
+
+## Sandbox environment notes
+
+- Python 3.11.2. `/tmp` is mounted noexec, so executable test stubs live in
+  gitignored `tests/.stubs/`. System package installation remains impossible
+  (read-only apt lists). A local virtualenv at `.venv/` (gitignored) hosts dev
+  dependencies plus OpenVINO 2026.3.0 / openvino-genai 2026.3.0.0.
+- huggingface.co was reachable from this sandbox during earlier passes; the
+  default suite never uses that network path.
 
 ## Host-only pending
 
-All Windows/NPU, microphone, tray, shortcut, Word/Notion/Codex insertion, startup,
-installer, and target-machine performance evidence is pending.
+All NPU/GPU evidence, Windows packaging/installer, microphone/UI, insertion,
+one-hour endurance, representative accuracy — and execution of the rewritten
+PowerShell harness itself (static-tested only).
 
 ## Next action
 
-Finish chunking/media/history/UI/diagnostics and expand the Windows harness with identical
-device benchmarks after the model-acquisition manifest is implemented.
+Owner runs `host-validation\Invoke-NpuScribeValidation.ps1 -SetupEnvironment -DownloadModels`,
+supplies one public evaluation lecture via a manifest, and returns the two
+sanitized reports. Then compare tiny/base candidates per the selection policy
+and only then consider a default-model statement.

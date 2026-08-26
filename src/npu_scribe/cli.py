@@ -1,18 +1,367 @@
+"""Command-line interface for Milestone 1 batch transcription.
+
+Exit codes: 0 success, 1 operational failure, 2 argument errors (argparse).
+Ordinary transcription never performs network activity; network is used only by
+the explicit `models download` and `evaluate` commands.
+"""
+
 from __future__ import annotations
 
 import argparse
+import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any, TypeAlias
 
+from .acquisition import MANIFEST, AcquisitionError, download_model, get_spec, verify_installed
+from .checkpoint import CheckpointError
+from .devices import Benchmark, cache_key, choose_device, load_cached, run_benchmark, save_cached
 from .engines import MockSpeechEngine, OpenVINOWhisperEngine
-from .export import structured_json
+from .export import ExportError, write_export
+from .media import MediaError
+from .pipeline import BatchOptions, BatchRunner, PipelineError
+from .storage import SessionStore
 
 
-def main() -> int:
+def default_data_dir() -> Path:
+    import os
+
+    override = os.environ.get("NPUSCRIBE_DATA_DIR")
+    if override:
+        return Path(override)
+    try:
+        import platformdirs
+
+        return Path(platformdirs.user_data_path("npu-scribe", appauthor=False))
+    except Exception:  # noqa: BLE001 - fall back beside the platform default
+        return Path.home() / ".local" / "share" / "npu-scribe"
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="npu-scribe")
-    parser.add_argument("audio", type=Path)
-    parser.add_argument("--model", type=Path)
-    parser.add_argument("--device", default="CPU")
-    args = parser.parse_args()
-    engine = OpenVINOWhisperEngine(args.model) if args.model else MockSpeechEngine()
-    print(structured_json(engine.transcribe(args.audio, args.device), "raw"), end="")
+    parser.add_argument("--data-dir", type=Path, default=None)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    models = subparsers.add_parser("models", help="list or download approved models")
+    models_sub = models.add_subparsers(dest="models_command", required=True)
+    models_sub.add_parser("list")
+    models_download = models_sub.add_parser("download")
+    models_download.add_argument("model_id")
+
+    subparsers.add_parser("devices", help="enumerate devices and cached benchmarks")
+
+    transcribe = subparsers.add_parser("transcribe")
+    transcribe.add_argument("input", type=Path)
+    add_run_arguments(transcribe)
+
+    resume = subparsers.add_parser("resume")
+    resume.add_argument("session_id")
+    add_run_arguments(resume)
+
+    export_cmd = subparsers.add_parser("export")
+    export_cmd.add_argument("session_id")
+    export_cmd.add_argument("--format", required=True, choices=["json", "markdown", "text", "srt"])
+    export_cmd.add_argument("--layer", default="raw", choices=["raw", "balanced"])
+    export_cmd.add_argument("--overwrite", action="store_true")
+
+    evaluation = subparsers.add_parser("evaluate")
+    evaluation.add_argument("manifest", type=Path)
+    evaluation.add_argument("--model", default=None)
+    evaluation.add_argument("--device", default="auto")
+    return parser
+
+
+def add_run_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--model", default="mock")
+    parser.add_argument("--device", default="auto")
+    parser.add_argument("--chunk-seconds", type=float, default=30.0)
+    parser.add_argument("--overlap-seconds", type=float, default=1.0)
+    parser.add_argument("--ffmpeg", default=None)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    data_dir = (args.data_dir or default_data_dir()).expanduser()
+    store = SessionStore(data_dir)
+    try:
+        return dispatch(args, store, data_dir)
+    except (
+        AcquisitionError,
+        CheckpointError,
+        ExportError,
+        MediaError,
+        PipelineError,
+        FileNotFoundError,
+        NotADirectoryError,
+        PermissionError,
+        ValueError,
+        RuntimeError,
+        OSError,
+    ) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
+
+
+def dispatch(args: argparse.Namespace, store: SessionStore, data_dir: Path) -> int:
+    if args.command == "models":
+        return run_models(args, data_dir)
+    if args.command == "devices":
+        return run_devices(args, store, data_dir)
+    if args.command == "transcribe":
+        return run_transcribe(args, store, data_dir)
+    if args.command == "resume":
+        return run_resume(args, store, data_dir)
+    if args.command == "export":
+        path = write_export(store, args.session_id, args.layer, args.format, args.overwrite)
+        print(f"exported {args.session_id} {args.layer} layer to {path.name}")
+        return 0
+    if args.command == "evaluate":
+        return run_evaluate(args, data_dir)
+    raise PipelineError(f"unknown command {args.command}")
+
+
+def run_models(args: argparse.Namespace, data_dir: Path) -> int:
+    if args.models_command == "list":
+        for spec in MANIFEST.values():
+            print(
+                f"{spec.id}  {spec.role}  {spec.download_bytes / 1e6:.1f} MB  "
+                f"{spec.language}-only  {spec.license}"
+            )
+        return 0
+    spec = get_spec(args.model_id)
+    target = download_model(spec.id, data_dir / "models")
+    verified = verify_installed(data_dir / "models", spec)
+    print(f"model ready: {target.name}" if verified else f"model staged at {target.name}")
     return 0
+
+
+def run_devices(args: argparse.Namespace, store: SessionStore, data_dir: Path) -> int:
+    devices: list[str] = []
+    runtime_version = "openvino-not-installed"
+    try:
+        import openvino as ov  # type: ignore[import-untyped]
+
+        core = ov.Core()
+        devices = list(core.available_devices)
+        runtime_version = str(ov.__version__)
+    except ImportError:
+        pass
+    print(f"runtime: {runtime_version}")
+    for device in devices:
+        print(f"device: {device}")
+    cache_path = data_dir / "device-benchmarks.json"
+    key = cache_key("any", runtime_version, ",".join(devices))
+    cached = load_cached(cache_path, key)
+    if cached:
+        for bench in cached:
+            state = "ok" if bench.succeeded else f"failed ({bench.fallback_reason})"
+            print(f"cached benchmark {bench.device}: {bench.median_seconds:.3f}s [{state}]")
+    return 0
+
+
+EngineFactory: TypeAlias = Callable[[str], Any]
+
+
+def make_engine_provider(model_id: str, data_dir: Path) -> EngineFactory:
+    if model_id in MANIFEST:
+        spec = get_spec(model_id)
+        install = verify_installed(data_dir / "models", spec)
+        if install is None:
+            raise AcquisitionError(
+                f"model '{model_id}' is not installed; run 'npu-scribe models download {model_id}'"
+            )
+
+        def provider(device: str) -> Any:
+            return OpenVINOWhisperEngine(install, spec.id, multilingual=spec.multilingual)
+
+        return provider
+    if model_id == "mock":
+
+        def provider(device: str) -> Any:
+            return MockSpeechEngine()
+
+        return provider
+    raise AcquisitionError(
+        f"model '{model_id}' is not manifest-approved; run 'npu-scribe models list'"
+    )
+
+
+def benchmark_devices(provider: EngineFactory, model_id: str, data_dir: Path) -> list[Benchmark]:
+    """Same representative workload per device; warmup kept separate from runs."""
+    try:
+        import openvino as ov
+
+        runtime_version = str(ov.__version__)
+        devices = [d for d in ov.Core().available_devices]
+    except ImportError:
+        return []
+    cache_path = data_dir / "device-benchmarks.json"
+    key = cache_key(_model_identity(model_id, data_dir), runtime_version, ",".join(devices))
+    cached = load_cached(cache_path, key)
+    if cached:
+        return cached
+    samples = [0.0] * 16_000
+
+    def workload(device: str) -> float:
+        import time
+
+        started = time.perf_counter()
+        provider(device).transcribe_samples(samples, device)
+        return time.perf_counter() - started
+
+    results = [
+        run_benchmark(workload, device, "speech-chunk") for device in devices if device != "AUTO"
+    ]
+    save_cached(cache_path, key, results)
+    return results
+
+
+def _model_identity(model_id: str, data_dir: Path) -> str:
+    from .storage import sha256_file
+
+    install = data_dir / "models" / model_id
+    if install.is_dir():
+        parts = sorted(p.name for p in install.iterdir())
+        return sha256_file(install / parts[0]) if parts else model_id
+    return model_id
+
+
+def resolve_device(
+    requested: str,
+    provider: EngineFactory,
+    model_id: str,
+    data_dir: Path,
+) -> tuple[str, list[Benchmark]]:
+    from .devices import Policy
+
+    benchmarks = benchmark_devices(provider, model_id, data_dir)
+    is_manual = requested.upper() not in ("AUTO", "")
+    policy: Policy = "manual" if is_manual else "fastest"
+    if not benchmarks:
+        return (requested.upper() if is_manual else "CPU"), benchmarks
+    chosen = choose_device(benchmarks, policy, requested.upper() if is_manual else None)
+    return chosen, benchmarks
+
+
+def run_transcribe(args: argparse.Namespace, store: SessionStore, data_dir: Path) -> int:
+    provider = make_engine_provider(args.model, data_dir)
+    requested, benchmarks = resolve_device(args.device, provider, args.model, data_dir)
+    options = BatchOptions(
+        model_id=args.model,
+        requested_device=requested,
+        chunk_seconds=args.chunk_seconds,
+        overlap_seconds=args.overlap_seconds,
+        ffmpeg_path=args.ffmpeg,
+    )
+    runner = BatchRunner(store, provider, benchmarks, options)
+    session = runner.run_new(args.input)
+    report_session(session)
+    return 0
+
+
+def run_resume(args: argparse.Namespace, store: SessionStore, data_dir: Path) -> int:
+    provider = make_engine_provider(args.model, data_dir)
+    requested, benchmarks = resolve_device(args.device, provider, args.model, data_dir)
+    options = BatchOptions(
+        model_id=args.model,
+        requested_device=requested,
+        chunk_seconds=args.chunk_seconds,
+        overlap_seconds=args.overlap_seconds,
+        ffmpeg_path=args.ffmpeg,
+    )
+    runner = BatchRunner(store, provider, benchmarks, options)
+    session = runner.resume(args.session_id)
+    report_session(session)
+    return 0
+
+
+def report_session(session: Any) -> None:
+    """Stable machine-readable lines; the Windows harness parses the prefixes."""
+    diagnostics = session.diagnostics or {}
+    chunk_records = diagnostics.get("chunk_records", [])
+    fallback_events = diagnostics.get("fallback_events", [])
+    print(f"session: {session.id}")
+    print(f"status: {session.status}")
+    print(f"actual_device: {diagnostics.get('actual_device', 'unknown')}")
+    print(f"requested_device: {diagnostics.get('requested_device', 'unknown')}")
+    print(f"chunks_completed: {len(chunk_records)}")
+    print(f"fallback_events: {len(fallback_events)}")
+    inference = diagnostics.get("inference_seconds")
+    if inference is not None:
+        print(f"inference_seconds: {inference}")
+    duration = diagnostics.get("source_duration_seconds")
+    if duration is not None:
+        print(f"source_duration_seconds: {duration}")
+    print(f"location: lectures/{session.id}/ under the application data directory")
+
+
+def run_evaluate(args: argparse.Namespace, data_dir: Path) -> int:
+    from .evaluate import (
+        EvaluationReport,
+        evaluate_case,
+        fetch_case_audio,
+        load_manifest,
+        select_model,
+        write_report,
+    )
+
+    manifest = load_manifest(args.manifest)
+    model_id = args.model or str(manifest.get("model_id", ""))
+    provider = make_engine_provider(model_id, data_dir)
+    requested, _benchmarks = resolve_device(args.device, provider, model_id, data_dir)
+    report = EvaluationReport(manifest_name=str(manifest.get("name", args.manifest.stem)))
+    eval_media = data_dir / "evaluation" / "media"
+
+    for case in manifest["cases"]:
+        case.setdefault("model_id", model_id)
+
+        def transcribe(
+            path: Path, _case: dict[str, Any] = case
+        ) -> tuple[str, float, None, str, str]:
+            import time
+
+            engine: Any = provider(requested)
+            started = time.perf_counter()
+            transcript = engine.transcribe(path, requested)
+            inference = time.perf_counter() - started
+            runtime = "unavailable"
+            try:
+                import openvino as ov
+
+                runtime = str(ov.__version__)
+            except ImportError:
+                pass
+            actual = transcript.provenance.actual_device
+            return transcript.text, inference, None, actual, runtime
+
+        audio_path = fetch_case_audio(case, eval_media)
+        result = evaluate_case(case, audio_path, transcribe)
+        report.results.append(result)
+    report.selection = select_model(report.results)
+
+    reports_dir = data_dir / "evaluation" / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    json_path = reports_dir / f"{args.manifest.stem}.report.json"
+    write_report(report, json_path)
+    md_path = reports_dir / f"{args.manifest.stem}.report.md"
+    lines = [f"# Evaluation: {report.manifest_name}", ""]
+    for r in report.results:
+        lines.append(
+            f"- {r.case_id}: WER={r.wer} CER={r.cer} RTF={r.rtf} "
+            f"device={r.actual_device} status={r.status}"
+        )
+    lines.append(f"- selection: {report.selection.get('selected_model_id')}")
+    atomic_text(md_path, "\n".join(lines) + "\n")
+    print(f"report written: {json_path.name}")
+    return 0
+
+
+def atomic_text(path: Path, content: str) -> None:
+    from .storage import atomic_write
+
+    atomic_write(path, content.encode("utf-8"))
+
+
+if __name__ == "__main__":
+    sys.exit(main())
