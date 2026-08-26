@@ -1,19 +1,12 @@
 # Implementation status
 
-Updated: 2026-08-25 UTC (reliability-correction pass)
+Updated: 2026-08-26 UTC
 
 Current milestone: Milestone 1 (CLI batch transcription vertical slice)
-implemented; the Milestone 1 changes are **uncommitted** working-tree changes on
-branch `feature/batch-transcription-core` on top of commit `89178b0`. The
-working tree must not be described as clean unless `git status` genuinely shows
-it clean at commit time. `.git` was never modified by agent passes.
-
-## Git state (corrected again)
-
-The earlier note claiming "a single commit and a clean working tree at the time
-of the last check" is stale/misleading: this correction pass modified harness,
-test, CLI, pipeline, and documentation files, and all of it remains uncommitted.
-The owner should review `git status`/`git diff` before committing.
+implemented and committed as `ac0394b` ("Complete batch transcription core")
+on branch `feature/batch-transcription-core`. The working tree must not be
+described as clean unless `git status` genuinely shows it clean at check time.
+`.git` was never modified by agent passes.
 
 ## What exists now
 

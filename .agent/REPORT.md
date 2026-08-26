@@ -24,9 +24,8 @@ formats, insertion/OneDrive contracts, packaging definitions.
 
 ## Corrected stale claims
 
-- `.agent/STATUS.md` now states plainly that the Milestone 1 changes are
-  uncommitted on `feature/batch-transcription-core`; the working tree is not
-  clean and must not be described as such until the owner commits.
+- `.agent/STATUS.md` records the committed Milestone 1 state (`ac0394b`)
+  instead of the earlier uncommitted-tree claim.
 - `.agent/TEST_RESULTS.md` separates deterministic default-suite results from
   opt-in live tests; earlier "75 passed" style summaries that mixed both are
   superseded.
@@ -39,9 +38,10 @@ formats, insertion/OneDrive contracts, packaging definitions.
 
 ## Public-release blockers
 
-No trusted-baseline review by owner yet (single setup commit), no owner-run
-Windows results, FFmpeg not bundled/pinned, installer unverified, model
-evaluation manifests not yet supplied with public lecture material.
+No owner-run Windows results yet (Milestone 1 baseline is committed as
+`ac0394b`; trusted-baseline review remains the owner's call), FFmpeg not
+bundled/pinned, installer unverified, model evaluation manifests not yet
+supplied with public lecture material.
 
 ## Security posture
 

@@ -1,7 +1,10 @@
 # NPU Scribe
 
 NPU Scribe is an English-only, local Windows lecture transcription application
-under active development. Milestone 1 — a reliable command-line batch-transcription
+designed for a system with an Intel NPU: device selection is measured, actual
+device provenance is recorded per run, and CPU/GPU are supported fallbacks —
+no specific hardware model is required. It is under active development.
+Milestone 1 — a reliable command-line batch-transcription
 workflow for imported files — is implemented and verified in the Linux sandbox;
 all Windows, NPU, GPU, endurance, and accuracy claims still require owner-run
 host validation.
@@ -29,8 +32,20 @@ host validation.
 - No network access during ordinary transcription (socket-denial tested);
   network is used only by explicit `models download` / `evaluate` commands.
 
+## Prerequisites
+
+- Python 3.11 or 3.12 (3.11 is used for development).
+- FFmpeg binary on PATH (or passed via `--ffmpeg`) for MP3/M4A/MP4 inputs;
+  plain mono 16 kHz WAV needs nothing extra. FFmpeg is not bundled.
+- No NPU/GPU required: OpenVINO falls back to CPU automatically; actual device
+  provenance is recorded per run.
+- Sessions, exports, and models live under the per-user data directory, never
+  inside this repository.
+
+## Quick start
+
 ```bash
-python -m pip install -e '.[dev,inference]'
+python -m pip install -e '.[inference]'
 npu-scribe models list
 npu-scribe models download whisper-tiny.en-int4-ov
 npu-scribe transcribe lecture.wav --model whisper-tiny.en-int4-ov --device auto
