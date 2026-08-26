@@ -1,15 +1,19 @@
 # Test results
 
-Updated: 2026-08-25 UTC (reliability-correction pass).
+Updated: 2026-08-26 UTC (pytest 9.0.3 re-verification).
 
 Results are always reported separately: deterministic default suite first, then
 opt-in live tests. They are never merged into one ambiguous count.
 
 ## Default network-free suite (verified-sandbox)
 
-Environment: Linux container, Python 3.11.2, venv with pytest 8.3.5 /
+Environment: Linux container, Python 3.11.2, venv with pytest 9.0.3 /
 pytest-cov 6.0.0 / ruff 0.9.10 / mypy 1.15.0 / openvino 2026.3.0 /
 openvino-genai 2026.3.0.0.
+
+- Re-verified 2026-08-26 after the pytest 8.3.5 → 9.0.3 security bump
+  (Dependabot: vulnerable tmpdir handling): `pytest -m "not live"` — 96 passed,
+  1 deselected; `--cov` run also green (85% total).
 
 - `pytest -m "not live"` with sockets monkeypatched to raise
   (`socket.socket` denied) and the acquisition fetcher patched out:
