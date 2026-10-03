@@ -27,6 +27,8 @@ from .chunking import DEFAULT_OVERLAP_SECONDS
 from .devices import Benchmark, cache_key, choose_device, load_cached, run_benchmark, save_cached
 from .engines import MockSpeechEngine, OpenVINOWhisperEngine
 from .export import ExportError, write_export
+from .formatting import STYLES as FORMAT_STYLES
+from .formatting import format_session
 from .media import MediaError
 from .pipeline import BatchOptions, BatchRunner, PipelineError
 from .storage import SessionStore
@@ -72,7 +74,9 @@ def build_parser() -> argparse.ArgumentParser:
     export_cmd.add_argument("session_id")
     export_cmd.add_argument("--format", required=True, choices=["json", "markdown", "text", "srt"])
     export_cmd.add_argument(
-        "--layer", default="raw", choices=["raw", "balanced", "edited", "ai", "summary"]
+        "--layer",
+        default="raw",
+        choices=["raw", "balanced", "edited", "ai", "summary", "formatted"],
     )
     export_cmd.add_argument("--overwrite", action="store_true")
 
@@ -80,6 +84,17 @@ def build_parser() -> argparse.ArgumentParser:
     cleanup.add_argument("session_id")
     add_cleanup_arguments(cleanup)
     cleanup.add_argument("--stop-file", type=Path, default=None)
+    cleanup.add_argument("--formatting", choices=("off", *FORMAT_STYLES), default="off")
+
+    formatting = subparsers.add_parser(
+        "format", help="save a complete transcript with a separate layout"
+    )
+    formatting.add_argument("session_id")
+    formatting.add_argument("--source", choices=("raw", "balanced", "ai"), default="ai")
+    formatting.add_argument("--style", choices=FORMAT_STYLES, default="prose")
+    formatting.add_argument("--model", default=DEFAULT_MODEL)
+    formatting.add_argument("--device", choices=("AUTO", "CPU", "GPU", "NPU"), default="AUTO")
+    formatting.add_argument("--stop-file", type=Path, default=None)
 
     summary = subparsers.add_parser("summarize", help="save separate study notes from a session")
     summary.add_argument("session_id")
@@ -127,6 +142,7 @@ def add_run_arguments(parser: argparse.ArgumentParser) -> None:
         default="off",
         help="automatically clean the completed transcript at this level",
     )
+    parser.add_argument("--formatting", choices=("off", *FORMAT_STYLES), default="off")
     parser.add_argument("--cleanup-model", default=DEFAULT_MODEL)
     parser.add_argument("--cleanup-device", choices=("AUTO", "CPU", "GPU", "NPU"), default="AUTO")
     parser.add_argument("--cleanup-mode", choices=("lecture", "dictation"), default="lecture")
@@ -183,6 +199,8 @@ def dispatch(args: argparse.Namespace, store: SessionStore, data_dir: Path) -> i
         return run_resume(args, store, data_dir)
     if args.command in ("cleanup", "cleanup-text", "summarize"):
         return run_cleanup(args, store, data_dir)
+    if args.command == "format":
+        return run_format(args, store, data_dir)
     if args.command == "export":
         path = write_export(store, args.session_id, args.layer, args.format, args.overwrite)
         print(f"exported {args.session_id} {args.layer} layer to {path.name}")
@@ -382,7 +400,21 @@ def finish_transcription(
         return 130
     level = getattr(args, "cleanup", "off")
     if level == "off":
-        return 0
+        if getattr(args, "formatting", "off") == "off":
+            return 0
+        return run_format(
+            argparse.Namespace(
+                session_id=session.id,
+                source="raw",
+                style=args.formatting,
+                model=args.cleanup_model,
+                model_root=args.model_root,
+                device=args.cleanup_device,
+                stop_file=getattr(args, "stop_file", None),
+            ),
+            store,
+            data_dir,
+        )
     cleanup_args = argparse.Namespace(
         command="cleanup",
         session_id=session.id,
@@ -391,6 +423,7 @@ def finish_transcription(
         device=getattr(args, "cleanup_device", "AUTO"),
         mode=getattr(args, "cleanup_mode", "lecture"),
         style=level,
+        formatting=getattr(args, "formatting", "off"),
         stop_file=getattr(args, "stop_file", None),
     )
     try:
@@ -399,7 +432,7 @@ def finish_transcription(
         raise
     except (RuntimeError, OSError, ValueError) as error:
         print(
-            f"Transcription is ready and can be exported. AI cleanup failed: {error}",
+            f"Transcription is ready and can be exported. Cleanup or formatting failed: {error}",
             file=sys.stderr,
         )
         return 1
@@ -457,6 +490,17 @@ def run_cleanup(args: argparse.Namespace, store: SessionStore, data_dir: Path) -
         records = (transcript.transformation or {}).get("blocks", [])
         if any(record["used_source"] for record in records):
             print("Some blocks retained source text after validation warnings; review the result.")
+        if args.command == "cleanup" and getattr(args, "formatting", "off") != "off":
+            format_args = argparse.Namespace(
+                session_id=args.session_id,
+                source="ai",
+                style=args.formatting,
+                model=args.model,
+                model_root=args.model_root,
+                device=args.device,
+                stop_file=stop,
+            )
+            return run_format(format_args, store, data_dir, model)
         return 0
     source, output = args.input.expanduser().resolve(), args.output.expanduser().resolve()
     if source == output:
@@ -496,6 +540,38 @@ def run_cleanup(args: argparse.Namespace, store: SessionStore, data_dir: Path) -
     print(f"AI cleanup ready: {output}")
     if any(record["used_source"] for record in records):
         print("Some blocks retained source text after validation warnings; review the result.")
+    return 0
+
+
+def run_format(
+    args: argparse.Namespace, store: SessionStore, data_dir: Path, model: Any = None
+) -> int:
+    stop = getattr(args, "stop_file", None)
+    cancelled = stop.exists if stop else None
+    if args.style != "prose" and model is None:
+        model = make_model(
+            args.model,
+            args.model_root or data_dir / "models",
+            args.device,
+            data_dir / "cache" / "cleanup",
+            cancelled,
+        )
+    path = format_session(
+        store,
+        args.session_id,
+        args.style,
+        args.source,
+        model,
+        args.model,
+        args.device,
+        cancelled,
+        lambda done, total: print(f"format_blocks: {done}/{total}", flush=True),
+    )
+    print(f"Formatted transcript ready: {path}")
+    transcript = store.load_transcript(args.session_id, "formatted")
+    print(f"format_device: {transcript.provenance.actual_device}")
+    if any(record["used_source"] for record in (transcript.transformation or {}).get("blocks", [])):
+        print("Some layouts were rejected; those blocks use complete source text in prose.")
     return 0
 
 

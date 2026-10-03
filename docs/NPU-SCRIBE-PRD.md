@@ -9,8 +9,8 @@
 **License:** MIT for original application code; model and dataset licenses remain separate
 
 > Historical planning document: the implemented standalone transcription engine
-> and desktop workflow are described in the README and user guide. Dictation and
-> rewriting requirements below are proposals, not shipped features.
+> and desktop workflow are described in the README and user guide. File cleanup
+> is experimental; live microphone dictation, hotkeys, and insertion remain planned.
 
 ## 1. Executive summary
 

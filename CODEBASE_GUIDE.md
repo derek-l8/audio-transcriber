@@ -16,6 +16,8 @@
 - `ai_cleanup.py`: local text model, bounded requests, lecture/dictation prompts,
   heuristic source fallback, AUTO device fallback, cancellation, retained AI versions,
   and separate formatted excerpt summaries.
+- `formatting.py`: independent source-preserving layout, validated passage plans,
+  prose fallback, complete snapshots and formatted exports.
 - `editing.py`: manual revisions, retained history, source hashes and stale-write checks.
 - `desktop.py` / `desktop_ui.py`: optional Qt launcher and child-worker interface.
 - `desktop_player.py` / `desktop_editing.py`: playback, seeking and edit/history dialogs.
@@ -25,7 +27,7 @@
 - `evaluate.py`: manifest-driven evaluation with the recorded selection policy.
 - `metrics.py`: dependency-free WER/CER.
 - `cli.py`: subcommand CLI (`models`, `devices`, `transcribe`, `resume`,
-  `export`, `cleanup`, `cleanup-text`, `summarize`, `evaluate`) tested through the real entry point.
+  `export`, `cleanup`, `cleanup-text`, `format`, `summarize`, `evaluate`) tested through the real entry point.
 
 Follow a feature into the tests with `rg 'symbol_name' tests src`. Start debugging storage
 at `SessionStore.save_transcript`; start inference debugging at provenance construction;

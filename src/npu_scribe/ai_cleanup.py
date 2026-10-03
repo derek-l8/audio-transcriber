@@ -17,7 +17,7 @@ from .models import InferenceProvenance, Segment, Transcript, utc_now
 from .storage import SessionStore, atomic_json, sha256_file
 
 DEFAULT_MODEL = "qwen2.5-7b-instruct-int4-ov"
-PROMPT_VERSION = "cleanup-v2"
+PROMPT_VERSION = "cleanup-v3"
 BLOCK_CHARS = 1200
 MODES = ("lecture", "dictation")
 STYLES = ("light", "medium")
@@ -36,6 +36,10 @@ class TextGenerator(Protocol):
 
 
 def system_prompt(mode: str, style: str) -> str:
+    if mode == "format":
+        from .formatting import formatting_prompt
+
+        return formatting_prompt(style)
     if mode == "summary" and style in STYLES:
         return (
             "Select the important passages from this numbered lecture excerpt for study notes. "
@@ -64,6 +68,10 @@ def system_prompt(mode: str, style: str) -> str:
             "qualifications, repetitions used for emphasis, and quotations. Do not "
             "interpret words such as period, comma, or actually as editing commands. "
             "Remove only obvious hesitation sounds such as um and uh. "
+            "Excerpts can start or end in the middle of a sentence. Keep those boundary "
+            "fragments incomplete; do not add an implied ending or conclusion. Leave "
+            "unclear recognition words as supplied rather than guessing or adding "
+            "annotations such as [inaudible]. "
         )
     else:
         common += (
@@ -152,7 +160,11 @@ class LocalCleanupModel:
                 self.load_seconds += time.perf_counter() - started
         history = genai.ChatHistory()
         history.append({"role": "system", "content": system_prompt(mode, style)})
-        if mode == "summary":
+        if mode == "format":
+            from .formatting import formatting_examples
+
+            examples = formatting_examples(style)
+        elif mode == "summary":
             examples = [
                 (
                     "[0] um we compared two pumps.\n[1] The first moved five liters per minute.\n"
@@ -190,6 +202,14 @@ class LocalCleanupModel:
                     "be replaced with 50 volts",
                     "The period is not constant, and the 5 volt supply cannot "
                     "be replaced with 50 volts.",
+                ),
+                (
+                    "um if a test fails you try it yourself and you'll",
+                    "If a test fails, you try it yourself and you'll",
+                ),
+                (
+                    "we have not measured the power use yet so",
+                    "We have not measured the power use yet, so",
                 ),
             ]
         for before, after in examples:
@@ -313,6 +333,37 @@ def check_candidate(source: str, candidate: str, mode: str) -> list[str]:
     negation = r"\b(?:no|not|never|cannot|without)\b|n['’]t\b"
     if len(re.findall(negation, source, re.I)) != len(re.findall(negation, candidate, re.I)):
         reasons.append("negation-change")
+    if mode == "lecture":
+        # Bounded excerpts often cut off mid-sentence. Reject a changed terminal
+        # anchor after a function word or contraction; punctuation is immaterial.
+        # This catches some invented endings, not every change in meaning.
+        fragment_end = (
+            r"(?:\b(?:and|or|but|if|because|when|while|so|then|to|the|a|an|of|with|for|"
+            r"your|my|our|their|we|you|they|he|she|it|i)|"
+            r"\b(?:i|you|we|they|he|she|it)['’](?:ll|re|ve|d|m))[\s,;:.…—-]*$"
+        )
+
+        def tail(text: str) -> list[str]:
+            words = re.findall(r"\w+(?:['’]\w+)?", text.casefold().replace("’", "'"))
+            words = [word for word in words if word not in ("um", "uh")]
+            return [word for i, word in enumerate(words) if not i or word != words[i - 1]][-3:]
+
+        uncertainty = (
+            r"\b(?:may|might|maybe|perhaps|probably|possibly|uncertain|unknown|apparently|"
+            r"seems?|seemed|appears?|appeared)\b|\b(?:looks?|looked|looking)\s+like\b|"
+            r"\bi\s+(?:think|guess|suspect)\b"
+        )
+        if len(re.findall(uncertainty, candidate, re.I)) < len(
+            re.findall(uncertainty, source, re.I)
+        ):
+            reasons.append("uncertainty-loss")
+        fragment_source = re.sub(r"\b(?:um|uh)\b", "", source, flags=re.I)
+        if re.search(fragment_end, fragment_source, re.I) and tail(source) != tail(candidate):
+            reasons.append("unfinished-tail-change")
+        for label in ("[inaudible]", "[unclear]"):
+            if label in candidate.casefold() and label not in source.casefold():
+                reasons.append("invented-annotation")
+                break
     original_words = len(source.split())
     minimum = 0.5 if mode == "lecture" else 0.25
     if original_words >= 12 and len(candidate.split()) < original_words * minimum:

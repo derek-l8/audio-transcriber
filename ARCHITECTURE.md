@@ -47,12 +47,19 @@ decisions and alternatives.
 - `ai_cleanup.py` — a separate lazy OpenVINO LLM pipeline with independent
   CPU/GPU/NPU selection and GPU-to-CPU fallback for AUTO. Fresh chat history per bounded source block,
   lecture/dictation prompts and light/medium styles. Concrete numeric/negation/
-  text-size checks retain the source on warnings; these are not semantic proofs.
+  text-size checks retain the source on warnings. Important edits need review.
   Summary requests structured source-passage selections, validates indices and
   headings, and renders source text with conservative rules. Its output/history
-  are separate; selection permits omissions and is not a semantic proof.
+  are separate; summary selection permits omissions.
   Completed results retain immutable AI snapshots and atomically publish a latest
   file with source hash, original speech provenance, and cleanup settings.
+
+- `formatting.py` — independent layouts reading Raw, Balanced, or AI. Mostly prose
+  requires no model; Mixed/Structured reuse the cleanup pipeline where available.
+  Layout plans must cover every numbered passage once in source order. Headings
+  quote their block; tables require explicit comparable numeric rows, and steps
+  require source step markers. Invalid plans fall back to complete prose. Original
+  versions remain unchanged; formatted snapshots and source hashes are retained.
 
 ## Desktop and outer adapters
 
@@ -87,6 +94,8 @@ Only explicit acquisition/evaluation commands initiate network downloads.
     edits/                  retained manual revision snapshots
     ai-transcript.json      latest complete AI result (optional)
     ai-cleanup-history/     retained complete AI snapshots
+    formatted-transcript.json latest complete layout (optional)
+    formatting-history/     retained complete layout snapshots
     summary-transcript.json latest complete excerpt notes (optional)
     summary-history/        retained complete summary snapshots
     exports/                generated, never silently overwritten

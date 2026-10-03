@@ -74,4 +74,11 @@ than generated word alignment. Cleanup AUTO tries GPU and retries a failed GPU
 block on CPU, recording devices/fallback; explicit choices stay strict.
 Summarize reads Raw separately and retains formatted excerpt notes in Summary,
 with separate history and no subtitle export. Exports select Raw, Balanced,
-Edited, AI, or Summary; failure leaves earlier outputs available.
+Edited, AI, Formatted, or Summary; failure leaves earlier outputs available.
+
+Formatting follows optional cleanup and reads the resulting AI layer, or Raw
+when cleanup is Off. Mostly prose uses local paragraph grouping without a model.
+Mixed/Structured request a layout plan from the same text model, reusing the loaded
+pipeline after cleanup. Every source passage must appear once in original order;
+unsupported layouts become prose. Complete formatted versions have a separate
+history and source hash. They are documents rather than aligned subtitles.

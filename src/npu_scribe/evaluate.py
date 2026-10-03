@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import urllib.parse
 import urllib.request
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
@@ -193,8 +194,9 @@ def select_model(results: list[CaseResult]) -> dict[str, Any]:
     chosen = (
         min(
             pool,
-            key=lambda model_id: sum(item.wer or 0.0 for item in groups[model_id])
-            / len(groups[model_id]),
+            key=lambda model_id: (
+                sum(item.wer or 0.0 for item in groups[model_id]) / len(groups[model_id])
+            ),
         )
         if pool
         else None

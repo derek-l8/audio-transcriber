@@ -7,7 +7,7 @@ import uuid
 from pathlib import Path
 
 from PySide6.QtCore import QProcess, Qt, QTimer
-from PySide6.QtGui import QCloseEvent, QTextCursor
+from PySide6.QtGui import QCloseEvent, QTextCursor, QTextDocument
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -18,10 +18,10 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMainWindow,
     QMessageBox,
-    QPlainTextEdit,
     QProgressBar,
     QPushButton,
     QSplitter,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -188,6 +188,34 @@ class LectureWindow(QMainWindow):
         self.summary_button.clicked.connect(self.start_summary)
         cleanup_controls.addWidget(self.summary_button)
         layout.addLayout(cleanup_controls)
+        format_controls = QHBoxLayout()
+        format_controls.addWidget(QLabel("Formatting"))
+        self.format_style = QComboBox()
+        self.format_style.setAccessibleName("Formatting style")
+        for label, value in (
+            ("Off", "off"),
+            ("Mostly prose", "prose"),
+            ("Mixed", "mixed"),
+            ("Mostly structured", "structured"),
+        ):
+            self.format_style.addItem(label, value)
+        self.format_style.setCurrentIndex(
+            max(0, self.format_style.findData(settings.get("format_style", "prose")))
+        )
+        self.format_style.setToolTip(
+            "Prose needs no model pass. Mixed and structured request a layout after cleanup, "
+            "preserving every source passage."
+        )
+        format_controls.addWidget(self.format_style)
+        self.format_button = QPushButton("Format selected")
+        self.format_button.clicked.connect(self.start_formatting)
+        self.format_button.setToolTip(
+            "Formats the selected Raw, Balanced, or AI layer into a separate version. "
+            "Does not summarize."
+        )
+        format_controls.addWidget(self.format_button)
+        format_controls.addStretch()
+        layout.addLayout(format_controls)
         split = QSplitter()
         self.library = QListWidget()
         self.library.setAccessibleName("Lecture library")
@@ -204,10 +232,10 @@ class LectureWindow(QMainWindow):
         self.layer = QComboBox()
         self.layer.setAccessibleName("Transcript layer")
         self.layer.setObjectName("transcriptLayer")
-        self.layer.addItems(["Raw", "Balanced", "Edited", "AI", "Summary"])
+        self.layer.addItems(["Raw", "Balanced", "Edited", "AI", "Formatted", "Summary"])
         self.layer.setToolTip(
             "Raw: unedited recognition. Balanced: rule-based formatting. "
-            "AI: model cleanup. Summary: shorter study notes."
+            "AI: model cleanup. Formatted: complete text with layout. Summary: shorter study notes."
         )
         self.layer.currentIndexChanged.connect(self.show_selected)
         tools.addWidget(self.layer)
@@ -242,7 +270,7 @@ class LectureWindow(QMainWindow):
         edit_controls.addWidget(self.history_button)
         edit_controls.addStretch(1)
         right.addLayout(edit_controls)
-        self.transcript = QPlainTextEdit()
+        self.transcript = QTextEdit()
         self.transcript.setAccessibleName("Transcript")
         self.transcript.setObjectName("transcript")
         self.transcript.setReadOnly(True)
@@ -264,11 +292,12 @@ class LectureWindow(QMainWindow):
         self.status.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(self.status)
         self.cleanup_style.currentTextChanged.connect(self._buttons)
+        self.format_style.currentIndexChanged.connect(self._buttons)
         self.export_format.currentTextChanged.connect(self._buttons)
         self.setCentralWidget(central)
         self.setStyleSheet(
             "QPushButton { padding: 7px 12px; } QComboBox, QLineEdit { padding: 5px; } "
-            "QPlainTextEdit { font-size: 14px; }"
+            "QTextEdit { font-size: 14px; }"
         )
         self._folder_labels()
         self.refresh()
@@ -292,6 +321,7 @@ class LectureWindow(QMainWindow):
                 "cleanup_mode": str(self.cleanup_mode.currentData()),
                 "cleanup_style": self.cleanup_style.currentText(),
                 "cleanup_device": self.cleanup_device.currentText(),
+                "format_style": str(self.format_style.currentData()),
                 "model": self.model.currentData(),
                 "device": self.device.currentText(),
             },
@@ -379,6 +409,36 @@ class LectureWindow(QMainWindow):
                 str(self.cleanup_mode.currentData()),
                 "--style",
                 self.cleanup_style.currentText(),
+                "--formatting",
+                str(self.format_style.currentData()),
+            ]
+        )
+
+    def start_formatting(self) -> None:
+        session_id = self.selected_id()
+        if self.busy or not session_id or not self.format_button.isEnabled():
+            return
+        source = self.layer.currentText().lower()
+        if source not in ("raw", "balanced", "ai"):
+            source = (
+                "ai"
+                if (self.store.session_dir(session_id) / "ai-transcript.json").is_file()
+                else "raw"
+            )
+        self._run_formatting(session_id, source)
+
+    def _run_formatting(self, session_id: str, source: str) -> None:
+        self.active_id = session_id
+        self._start(
+            [
+                "format",
+                session_id,
+                "--source",
+                source,
+                "--style",
+                str(self.format_style.currentData()),
+                "--model",
+                str(self.cleanup_model.currentData()),
             ]
         )
 
@@ -399,7 +459,7 @@ class LectureWindow(QMainWindow):
             self.status.setText(f"Could not save settings: {error}")
             return
         self.job_kind = (
-            arguments[0] if arguments[0] in ("cleanup", "summarize") else "transcription"
+            arguments[0] if arguments[0] in ("cleanup", "summarize", "format") else "transcription"
         )
         self.before_ids = set(self.sessions)
         self.output = ""
@@ -411,7 +471,7 @@ class LectureWindow(QMainWindow):
             *arguments,
             "--device",
             self.cleanup_device.currentText()
-            if self.job_kind in ("cleanup", "summarize")
+            if self.job_kind in ("cleanup", "summarize", "format")
             else self.device.currentText(),
             "--stop-file",
             str(self.stop_file),
@@ -425,10 +485,12 @@ class LectureWindow(QMainWindow):
             (
                 "Preparing formatted study notes…"
                 if self.job_kind == "summarize"
+                else "Preparing transcript layout…"
+                if self.job_kind == "format"
                 else "Preparing local AI cleanup…"
             )
             + " Raw and prior versions stay available."
-            if self.job_kind in ("cleanup", "summarize")
+            if self.job_kind in ("cleanup", "summarize", "format")
             else "Preparing lecture… Pause waits for the current chunk to finish."
         )
         self.progress.setRange(0, 0)
@@ -452,14 +514,14 @@ class LectureWindow(QMainWindow):
             self.output
             + bytes(self.process.readAllStandardOutput().data()).decode("utf-8", errors="replace")
         )[-8192:]
-        if self.job_kind in ("cleanup", "summarize"):
+        if self.job_kind in ("cleanup", "summarize", "format"):
             for line in reversed(self.output.splitlines()):
-                if line.startswith("cleanup_blocks: "):
+                if line.startswith(("cleanup_blocks: ", "format_blocks: ")):
                     try:
                         done, total = map(int, line.split(": ", 1)[1].split("/"))
                         self.progress.setRange(0, max(1, total))
                         self.progress.setValue(done)
-                        self.progress.setFormat(f"{done} / {total} cleanup blocks")
+                        self.progress.setFormat(f"{done} / {total} text blocks")
                     except ValueError:
                         pass
                     break
@@ -483,12 +545,19 @@ class LectureWindow(QMainWindow):
             self.progress.setRange(0, 1)
             self.progress.setValue(1)
             self.progress.setFormat("Complete")
-            if self.job_kind in ("cleanup", "summarize"):
-                self.layer.setCurrentText("Summary" if self.job_kind == "summarize" else "AI")
+            if self.job_kind in ("cleanup", "summarize", "format"):
+                target_layer = "Summary" if self.job_kind == "summarize" else "AI"
+                if self.job_kind == "format" or (
+                    self.job_kind == "cleanup" and self.format_style.currentData() != "off"
+                ):
+                    target_layer = "Formatted"
+                self.layer.setCurrentText(target_layer)
                 self.show_selected()
                 self.status.setText(
                     "Summary ready. Review these notes against Raw."
                     if self.job_kind == "summarize"
+                    else "Transcript formatting ready. Review the layout against its source."
+                    if target_layer == "Formatted"
                     else "AI cleanup ready. Review the AI version against Raw before using it."
                 )
             else:
@@ -509,6 +578,15 @@ class LectureWindow(QMainWindow):
                         self._run_cleanup(self.active_id)
                     if self.busy:
                         return
+                if (
+                    not self.closing
+                    and not was_paused
+                    and self.format_style.currentData() != "off"
+                    and self.active_id
+                ):
+                    self._run_formatting(self.active_id, "raw")
+                    if self.busy:
+                        return
                 self.status.setText(
                     "Transcript ready. Select Raw or Balanced to review and export."
                 )
@@ -517,17 +595,23 @@ class LectureWindow(QMainWindow):
                 (
                     "Summary stopped safely. Summarize selected restarts it. "
                     if self.job_kind == "summarize"
+                    else "Formatting stopped safely. Format selected restarts it. "
+                    if self.job_kind == "format"
                     else "AI cleanup stopped safely. Clean selected restarts it. "
                 )
                 + "Previous versions remain available."
-                if self.job_kind in ("cleanup", "summarize")
+                if self.job_kind in ("cleanup", "summarize", "format")
                 else "Paused safely. Select this lecture and Resume selected to continue."
             )
         else:
             self.progress.setRange(0, 1)
             self.progress.setValue(0)
             self.status.setText(
-                ("Transcript remains ready. " if self.job_kind in ("cleanup", "summarize") else "")
+                (
+                    "Transcript remains ready. "
+                    if self.job_kind in ("cleanup", "summarize", "format")
+                    else ""
+                )
                 + f"{self.job_kind.capitalize()} failed (exit {code}). "
                 f"{self.output.strip() or self.process.errorString()}"
             )
@@ -610,6 +694,7 @@ class LectureWindow(QMainWindow):
             self.cleanup_mode,
             self.cleanup_style,
             self.cleanup_device,
+            self.format_style,
         ):
             control.setEnabled(not self.busy)
         self.pause_button.setEnabled(
@@ -633,10 +718,21 @@ class LectureWindow(QMainWindow):
             not self.busy and completed and self.cleanup_style.currentText() != "off"
         )
         self.summary_button.setEnabled(not self.busy and completed)
+        self.format_button.setEnabled(
+            not self.busy and completed and self.format_style.currentData() != "off"
+        )
+        formatted_ready = (
+            session is not None
+            and (self.store.session_dir(session.id) / "formatted-transcript.json").is_file()
+        )
         self.export_button.setEnabled(
             completed
             and (self.layer.currentText() != "Edited" or edited)
             and (self.layer.currentText() != "AI" or ai_ready)
+            and (
+                self.layer.currentText() != "Formatted"
+                or (formatted_ready and self.export_format.currentText() != "srt")
+            )
             and (
                 self.layer.currentText() != "Summary"
                 or (summary_ready and self.export_format.currentText() != "srt")
@@ -645,7 +741,7 @@ class LectureWindow(QMainWindow):
         self.edit_button.setEnabled(
             not self.busy
             and completed
-            and self.layer.currentText() not in ("AI", "Summary")
+            and self.layer.currentText() not in ("AI", "Summary", "Formatted")
             and ((self.layer.currentText() == "Edited") == edited)
         )
         self.history_button.setEnabled(edited)
@@ -679,29 +775,53 @@ class LectureWindow(QMainWindow):
                     f"{' '.join(s.text.split())}"
                     for s in transcript.segments
                 )
-                if self.layer.currentText() in ("AI", "Summary"):
+                if self.layer.currentText() in ("AI", "Summary", "Formatted"):
                     text = "\n\n".join(s.text for s in transcript.segments)
                     records = (transcript.transformation or {}).get("blocks", [])
                     retained = sum(bool(record.get("used_source")) for record in records)
+                    if self.layer.currentText() == "Formatted":
+                        metadata = transcript.transformation or {}
+                        styles = {
+                            "prose": "Mostly prose",
+                            "mixed": "Mixed",
+                            "structured": "Mostly structured",
+                        }
+                        description = (
+                            "\nFormatting: "
+                            + styles.get(str(metadata.get("style")), "Unknown")
+                            + " · source: "
+                            + str(metadata.get("source_layer", "unknown")).upper()
+                            + (
+                                " · no AI pass"
+                                if transcript.provenance.actual_device == "none"
+                                else " · " + transcript.provenance.actual_device
+                            )
+                        )
+                    else:
+                        description = (
+                            (
+                                "\nSummary: "
+                                if self.layer.currentText() == "Summary"
+                                else "\nAI cleanup: "
+                            )
+                            + f"{transcript.provenance.model} · "
+                            + transcript.provenance.actual_device
+                            + " · source-block timing; review against Raw"
+                        )
                     self.details.setText(
                         self.details.text()
-                        + (
-                            "\nSummary: "
-                            if self.layer.currentText() == "Summary"
-                            else "\nAI cleanup: "
-                        )
-                        + f"{transcript.provenance.model} · {transcript.provenance.actual_device}"
-                        + " · source-block timing; review against Raw"
-                        + (
-                            f" · {retained} block(s) retained source after warnings"
-                            if retained
-                            else ""
-                        )
+                        + description
+                        + (f" · {retained} block(s) used source after warnings" if retained else "")
                     )
-                self.transcript.setPlainText(text)
+                if self.layer.currentText() == "Formatted":
+                    self.transcript.document().setMarkdown(
+                        text, QTextDocument.MarkdownFeature.MarkdownNoHTML
+                    )
+                else:
+                    self.transcript.setPlainText(text)
                 self.segment_starts = (
                     []
-                    if self.layer.currentText() in ("AI", "Summary")
+                    if self.layer.currentText() in ("AI", "Summary", "Formatted")
                     else [s.start for s in transcript.segments]
                 )
                 if self.layer.currentText() == "Edited":

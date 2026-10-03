@@ -31,6 +31,7 @@ def window(app, tmp_path):
     result.model.addItem("Test fixture", "mock")
     result.model.setCurrentIndex(result.model.findData("mock"))
     result.cleanup_style.setCurrentText("off")
+    result.format_style.setCurrentIndex(result.format_style.findData("off"))
     yield result
     if result.busy:
         result.pause()
@@ -319,13 +320,16 @@ def test_cleanup_defaults_and_off_persist(app, tmp_path):
     assert window.cleanup_style.currentText() == "light"
     assert window.cleanup_device.currentText() == "AUTO"
     assert window.device.currentText() == "CPU"
+    assert window.format_style.currentData() == "prose"
     window.cleanup_style.setCurrentText("off")
+    window.format_style.setCurrentIndex(window.format_style.findData("off"))
     window.device.setCurrentText("GPU")
     window._save_settings()
     window.close()
     reopened = LectureWindow(tmp_path / "library")
     assert reopened.cleanup_style.currentText() == "off"
     assert reopened.device.currentText() == "GPU"
+    assert reopened.format_style.currentData() == "off"
     reopened.close()
 
 
@@ -412,3 +416,66 @@ def test_pause_at_speech_completion_does_not_start_cleanup(app, window, three_se
     assert not window.busy
     session = next(iter(window.sessions.values()))
     assert not (window.store.session_dir(session.id) / "ai-transcript.json").exists()
+
+
+def test_automatic_prose_formatting_with_cleanup_off(app, window, three_second_wav):
+    window.format_style.setCurrentIndex(window.format_style.findData("prose"))
+    window.start_import(three_second_wav)
+    wait_finished(app, window)
+    session = next(iter(window.sessions.values()))
+    assert window.layer.currentText() == "Formatted"
+    assert window.transcript.toPlainText() == "synthetic transcript"
+    assert (
+        window.store.load_transcript(session.id, "formatted").transformation["source_layer"]
+        == "raw"
+    )
+    assert not window.edit_button.isEnabled()
+    assert not window.player.seek_button.isEnabled()
+    window.export_format.setCurrentText("srt")
+    assert not window.export_button.isEnabled()
+    window.export_format.setCurrentText("markdown")
+    assert window.export_button.isEnabled()
+
+
+def test_desktop_cleanup_then_format_and_rerun_keep_sources(
+    app, window, three_second_wav, tmp_path, monkeypatch
+):
+    import sys
+
+    worker = tmp_path / "cleanup-layout-worker.py"
+    worker.write_text("""
+import json, sys
+import npu_scribe.cli as cli
+class Fixture:
+    device='CPU'
+    def generate(self, text, mode, style):
+        if mode == 'format':
+            return json.dumps({'blocks':[{'kind':'bullets','passages':[0]}]})
+        return text.capitalize()+'.'
+cli.make_model=lambda *args: Fixture()
+raise SystemExit(cli.main(sys.argv[1:]))
+""")
+    monkeypatch.setattr(
+        "npu_scribe.desktop_ui.worker_command", lambda args: (sys.executable, [str(worker), *args])
+    )
+    window.cleanup_style.setCurrentText("light")
+    window.format_style.setCurrentIndex(window.format_style.findData("mixed"))
+    window.start_import(three_second_wav)
+    wait_finished(app, window)
+    session = next(iter(window.sessions.values()))
+    output = window.store.load_transcript(session.id, "formatted")
+    assert output.text == "- Synthetic transcript."
+    assert output.transformation["source_layer"] == "ai"
+    assert window.layer.currentText() == "Formatted"
+    assert "Synthetic transcript." in window.transcript.toPlainText()
+    directory = window.store.session_dir(session.id)
+    hashes = {layer: sha256_file(directory / f"{layer}-transcript.json") for layer in ("raw", "ai")}
+    window.layer.setCurrentText("AI")
+    window.format_style.setCurrentIndex(window.format_style.findData("prose"))
+    window.start_formatting()
+    wait_finished(app, window)
+    assert len(list((directory / "formatting-history").glob("*.json"))) == 2
+    assert all(
+        sha256_file(directory / f"{layer}-transcript.json") == digest
+        for layer, digest in hashes.items()
+    )
