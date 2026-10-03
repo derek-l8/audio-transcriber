@@ -1,0 +1,199 @@
+{
+  "purpose": "Local AI cleanup workflow and bounded synthetic-text quality pilot; not representative lecture accuracy or a device benchmark",
+  "model": "qwen2.5-7b-instruct-int4-ov",
+  "model_revision": "51f38f02586876c08ca2a604224da20ea61685b8",
+  "prompt_version": "cleanup-v2",
+  "runtime": {
+    "openvino": "2026.3.0-22451-8a17657b995-releases/2026/3",
+    "openvino_genai": "2026.3.0.0-3277-bd8d6542e3c",
+    "available_devices": [
+      "CPU",
+      "GPU",
+      "NPU"
+    ]
+  },
+  "limitations": [
+    "One Windows host; short English synthetic text only",
+    "Guard checks are not semantic-equivalence checks; names/dates/written quantities can escape them",
+    "Wall times include first model loading and other checks were running concurrently; no fair backend speed or power comparison",
+    "No physical accelerator utilization or energy measurement",
+    "Frozen bundle and installer were not rebuilt for this feature"
+  ],
+  "cpu_cases": [
+    {
+      "source": "I need the blue board sorry I mean the green board and please do not change the 3.3 volt regulator",
+      "mode": "dictation",
+      "style": "light",
+      "output": "I need the green board, and please do not change the 3.3 volt regulator.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 32.7263,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 32.726,
+      "load_seconds": 7.712725500110537
+    },
+    {
+      "source": "Can you please send Jamie the draft by Friday no sorry by Monday and include the 12 volt measurements please",
+      "mode": "dictation",
+      "style": "medium",
+      "output": "Can you please send Jamie the draft by Monday and include the 12 volt measurements?",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 9.7036,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 9.704,
+      "load_seconds": 7.712725500110537
+    },
+    {
+      "source": "The supply is 5 volts, not 50 volts. Um, the period is not constant. We cannot assume linearity.",
+      "mode": "lecture",
+      "style": "light",
+      "output": "The supply is 5 volts, not 50 volts. The period is not constant. We cannot assume linearity.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 7.3272,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 7.327,
+      "load_seconds": 7.712725500110537
+    },
+    {
+      "source": "write literal new paragraph here comma then stop period",
+      "mode": "dictation",
+      "style": "light",
+      "output": "Write new paragraph here, then stop.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 5.9922,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 5.992,
+      "load_seconds": 7.712725500110537
+    },
+    {
+      "source": "um please send the report Tuesday actually Thursday new paragraph first check voltage second check current",
+      "mode": "dictation",
+      "style": "light",
+      "output": "Please send the report Thursday.\n\nFirst, check the voltage.\nSecond, check the current.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 3.0392,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 3.039,
+      "load_seconds": 7.712725500110537
+    }
+  ],
+  "npu_cases": [
+    {
+      "device": "NPU",
+      "source": "um please send the report Tuesday actually Thursday new paragraph first check voltage second check current",
+      "mode": "dictation",
+      "output": "Please send the report Thursday.\n\nFirst, check the voltage.\nSecond, check the current.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 173.4807,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 173.481,
+      "load_seconds": 169.67716870002914
+    },
+    {
+      "device": "NPU",
+      "source": "We cannot assume linearity. Um, the period depends on amplitude, and actually this is an approximation, not an exact result.",
+      "mode": "lecture",
+      "output": "We cannot assume linearity. The period depends on amplitude, and actually this is an approximation, not an exact result.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 3.3651,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 3.365,
+      "load_seconds": 169.67716870002914
+    }
+  ],
+  "gpu_cases": [
+    {
+      "device": "GPU",
+      "source": "um please send the report Tuesday actually Thursday",
+      "mode": "dictation",
+      "output": "Please send the report Thursday.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 16.6856,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 16.686,
+      "load_seconds": 15.158544699894264
+    },
+    {
+      "device": "GPU",
+      "source": "The supply is 5 volts, not 50 volts. Um, the period is not constant. We cannot assume linearity.",
+      "mode": "lecture",
+      "output": "The supply is 5 volts, not 50 volts. The period is not constant. We cannot assume linearity.",
+      "records": [
+        {
+          "block": 0,
+          "seconds": 1.3989,
+          "used_source": false,
+          "warnings": []
+        }
+      ],
+      "seconds": 1.399,
+      "load_seconds": 15.158544699894264
+    }
+  ],
+  "desktop": {
+    "actual_cli_child": true,
+    "actual_model": true,
+    "device": "CPU",
+    "text": "The supply is 5 volts, not 50 volts, and we cannot assume linearity.",
+    "original_files_unchanged": true,
+    "exports": 4,
+    "status": "AI cleanup ready. Review the AI version against Raw before using it.",
+    "seconds": 42.509
+  },
+  "installed_wheel": {
+    "real_cpu_cleanup_from_other_working_directory": true,
+    "working_directory_with_spaces": true,
+    "input_unchanged": true
+  },
+  "regression": {
+    "passed": 186,
+    "skipped": 1,
+    "live_deselected": 1,
+    "ruff": "passed",
+    "mypy": "passed"
+  },
+  "smaller_candidate": {
+    "model": "OpenVINO/Qwen2.5-1.5B-Instruct-int4-ov",
+    "decision": "rejected as default",
+    "observed_failure": "Tuesday actually Thursday became Tuesday and the correction was lost; heuristics did not catch it"
+  }
+}

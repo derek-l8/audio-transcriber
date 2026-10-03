@@ -1,67 +1,131 @@
 # NPU Scribe
 
-NPU Scribe is an English-only, local Windows lecture transcription application
-designed for a system with an Intel NPU: device selection is measured, actual
-device provenance is recorded per run, and CPU/GPU are supported fallbacks —
-no specific hardware model is required. It is under active development.
-Milestone 1 — a reliable command-line batch-transcription
-workflow for imported files — is implemented and verified in the Linux sandbox;
-all Windows, NPU, GPU, endurance, and accuracy claims still require owner-run
-host validation.
+Transcribe English audio and video files on your own computer, then optionally
+clean up grammar and formatting or produce study notes with a local AI model. Export text, Markdown,
+JSON, or SRT subtitles. The optional Windows desktop app adds playback, search,
+and manual corrections.
 
-## What works now (verified in the sandbox)
+Transcription and cleanup run offline after model download, with no subscription
+or API key. This is a working v0.1 source package; AI cleanup and the desktop app
+are experimental. A validated installer release is not available yet.
 
-- `npu-scribe` CLI: model management, device listing, batch transcription,
-  explicit resume, exports, and manifest-driven evaluation.
-- Explicit, checksum-verified download of manifest-approved OpenVINO Whisper
-  models from `huggingface.co` only; staged verification with atomic promotion.
-- Import of WAV/MP3/M4A/MP4 through a media-decoder boundary; validated mono
-  16 kHz PCM WAV flows without FFmpeg, other containers need a configured
-  FFmpeg binary (adapter tested with deterministic stubs).
-- Bounded-memory chunking (default 30 s chunks, 1 s overlap), absolute source
-  timestamps parsed from the pinned OpenVINO GenAI runtime's real result
-  structure (`WhisperDecodedResults.chunks`), overlap deduplication that never
-  deletes legitimate repeated content outside the overlap window.
-- Atomic per-chunk checkpoints and explicit resume that refuses fingerprint,
-  model, decoder, or chunking mismatches; resumed runs produce byte-identical
-  raw segments to uninterrupted runs (verified with the real pinned model).
-- Immutable raw transcript plus deterministic Balanced layer per session.
-- Exports: versioned JSON, Markdown, text, SRT (validated) for both layers.
-- Measured device benchmarks with warmup/run separation, identity-keyed cache,
-  automatic selection, verified-device fallback with recorded provenance.
-- No network access during ordinary transcription (socket-denial tested);
-  network is used only by explicit `models download` / `evaluate` commands.
+## Install on Windows
 
-## Prerequisites
+Use 64-bit Python 3.12 and PowerShell. Follow
+[Windows installation](docs/USER_GUIDE.md#install-on-windows) to get the source,
+create its Python environment, and download a speech model. The guide supports
+Git and **Code > Download ZIP**, and stores your library separately from the code.
 
-- Python 3.11 or 3.12 (3.11 is used for development).
-- FFmpeg binary on PATH (or passed via `--ffmpeg`) for MP3/M4A/MP4 inputs;
-  plain mono 16 kHz WAV needs nothing extra. FFmpeg is not bundled.
-- No NPU/GPU required: OpenVINO falls back to CPU automatically; actual device
-  provenance is recorded per run.
-- Sessions, exports, and models live under the per-user data directory, never
-  inside this repository.
+Windows x64 is the locally tested target. Python 3.11 is also supported by the
+source package; other devices and operating systems are not fully validated.
 
-## Quick start
+## Transcribe and export
 
-```bash
-python -m pip install -e '.[inference]'
-npu-scribe models list
-npu-scribe models download whisper-tiny.en-int4-ov
-npu-scribe transcribe lecture.wav --model whisper-tiny.en-int4-ov --device auto
-npu-scribe resume SESSION_ID
-npu-scribe export SESSION_ID --format srt --layer balanced
+From the source folder with its installed `.venv` and downloaded model,
+replace the example paths below. For **MP3, M4A, or MP4**, first
+[set up FFmpeg](docs/USER_GUIDE.md#cli-transcription-and-export); it is not bundled.
+
+```powershell
+$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$InputFile = 'C:\Lectures\lecture.mp4'
+$FFmpeg = 'C:\Tools\ffmpeg\bin\ffmpeg.exe'
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --device CPU --ffmpeg "$FFmpeg"
+if ($LASTEXITCODE -ne 0) { throw 'Transcription did not finish; check the message above.' }
 ```
 
-## Not yet claimed
+Successful output includes `session: ...` and `status: ready`. Copy that session
+identifier into the export command:
 
-No NPU acceleration, Windows compatibility, bundled FFmpeg, one-hour endurance,
-accuracy threshold, or model superiority claim is verified yet. The desktop UI,
-microphone recording, dictation insertion, semantic rewriting, summaries, and
-math-symbol conversion are intentionally out of scope for this milestone.
+```powershell
+$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Session = 'SESSION_ID_FROM_OUTPUT'
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --layer raw --format text
+if ($LASTEXITCODE -ne 0) { throw 'Export failed; check the message above.' }
+```
 
-Models are never bundled or fetched during ordinary operation. Do not place
-models, recordings, transcripts, or diagnostics inside the repository.
+The file is saved under `$Data\lectures\$Session\exports`. Change `--format` to
+`markdown`, `json`, or `srt`; an existing export requires `--overwrite`.
+WAV files bypass FFmpeg and must already be mono, 16 kHz, 16-bit PCM. The
+[user guide](docs/USER_GUIDE.md#cli-transcription-and-export) covers conversion
+and pause/resume. No PowerShell activation script is required.
 
-License: original code is MIT. Third-party runtimes, models, media codecs, and
-datasets retain their own licenses; see `THIRD_PARTY_NOTICES.md`.
+## What you get
+
+Each session preserves the recording and its **Raw** transcript. **Balanced**
+applies deterministic cleanup. Manual corrections create a separate **Edited**
+version; model cleanup creates **AI** text, and **Summary** holds shorter study notes.
+The desktop runs Light cleanup automatically after import when its model is installed;
+select Off for unedited text or Medium for more rewriting. Export the version you need.
+
+Speech recognition and AI cleanup have independent device settings. Start speech
+recognition on **CPU**. For cleanup, GPU was fastest under moderate graphics
+activity in our one-host test; NPU used less CPU but still needed substantial RAM
+and slowed a heavier graphics workload. Speech starts on CPU; cleanup defaults to
+**AUTO**, which tries an available OpenVINO GPU and falls back to CPU. You can
+select either device or NPU explicitly. See
+[device choice and resource use](docs/USER_GUIDE.md#choose-devices-and-manage-resource-use).
+
+## Optional AI cleanup
+
+Follow the [cleanup guide](docs/USER_GUIDE.md#local-ai-cleanup) to download the
+separate text model and clean a session or an existing UTF-8 text file. The current
+Qwen2.5 7B INT4 model needs about **4.5 GB of downloads** and several GiB of RAM.
+
+Lecture mode prioritizes detail; dictation mode attempts spoken corrections and
+formatting. The model can change meaning or mishandle formatting commands, so
+review important results against the source. These modes process existing text.
+
+## Optional desktop app
+
+From the source folder, install the interface and launch it:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install '.[desktop,inference]'
+if ($LASTEXITCODE -ne 0) { throw 'Desktop installation failed; stop here.' }
+$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+.\.venv\Scripts\python.exe -m npu_scribe.desktop --data-dir "$Data"
+```
+
+Choose an installed speech model, use **Choose FFmpeg** for compressed files,
+and press **Import lecture**. Review the completed text, play the preserved audio,
+and export the selected version. Choose Off, Light, or Medium before importing;
+**Clean selected** reruns cleanup and **Summarize selected** creates formatted notes.
+Download the separate cleanup model first, or choose Off. MP4 playback is audio only. See the
+[desktop workflow](docs/USER_GUIDE.md#desktop-workflow) for corrections and cleanup.
+
+## Your files and updates
+
+The default library is in your local application-data folder, separate from
+the source. It holds recordings, models, transcripts, revisions, and exports.
+Keep personal media and transcripts out of the Git checkout. See
+[privacy and data locations](PRIVACY.md).
+
+To update, close or pause active jobs, preserve local code changes, and follow
+the [Git or ZIP update procedure](docs/USER_GUIDE.md#update-an-existing-checkout).
+Reinstall from the updated source and use the same library and custom model folder.
+
+## Limits and troubleshooting
+
+The program accepts local files. Video-link downloading and live microphone
+dictation are not implemented. Summaries are excerpt-by-excerpt notes, not a
+verified account of the full lecture; check them against the transcript. Transcription can miss words, including
+near 30-second chunk cuts. GPU/NPU support depends on drivers and the model;
+Speech Auto uses short synthetic audio; cleanup AUTO uses GPU availability and
+CPU fallback. Neither measures interference with your other applications.
+
+See [common problems](docs/USER_GUIDE.md#common-problems) for missing models,
+FFmpeg, device errors, slow cleanup, and library locks.
+
+## Development and evidence
+
+The compact [tests and decisions](docs/TESTED_DECISIONS.md) record explains model,
+device, and chunking choices with measurements and links to the underlying reports.
+
+See [development](DEVELOPMENT.md) for contributor setup and checks,
+[testing](TESTING.md) for evidence and its limits, and
+[model evaluation](MODEL_EVALUATION.md) for speech comparisons.
+[Architecture](ARCHITECTURE.md), [Windows validation](host-validation/README.md),
+and [experimental packaging](packaging/README.md) provide technical details.
+
+Original code is [MIT licensed](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md)
+for dependencies, models, codecs, and source licenses.

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "manifest": "MIT OCW 4 clips: base on GPU",
+  "results": [
+    {
+      "case_id": "lec01-object-oriented-programming",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "GPU",
+      "actual_device": "GPU",
+      "wer": 0.0689,
+      "cer": 0.0378,
+      "rtf": 0.0831,
+      "load_seconds": null,
+      "inference_seconds": 9.582,
+      "audio_seconds": 115.24,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "lec07-circuits",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "GPU",
+      "actual_device": "GPU",
+      "wer": 0.1327,
+      "cer": 0.0728,
+      "rtf": 0.0633,
+      "load_seconds": null,
+      "inference_seconds": 7.392,
+      "audio_seconds": 116.77,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "lec08-op-amps",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "GPU",
+      "actual_device": "GPU",
+      "wer": 0.0836,
+      "cer": 0.0451,
+      "rtf": 0.0583,
+      "load_seconds": null,
+      "inference_seconds": 6.922,
+      "audio_seconds": 118.76,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "agarwal-lec01-circuit-abstraction",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "GPU",
+      "actual_device": "GPU",
+      "wer": 0.2789,
+      "cer": 0.194,
+      "rtf": 0.0665,
+      "load_seconds": null,
+      "inference_seconds": 7.385,
+      "audio_seconds": 111.0,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    }
+  ],
+  "selection": {
+    "rejected_real_time_or_slower": [],
+    "eligible_ids": [],
+    "preferred_rtf_le_05": false,
+    "selected_model_id": null,
+    "note": "Compare at least two models on identical measured cases and one device."
+  }
+}

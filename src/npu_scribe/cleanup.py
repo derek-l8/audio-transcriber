@@ -8,7 +8,6 @@ from .models import Mode
 
 FILLERS = re.compile(r"\b(?:um+|uh+|erm|you know)\b[,.]?\s*", re.IGNORECASE)
 REPETITION = re.compile(r"\b([\w'-]+)(?:\s+\1\b)+", re.IGNORECASE)
-CORRECTION = re.compile(r"\b(?:actually|I mean|scratch that)\b[,:]?\s*", re.IGNORECASE)
 COMMANDS = {
     "new paragraph": "\n\n",
     "bullet point": "\n- ",
@@ -44,13 +43,11 @@ def spoken_formatting(text: str) -> str:
 
 
 def deterministic_cleanup(text: str) -> str:
-    text = spoken_formatting(text.strip())
+    text = text.strip()
     text = FILLERS.sub("", text)
     text = REPETITION.sub(r"\1", text)
-    # Keep the clause after an explicit correction marker; earlier claims remain visible in raw.
-    matches = list(CORRECTION.finditer(text))
-    if matches:
-        text = text[matches[-1].end() :]
+    # Context-dependent self-corrections belong to the AI dictation mode.
+    # The rule layer retains their source wording and ordinary technical words.
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\s+([,.?!])", r"\1", text)
     text = re.sub(r"([,.?!])(?=\w)", r"\1 ", text)

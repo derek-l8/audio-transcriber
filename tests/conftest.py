@@ -10,6 +10,20 @@ import pytest
 STUB_DIR = Path(__file__).parent / ".stubs"
 
 
+def enable_python_stub_on_windows(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Launch test decoder scripts through Python where shebangs are not executable."""
+    if os.name != "nt":
+        return
+    from npu_scribe import media
+
+    build_args = media.build_ffmpeg_args
+
+    def python_args(ffmpeg_path: str, source: Path, destination: Path) -> list[str]:
+        return [sys.executable, *build_args(ffmpeg_path, source, destination)]
+
+    monkeypatch.setattr(media, "build_ffmpeg_args", python_args)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def deny_network_by_default():
     """The default suite must never touch the network.
@@ -73,18 +87,20 @@ def three_second_wav(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def stub_media(tmp_path: Path, three_second_wav: Path) -> str:
+def stub_media(tmp_path: Path, three_second_wav: Path, monkeypatch: pytest.MonkeyPatch) -> str:
     """Executable FFmpeg stand-in that emits a valid normalized WAV.
 
     The sandbox mounts /tmp noexec, so stubs live beside the tests on the
     overlay filesystem; the directory is gitignored and disposable.
     """
     STUB_DIR.mkdir(exist_ok=True)
-    script = STUB_DIR / f"ffmpeg-stub-{abs(hash(str(tmp_path)))}"
+    suffix = ".py" if os.name == "nt" else ""
+    script = STUB_DIR / f"ffmpeg-stub-{abs(hash(str(tmp_path)))}{suffix}"
     script.write_text(
         f"#!{sys.executable}\n"
         "import sys\n"
         f"open(sys.argv[-1], 'wb').write(open({str(three_second_wav)!r}, 'rb').read())\n"
     )
     script.chmod(0o755)
+    enable_python_stub_on_windows(monkeypatch)
     return str(script)

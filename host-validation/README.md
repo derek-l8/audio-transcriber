@@ -1,4 +1,4 @@
-# Owner Windows validation — Milestone 1
+# Windows validation — Milestone 1
 
 Open an ordinary (non-Administrator) PowerShell in this directory. The intended
 one-command novice experience:
@@ -46,7 +46,8 @@ What this does, in order:
    automatically runs `resume SESSION_ID` with identical settings and verifies
    the session reaches `ready` with unique, ordered chunk records. Afterwards it
    runs one continuous pass over the same file for endurance, sampling peak
-   working-set memory, with a 6-hour enforced timeout.
+   process-tree working-set memory every 10 seconds, with a 6-hour enforced
+   timeout. Samples can miss shorter memory spikes.
 8. With `-EvaluationManifest`: measures WER/CER/RTF on prepared public material;
    WER/CER appear in the report only from that measured evaluation file.
 9. Writes sanitized Markdown + JSON reports (`schema_version 3`) recording exact
@@ -64,6 +65,65 @@ Preparing an evaluation manifest: point `audio_url` at the official public
 source and record its SHA-256, exact size, license, and reference-transcript
 provenance. See `MODEL_EVALUATION.md`. Do not bundle copyrighted media here.
 
-Status: the harness itself is static-tested for structure but has **not** been
-executed on Windows yet; treat all its outputs as unverified until an owner-run
-report exists.
+Status: executed on one Windows host on 2026-09-30. Sanitized JSON reports are
+in `evidence/2026-09-30/`. CPU/GPU/NPU smoke checks used synthetic silence;
+the one-hour endurance and resume checks used synthetic CPU audio. These do
+not measure speech accuracy, NPU speedup, broad compatibility, or two-hour
+memory growth. A repeat run can use a checksum-verified installed tiny model
+without `-DownloadModels`.
+
+For a separate continuous two-hour CPU run with a process-tree memory series,
+use PowerShell 7:
+
+```powershell
+pwsh -File .\Measure-NpuScribeEndurance.ps1 -LongFile PATH
+```
+
+The [one-host result](evidence/2026-09-30/two-hour-endurance/README.md) includes
+two successful synthetic runs, recoverability checks, and sampling limits.
+
+For three-way pause refinement comparisons, use `Measure-OverlapPilot.py`
+with `--strategies fixed pause-v1 pause-v2`. Prepare new pinned Yale sources
+with `Prepare-YaleContinuousPilot.py --source-set refinement`. The same analyzer
+groups reports by strategy and overlap. Keep all text-bearing files ignored.
+See [the new-lecture refinement result](evidence/2026-10-02/pause-refinement/README.md).
+
+For the original two-way overlap comparison, use
+`Prepare-YaleContinuousPilot.py --source-set holdout` with the pinned source
+MP3s/HTML and an explicit FFmpeg executable, then `Measure-OverlapPilot.py`.
+The latter verifies the installed tiny/base model files, warms each CPU
+pipeline, and runs 0,1 then 1,0 pairs through `BatchRunner`. Its completed-run
+index allows a rerun to skip finished measurements. `Analyze-OverlapPilot.py`
+checks edit counts and missing reference text across chunk seams. Keep the
+supplied data root and text-review output in ignored local storage; they
+contain recordings and transcript text. Only the numeric reports belong in
+the evidence directory. See [the held-out result and reproduction details](evidence/2026-10-01/overlap-holdout/README.md).
+
+The same measurement helper accepts `--comparison pause` to compare fixed
+zero-overlap cuts with the experimental pause-v1 strategy. Both conditions
+use the same WAV and reference; alternate repeats reverse their order. Run
+`Analyze-OverlapPilot.py` against the completed index to inspect seam deletions.
+Use a fresh data/output root for each algorithm or manifest change. The pause
+comparison uses all six previously prepared Yale passages, rather than new
+held-out material. See [the pause pilot](evidence/2026-10-01/pause-pilot/README.md).
+
+## Installation and frozen worker checks
+
+See [the package validation result](evidence/2026-10-02/package-validation/README.md) for fresh installation and one-host bundle evidence. `Test-DesktopWorkflow.py --worker-executable PATH` drives an existing frozen CLI worker from the source Qt UI; it does not automate the frozen window. The [packaging guide](../packaging/README.md) gives the complete commands and remaining gates. `Test-FrozenWindow.py` checks native idle close/reopen; `Test-WindowsInstaller.py` uses a separate test identity for install/reinstall/uninstall and library preservation. Keep all checkouts and generated files outside synced folders.
+
+
+`Test-FrozenReview.py` checks the actual frozen Windows GUI through owned
+accessibility controls and targeted Windows messages using a fresh silent/mock
+library. Dropdowns, playback, seeking, editing, search, latest/older history
+previews, twelve exports, normal close/reopen and immutable artifact checks passed in the [native review result](evidence/2026-10-02/frozen-review/README.md).
+`Test-FrozenJobClose.py` also passed native import, close during a real CPU job,
+reopen/resume and committed-text/audio preservation using repeated public speech.
+See the packaging guide for commands; use fresh ignored work directories.
+
+## AI cleanup quality and speed
+
+See the [matched cleanup result](evidence/2026-10-02/ai-cleanup-comparison/README.md)
+for CPU/GPU/NPU text-model quality, warmed latency, startup, and CPU-time evidence.
+`Compare-AiCleanup.py` runs identical cases sequentially with reversed device/case
+order on the second pass. The evidence guide gives synthetic-only reproduction
+commands and distinguishes strict check failures from semantic errors.

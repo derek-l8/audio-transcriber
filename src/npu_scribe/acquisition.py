@@ -21,11 +21,12 @@ import tempfile
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
 ALLOWED_HOSTS = frozenset({"huggingface.co"})
-MAX_MODEL_BYTES = 2 * 1024 * 1024 * 1024  # ~2 GB installed-size budget per candidate
+MAX_MODEL_BYTES = 6 * 1024 * 1024 * 1024  # Speech and local text-model asset budget.
 READ_CHUNK = 1024 * 1024
 
 
@@ -56,6 +57,7 @@ class ModelSpec:
     files: tuple[ModelFile, ...]
     source_url: str
     notes: str = ""
+    task: str = "speech"
 
     @property
     def download_bytes(self) -> int:
@@ -275,6 +277,72 @@ MANIFEST: dict[str, ModelSpec] = {
 }
 
 
+# Pinned public OpenVINO export. Runtime assets are acquired explicitly, never bundled.
+_TEXT_FILES: dict[str, tuple[int, str]] = {
+    "added_tokens.json": (605, "58b54bbe36fc752f79a24a271ef66a0a0830054b4dfad94bde757d851968060b"),
+    "config.json": (773, "47107d0e2030a880ae170474241652978a54ef24ce349d275739624020b55c83"),
+    "generation_config.json": (
+        243,
+        "7b5b9caf2e2ed66b9e6a9b7f1f8f77af4dfad41eee90f9d52e58465d0e3f6abf",
+    ),
+    "merges.txt": (1671853, "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"),
+    "openvino_detokenizer.bin": (
+        2189639,
+        "3ca47601554a3b871c1e45e8f31aa6e17d726365c075fb430d1a2089484ae8d6",
+    ),
+    "openvino_detokenizer.xml": (
+        9594,
+        "6d1a7a8cd1a8e8b2527ecbe4df2d4953213005c69c3685059ce86616f9301d53",
+    ),
+    "openvino_model.bin": (
+        4456584796,
+        "96eaf78c4e0ecfa5ca207805880b5b28e66bc15005d76f9fe5fd3cb09a33a590",
+    ),
+    "openvino_model.xml": (
+        2441511,
+        "2218d6519fc28130411e5905e81a8dd71c05d0972f17ddb85fbf5a0cd26cf36d",
+    ),
+    "openvino_tokenizer.bin": (
+        5588628,
+        "03c324c45a915c87e03c095b739c567371e5e5e131bf13b2052ac9e659b582cc",
+    ),
+    "openvino_tokenizer.xml": (
+        25114,
+        "4822836acc22026d3428a69fa24ee25fb6b06544afb33697dd9c81e9b277ab84",
+    ),
+    "special_tokens_map.json": (
+        613,
+        "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+    ),
+    "tokenizer.json": (
+        11421896,
+        "9c5ae00e602b8860cbd784ba82a8aa14e8feecec692e7076590d014d7b7fdafa",
+    ),
+    "tokenizer_config.json": (
+        7336,
+        "57fea41fa99fce34f91450643e48b3bfbb078c32c6831a3c06834f122c200510",
+    ),
+    "vocab.json": (2776833, "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"),
+}
+MANIFEST["qwen2.5-7b-instruct-int4-ov"] = ModelSpec(
+    id="qwen2.5-7b-instruct-int4-ov",
+    repo="OpenVINO/Qwen2.5-7B-Instruct-int4-ov",
+    revision="51f38f02586876c08ca2a604224da20ea61685b8",
+    role="cleanup-candidate",
+    language="en",
+    multilingual=True,
+    license="Apache-2.0",
+    license_url="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/main/LICENSE",
+    requires_remote_code=False,
+    serialization="openvino-ir+tokenizers (no pickle)",
+    min_openvino_genai="2026.3.0",
+    files=tuple(ModelFile(n, sha, size) for n, (size, sha) in sorted(_TEXT_FILES.items())),
+    source_url="https://huggingface.co/OpenVINO/Qwen2.5-7B-Instruct-int4-ov",
+    notes="Experimental local cleanup model; quality and device suitability require validation.",
+    task="text-cleanup",
+)
+
+
 def get_spec(model_id: str) -> ModelSpec:
     try:
         return MANIFEST[model_id]
@@ -291,7 +359,10 @@ def https_fetcher(max_bytes: int = MAX_MODEL_BYTES) -> Fetcher:
     def fetch(url: str, destination: Path, expected_size: int) -> None:
         if expected_size > max_bytes:
             raise AcquisitionError("manifest file exceeds the configured size limit")
-        limit = max(expected_size, max_bytes)
+        if expected_size > 256 * 1024 * 1024:
+            _fetch_ranges(url, destination, expected_size)
+            return
+        limit = expected_size
         received = 0
         # URL is manifest-constructed HTTPS only (see ModelSpec.url_for).
         with (
@@ -305,6 +376,41 @@ def https_fetcher(max_bytes: int = MAX_MODEL_BYTES) -> Fetcher:
                 out.write(chunk)
 
     return fetch
+
+
+def _fetch_ranges(url: str, destination: Path, expected_size: int) -> None:
+    """Bound large public-model responses; verify all ranges and the final file.
+
+    The model's normal SHA-256/size checks still run before promotion. Range
+    requests avoid a multi-gigabyte response stalling before its first bytes.
+    """
+    block = 32 * 1024 * 1024
+    with destination.open("wb") as output:
+        output.truncate(expected_size)
+
+    def fetch_range(start: int) -> None:
+        end = min(start + block, expected_size) - 1
+        request = urllib.request.Request(  # noqa: S310 - manifest-constructed HTTPS
+            url, headers={"Range": f"bytes={start}-{end}"}
+        )
+        with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310 - manifest HTTPS
+            expected_range = f"bytes {start}-{end}/{expected_size}"
+            if response.status != 206 or response.headers.get("Content-Range") != expected_range:
+                raise AcquisitionError("model server returned an unexpected byte range")
+            remaining = end - start + 1
+            with destination.open("r+b") as output:
+                output.seek(start)
+                while remaining:
+                    chunk = response.read(min(READ_CHUNK, remaining))
+                    if not chunk:
+                        raise AcquisitionError("model download ended before its expected size")
+                    output.write(chunk)
+                    remaining -= len(chunk)
+                if response.read(1):
+                    raise AcquisitionError("model byte range exceeded its expected size")
+
+    with ThreadPoolExecutor(max_workers=4) as workers:
+        list(workers.map(fetch_range, range(0, expected_size, block)))
 
 
 def verify_installed(models_root: Path, spec: ModelSpec) -> Path | None:

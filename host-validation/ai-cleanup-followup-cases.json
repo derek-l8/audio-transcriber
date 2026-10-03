@@ -1,0 +1,20 @@
+[
+  {
+    "id": "D01-unambiguous",
+    "mode": "dictation",
+    "style": "light",
+    "source": "um schedule the meeting Thursday actually Friday and keep the same room",
+    "content_required": [
+      "(?i)Friday",
+      "(?i)same room"
+    ],
+    "content_forbidden": [
+      "(?i)Thursday",
+      "(?i)actually"
+    ],
+    "formatting_required": [
+      "[.!?]$",
+      "(?i)^(?!.*\\bum\\b)"
+    ]
+  }
+]

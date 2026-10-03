@@ -5,16 +5,17 @@ build-backend = "hatchling.build"
 [project]
 name = "npu-scribe"
 version = "0.1.0"
-description = "Local-first Windows speech transcription and dictation"
+description = "Local audio transcription and AI text cleanup with OpenVINO"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
 dependencies = ["platformdirs==4.3.6"]
 
 [project.optional-dependencies]
-desktop = ["PySide6==6.8.2.1", "sounddevice==0.5.1", "numpy==2.2.3"]
+desktop = ["PySide6==6.8.2.1"]
 inference = ["openvino==2026.3.0", "openvino-genai==2026.3.0.0"]
-dev = ["pytest==9.0.3", "pytest-cov==6.0.0", "hypothesis==6.127.3", "ruff==0.9.10", "mypy==1.15.0"]
+bundle = ["pyinstaller==6.22.3"]
+dev = ["pytest==9.0.3", "pytest-cov==6.0.0", "hypothesis==6.127.3", "ruff==0.9.10", "mypy==1.15.0", "build==1.6.1", "hatchling==1.27.0"]
 
 [project.scripts]
 npu-scribe = "npu_scribe.cli:main"
@@ -22,6 +23,14 @@ npu-scribe-desktop = "npu_scribe.desktop:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/npu_scribe"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src", "/tests", "/docs", "/packaging", "/scripts", "/host-validation", "/.github",
+    "/pyproject.toml", "/README.md", "/LICENSE", "/THIRD_PARTY_NOTICES.md",
+    "/DEVELOPMENT.md", "/TESTING.md", "/PRIVACY.md", "/ARCHITECTURE.md",
+    "/REQUIREMENTS.md", "/DECISIONS.md", "/MODEL_EVALUATION.md", "/.gitignore",
+]
 
 [tool.ruff]
 line-length = 100

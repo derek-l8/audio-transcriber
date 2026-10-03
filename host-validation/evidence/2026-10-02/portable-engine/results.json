@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "installed_wheel": true,
+  "working_directory_outside_checkout": true,
+  "fresh_library_and_relocated_models": true,
+  "paths_with_spaces": true,
+  "minimal_path_without_python": true,
+  "ffmpeg_discovered_on_path": true,
+  "default_real_model": "whisper-tiny.en-int4-ov",
+  "actual_device": "CPU",
+  "chunks": 3,
+  "export_formats": [
+    "text",
+    "markdown",
+    "json",
+    "srt"
+  ],
+  "source_duration_seconds": 72.0,
+  "scope": "One Windows x64 host; installation and local runtime validation, not an accuracy benchmark."
+}

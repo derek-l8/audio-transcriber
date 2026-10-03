@@ -5,17 +5,21 @@
 **Status:** Build-ready specification  
 **Product type:** Personal-first, local Windows desktop application  
 **Repository name:** `npu-scribe`  
-**Current repository state:** Local Git repository in Sandbox v2; no GitHub remote is required during initial development  
+**Document status:** Historical planning requirements; current implemented scope is in the README
 **License:** MIT for original application code; model and dataset licenses remain separate
+
+> Historical planning document: the implemented standalone transcription engine
+> and desktop workflow are described in the README and user guide. Dictation and
+> rewriting requirements below are proposals, not shipped features.
 
 ## 1. Executive summary
 
 NPU Scribe is an English-only Windows desktop application for two related workflows:
 
-1. **Live dictation:** capture speech, remove fillers and false starts, optionally rewrite it, and insert the final text into ordinary text fields in Microsoft Word, Notion, and Codex.
+1. **Live dictation:** capture speech, remove fillers and false starts, optionally rewrite it, and insert the final text into ordinary editable desktop fields.
 2. **Lecture transcription:** record a microphone or import an audio/video file, create a timestamped transcript, retain the source audio and transcript versions, and provide local review, search, playback, cleanup, outline, summary, and export tools.
 
-The product runs locally without paid APIs. It uses OpenVINO-compatible speech and language models and benchmarks the available CPU, Intel GPU, and Intel NPU instead of assuming which device is fastest. It must make NPU use inspectable and verifiable. The name remains NPU Scribe even when a different device is selected for a particular workload.
+The product runs locally without paid APIs. It uses OpenVINO-compatible speech and language models and benchmarks the available CPU, Intel GPU, and Intel NPU instead of assuming which device is fastest. It must make NPU use inspectable and verifiable. Hardware-specific branding is pending replacement; CPU, GPU, and NPU are execution options.
 
 The first supported and optimized machine is the owner's Windows 11 laptop: Intel Core Ultra 5 335, Intel NPU, Intel integrated graphics, and 32 GB RAM. The application should have a best-effort CPU fallback for development, CI, and reviewers, but broad hardware support is not a v1 release gate.
 
@@ -40,7 +44,7 @@ The software is intended to replace the owner's need for a paid dictation produc
 A single owner who:
 
 - uses Windows 11;
-- dictates into Microsoft Word desktop, Notion desktop, and Codex desktop;
+- dictates into ordinary desktop text fields;
 - wants filler removal and optional rewriting;
 - records or imports lectures up to two hours;
 - accepts a one-time model download and benchmarking process;
@@ -66,7 +70,7 @@ These details are the initial target, not a promise of universal compatibility. 
 
 1. Produce accurate English transcripts locally from imported files and microphone recordings.
 2. Make balanced dictation noticeably cleaner than literal transcription while preserving the speaker's meaning.
-3. Insert short dictated text reliably into Word, Notion, and Codex without silently losing clipboard contents or text.
+3. Insert short dictated text reliably into ordinary desktop applications without silently losing clipboard contents or text.
 4. Use the fastest compatible local device for each workload and expose auditable device information.
 5. Preserve a recoverable chain from audio to raw transcript to cleaned or rewritten result.
 6. Provide a public, reproducible, well-documented portfolio repository.
@@ -78,7 +82,7 @@ Targets are measured on the owner's target machine unless otherwise specified. R
 | Area | Release target |
 |---|---|
 | Short dictation latency | For 15–30 second utterances, median stop-to-insert at or below 2 seconds and p95 at or below 4 seconds in Balanced mode |
-| Dictation reliability | At least 98% successful insertions across a documented test matrix covering Word, Notion, and Codex ordinary editable fields |
+| Dictation reliability | At least 98% successful insertions across a documented test matrix covering ordinary editable desktop fields |
 | Clipboard safety | Original clipboard restored after successful insertion; recoverable fallback offered if insertion fails |
 | Endurance | Complete a two-hour synthetic or licensed-audio transcription run without unbounded memory growth or loss of the recoverable source/transcript checkpoints |
 | Offline behavior | Zero application network connections during ordinary use after models are installed |
@@ -206,6 +210,16 @@ If a selected device is unavailable, the application may fall back only when the
 
 **Aggressive** may rewrite for clarity and concision, but must still preserve meaning and may not invent content. Its result receives a preview when configured or when the input exceeds the automatic-insertion threshold.
 
+**Current batch implementation:** Balanced remains a conservative rule layer.
+Local model cleanup is an explicit separate AI layer with lecture/dictation modes
+and Off/Light/Medium controls. Selected cleanup follows desktop transcription
+automatically; CLI can opt in. Summary saves separate formatted excerpt notes.
+Cleanup reads Raw, keeps completed revision snapshots, records
+source/model provenance, and falls back to source blocks on concrete heuristic
+warnings. The light/medium choices serve the minimal-edit/clarity use cases above;
+live capture, mode shortcuts, preview/insertion, and full semantic-preservation
+validation remain separate release targets. See the user guide for actual controls.
+
 Cleanup should use deterministic transformations where they are safer and sufficient. A local language model may handle semantic rewriting. Raw, cleaned, and rewritten layers must remain distinguishable.
 
 #### Spoken formatting commands
@@ -225,7 +239,7 @@ Literal-escape behavior must be documented so the user can dictate the words the
 #### Insertion
 
 - Automatically insert finalized text into the field that was focused when dictation began or ended, using a documented and tested focus policy.
-- Treat Word desktop, Notion desktop, and Codex desktop as required target applications.
+- Test insertion into ordinary editable desktop fields.
 - Up to approximately two minutes of speech may auto-insert. Longer dictation requires preview and confirmation.
 - Restore the user's prior clipboard after insertion whenever the insertion mechanism temporarily uses it.
 - If direct insertion fails, keep the result in local history, place it in a clearly identified fallback view, and offer an explicit copy action.
@@ -244,7 +258,7 @@ Literal-escape behavior must be documented so the user can dictate the words the
 - Temporarily retain failed dictation audio for diagnostics, clearly label it, and provide deletion controls.
 - Allow history to be disabled and cleared.
 - Provide a one-click “replace this with…” correction flow from history that can add an explicit dictionary mapping.
-- Do not monitor later edits in Word, Notion, Codex, or other applications.
+- Do not monitor later edits in other applications.
 
 ### 7.4 Personal dictionary
 
@@ -430,124 +444,28 @@ Core transcription, cleanup, storage, and orchestration logic should not depend 
 - Logs must minimize dictated content and personal paths.
 - Dependencies and redistributed binaries require pinned versions, provenance, licenses, and integrity checks where possible.
 
-## 11. Development and trust-boundary workflow
+## 11. Portable development and distribution
 
-Development occurs through the owner's Codex Sandbox Kit v2. The sandbox operating guide is a workflow constraint, not a product feature. The project may remain a local Git repository until the owner decides it is ready for GitHub.
+The application must install from the repository or a built package without
+requiring the original developer's directories, accounts, or development tools.
+Use a normal Python environment; see [Development](../DEVELOPMENT.md) for the
+current commands. No assistant, extension, subscription, API key, or coding
+service is required to run the application.
 
-### 11.1 Project layout and operating zones
+Keep source code, tests, packaging, and user documentation in the repository.
+Keep recordings, transcripts, models, environments, build output, credentials,
+and private machine settings outside published source packages. Automated tests
+use synthetic or documented public inputs; keep private recordings local.
 
-The durable project boundary is:
+Use the command-line interface and standard transcript exports as the public
+boundary for other applications. Integrations with particular assistants or
+editors belong outside the core project. Model downloads are explicit; ordinary
+transcription runs locally with the installed model and runtime.
 
-```text
-~/agent-workspaces/npu-scribe/
-├── repo/       # local Git working tree
-├── inbox/      # owner-selected private inputs for offline validation only
-├── outbox/     # review packages and deliberately exported results
-├── scratch/    # public or synthetic disposable work
-└── control/    # trusted launcher configuration and host-side boundary reports
-```
-
-The workflow has three distinct zones:
-
-1. **Trusted Windows/WSL host:** runs Docker Desktop, opens the WSL repository in VS Code, reviews changes, controls private inputs, and performs Git and GitHub operations.
-2. **Networked Codex runner:** receives one writable repository, public/synthetic scratch space, an outbox, public network access, and a project-specific Codex login. It does not receive the private inbox or general host access.
-3. **Offline validation runner:** receives a read-only source snapshot and the deliberately selected private inbox, has no network, and does not contain Codex.
-
-VS Code remains attached to trusted WSL through `code .`; it is not reopened inside a Dev Container. The Sandbox v2 launcher creates and verifies the coding container directly.
-
-### 11.2 One-time local setup
-
-The trusted host creates the project boundary and local Git repository:
-
-```bash
-~/codex-sandbox-kit/bin/sandboxctl init npu-scribe
-cd ~/agent-workspaces/npu-scribe/repo
-git init -b main
-```
-
-The owner places this PRD and any other non-private starting documents in the repository, reviews them, and creates a trusted baseline commit before autonomous work. A GitHub repository or remote is not required. The baseline commit is required for reliable diffs and `sandboxctl package`.
-
-The trusted host then verifies the setup and authenticates the project:
-
-```bash
-~/codex-sandbox-kit/bin/sandboxctl doctor npu-scribe
-~/codex-sandbox-kit/bin/sandboxctl login npu-scribe
-```
-
-Authentication uses ChatGPT device authorization rather than an API key. The project-specific Docker volume persists only `auth.json`; Codex configuration, rules, conversation sessions, logs, and caches inside the task container are disposable.
-
-### 11.3 Networked development
-
-Start an autonomous coding session only through the trusted launcher:
-
-```bash
-~/codex-sandbox-kit/bin/sandboxctl run npu-scribe
-```
-
-Do not start the project agent with plain `codex` from WSL, because that bypasses the outer Docker boundary. The launcher creates the container, verifies its complete mount allowlist and security configuration, writes a host-side report under `control/logs`, and starts Codex only after those checks pass. A failed boundary check is a stop condition and must not be worked around by weakening the container.
-
-Inside the networked runner:
-
-- `/workspace` is the writable project repository;
-- `/workspace/.git` is a nested read-only mount, so Codex cannot commit, push, change branches, or alter Git metadata;
-- `/agent/scratch` maps to the project's public/synthetic scratch directory;
-- `/agent/outbox` maps to the review outbox;
-- the root filesystem, Codex home, caches, and temporary directories are disposable;
-- there is no `/agent/inbox`, Windows drive, general WSL home, SSH agent, Docker socket, browser profile, VS Code socket, WSLg socket, password-manager session, or unrelated repository.
-
-The networked runner may use public internet resources and package registries. Use only public, appropriately licensed, or synthetic fixtures. Do not put private recordings, private transcripts, credentials, or secrets in `repo`, `scratch`, or prompts sent to the networked runner.
-
-Because the Codex conversation is not durable project state, each substantive session must write its status, decisions, commands run, test results, known failures, and next action into repository documentation or the review files under `.agent/` before it ends. The implementation must remain resumable from files without relying on the prior chat transcript.
-
-Deterministic noninteractive commands may be run in the same verified networked boundary with:
-
-```bash
-~/codex-sandbox-kit/bin/sandboxctl exec npu-scribe -- <command>
-```
-
-### 11.4 Trusted host review and Git promotion
-
-After a networked session exits, the owner reviews from trusted WSL or the VS Code WSL interface:
-
-```bash
-cd ~/agent-workspaces/npu-scribe/repo
-git status --short
-git diff --stat
-git diff
-~/codex-sandbox-kit/bin/sandboxctl package npu-scribe
-```
-
-The package command writes a timestamped review bundle to `outbox` containing status, diffs, checksums, and available `.agent` reports. The owner must inspect new files, diffs, reports, test output, host-side boundary reports, and every outbox artifact before promotion.
-
-Only the owner, from trusted WSL or Windows, performs:
-
-- baseline and subsequent Git commits;
-- branch creation and merging;
-- creation of a GitHub repository or remote;
-- pushes and pull requests;
-- GitHub Release publication;
-- deployment or installation onto Windows;
-- tests requiring the real Intel NPU, microphone, Word, Notion, Codex, tray, startup registration, or Windows installer.
-
-The autonomous agent may prepare exact commands and artifacts, but it must not claim that these trusted-host actions occurred. GitHub publication is deliberately deferred until the owner decides the local project is ready to showcase.
-
-### 11.5 Private offline validation
-
-If private audio is later needed, the owner places only the minimum selected fixtures in:
-
-```text
-~/agent-workspaces/npu-scribe/inbox
-```
-
-The owner then invokes a reviewed deterministic test command:
-
-```bash
-~/codex-sandbox-kit/bin/sandboxctl offline npu-scribe -- <command>
-```
-
-The offline runner has no network and no Codex executable. It mounts the repository and inbox read-only, copies the source into a fresh in-memory workspace for the command, and persists only files deliberately written to `/agent/outbox`. Project dependencies needed offline must be supplied through a separately reviewed and locked offline image; they may not be downloaded during private validation.
-
-Offline isolation prevents transmission but does not make every output safe to share: code under test can copy private content into the outbox. The owner must inspect and sanitize every returned artifact. Only reviewed aggregate metrics or explicitly approved artifacts may later enter the networked development environment. Real Windows NPU and desktop-integration validation remains a trusted-host task rather than an offline Docker task.
+Build and test an installed package from a different working directory before
+claiming portability. Record the OS and hardware actually tested. GPU/NPU support
+is optional and requires compatible hardware and drivers; one machine's results
+do not establish universal compatibility.
 
 ## 12. Testing and evaluation
 
@@ -608,7 +526,7 @@ Provide a one-command PowerShell entry point and a guided report flow that:
 6. exercises transcription and rewriting smoke tests;
 7. checks installer, Start menu, tray behavior, startup registration, and data-directory rules;
 8. guides the owner through microphone recording;
-9. guides insertion checks in Word, Notion, and Codex ordinary editable fields;
+9. guides insertion checks in ordinary editable desktop fields;
 10. restores settings and clipboard state where applicable;
 11. produces both human-readable and machine-readable sanitized reports;
 12. clearly labels skipped, failed, and unverified checks.
@@ -720,7 +638,7 @@ Deliver:
 
 - one-command Windows validation harness;
 - reversible installer/startup integration;
-- owner-run results for NPU, microphone, Word, Notion, Codex, and latency;
+- owner-run results for NPU, microphone, desktop text fields, and latency;
 - fixes from two or three bounded validation rounds;
 - sanitized benchmark report.
 
@@ -760,7 +678,7 @@ The product is v1-complete only when all applicable items are satisfied or expli
 - [ ] Supports hold-to-talk and toggle dictation.
 - [ ] Supports Raw, Balanced, and Aggressive modes.
 - [ ] Supports the documented spoken formatting commands.
-- [ ] Inserts into ordinary Word, Notion, and Codex fields with clipboard restoration and failure fallback.
+- [ ] Inserts into ordinary ordinary desktop applications fields with clipboard restoration and failure fallback.
 - [ ] Meets or transparently reports dictation latency and insertion targets.
 - [ ] Stores data in the selected dedicated folder and handles OneDrive Desktop redirection explicitly.
 - [ ] Provides history, retention, deletion, model, cache, and diagnostic controls.

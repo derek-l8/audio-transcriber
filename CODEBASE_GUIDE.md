@@ -11,14 +11,21 @@
 - `pipeline.py`: `BatchRunner` batch orchestration with device fallback;
   `run_lecture` kept as a compatibility wrapper.
 - `acquisition.py`: manifest-approved staged downloads with SHA-256 verification.
-- `cleanup.py`: commands, literal escaping, deterministic modes, rewrite risk checks.
+- `cleanup.py`: conservative Balanced rules; older formatting/rewrite helpers
+  remain available but are not the model-based cleanup path.
+- `ai_cleanup.py`: local text model, bounded requests, lecture/dictation prompts,
+  heuristic source fallback, AUTO device fallback, cancellation, retained AI versions,
+  and separate formatted excerpt summaries.
+- `editing.py`: manual revisions, retained history, source hashes and stale-write checks.
+- `desktop.py` / `desktop_ui.py`: optional Qt launcher and child-worker interface.
+- `desktop_player.py` / `desktop_editing.py`: playback, seeking and edit/history dialogs.
 - `dictionary.py`: explicit versioned mappings with conflict rejection.
 - `devices.py`: measured benchmarks, identity-keyed cache, selection/fallback order.
 - `export.py`: text, Markdown, SRT (validated), and versioned JSON to files.
 - `evaluate.py`: manifest-driven evaluation with the recorded selection policy.
 - `metrics.py`: dependency-free WER/CER.
 - `cli.py`: subcommand CLI (`models`, `devices`, `transcribe`, `resume`,
-  `export`, `evaluate`) tested through the real entry point.
+  `export`, `cleanup`, `cleanup-text`, `summarize`, `evaluate`) tested through the real entry point.
 
 Follow a feature into the tests with `rg 'symbol_name' tests src`. Start debugging storage
 at `SessionStore.save_transcript`; start inference debugging at provenance construction;

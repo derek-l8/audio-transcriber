@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +25,16 @@ def atomic_write(path: Path, data: bytes) -> None:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temporary, path)
+        for attempt in range(6):
+            try:
+                os.replace(temporary, path)
+                break
+            except OSError as error:
+                # Antivirus/sync readers can briefly deny an atomic replacement
+                # on Windows. Retry only those OS codes; persistent denial fails.
+                if getattr(error, "winerror", None) not in (5, 32, 33) or attempt == 5:
+                    raise
+                time.sleep(0.02 * 2**attempt)
     except BaseException:
         Path(temporary).unlink(missing_ok=True)
         raise
@@ -161,15 +171,21 @@ class SessionStore:
     def load_transcript(self, session_id: str, layer: str) -> Transcript:
         from .models import InferenceProvenance, Segment
 
-        if layer not in IMMUTABLE_LAYERS:
-            raise ValueError("immutable transcript layer must be raw or balanced")
+        if layer == "edited":
+            from .editing import load_revision
+
+            return load_revision(self, session_id).transcript
+        if layer not in IMMUTABLE_LAYERS | {"ai", "summary"}:
+            raise ValueError("unknown transcript layer")
         path = safe_child(self.lectures, session_id) / f"{layer}-transcript.json"
         if not path.is_file():
             raise FileNotFoundError(f"no {layer} transcript for {session_id}")
         value = json.loads(path.read_text(encoding="utf-8"))
         provenance = InferenceProvenance(**value["provenance"])
         segments = tuple(Segment(**s) for s in value["segments"])
-        return Transcript(segments, provenance, str(value.get("created_at", "")))
+        return Transcript(
+            segments, provenance, str(value.get("created_at", "")), value.get("transformation")
+        )
 
     # -- checkpoints and exports ---------------------------------------------------
 

@@ -1,0 +1,114 @@
+{
+  "manifest": "ami-manual-test-pilot",
+  "normalization": "Unicode casefold; tokens [a-z0-9]+ with internal apostrophes; punctuation ignored; numbers retained",
+  "rows": [
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "ami-es2004a-720-840",
+      "reference_words": 443,
+      "hypothesis_words": 386,
+      "word_errors": 144,
+      "normalized_wer": 0.3251,
+      "inference_seconds": 2.954,
+      "rtf": 0.0246,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "ami-es2004a-840-960",
+      "reference_words": 425,
+      "hypothesis_words": 345,
+      "word_errors": 210,
+      "normalized_wer": 0.4941,
+      "inference_seconds": 3.258,
+      "rtf": 0.0272,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "ami-es2014a-720-840",
+      "reference_words": 268,
+      "hypothesis_words": 233,
+      "word_errors": 117,
+      "normalized_wer": 0.4366,
+      "inference_seconds": 2.683,
+      "rtf": 0.0224,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "ami-es2014a-840-960",
+      "reference_words": 347,
+      "hypothesis_words": 325,
+      "word_errors": 94,
+      "normalized_wer": 0.2709,
+      "inference_seconds": 2.939,
+      "rtf": 0.0245,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "ami-es2004a-720-840",
+      "reference_words": 443,
+      "hypothesis_words": 378,
+      "word_errors": 128,
+      "normalized_wer": 0.2889,
+      "inference_seconds": 4.244,
+      "rtf": 0.0354,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "ami-es2004a-840-960",
+      "reference_words": 425,
+      "hypothesis_words": 347,
+      "word_errors": 119,
+      "normalized_wer": 0.28,
+      "inference_seconds": 4.496,
+      "rtf": 0.0375,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "ami-es2014a-720-840",
+      "reference_words": 268,
+      "hypothesis_words": 234,
+      "word_errors": 102,
+      "normalized_wer": 0.3806,
+      "inference_seconds": 4.103,
+      "rtf": 0.0342,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "ami-es2014a-840-960",
+      "reference_words": 347,
+      "hypothesis_words": 307,
+      "word_errors": 67,
+      "normalized_wer": 0.1931,
+      "inference_seconds": 4.386,
+      "rtf": 0.0365,
+      "actual_device": "CPU",
+      "fallback_events": []
+    }
+  ],
+  "summary": {
+    "whisper-tiny.en-int4-ov": {
+      "pooled_wer": 0.381,
+      "mean_case_wer": 0.3817,
+      "audio_seconds": 480
+    },
+    "whisper-base.en-int4-ov": {
+      "pooled_wer": 0.2805,
+      "mean_case_wer": 0.2857,
+      "audio_seconds": 480
+    }
+  }
+}

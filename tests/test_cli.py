@@ -7,7 +7,138 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.cli import main
+from npu_scribe.cli import build_parser, main
+
+
+def test_manual_device_does_not_benchmark_other_devices(tmp_path, monkeypatch):
+    from npu_scribe import cli
+
+    def unexpected(*args):
+        raise AssertionError("manual device must not benchmark other devices")
+
+    monkeypatch.setattr(cli, "benchmark_devices", unexpected)
+    assert cli.resolve_device("CPU", unexpected, "mock", tmp_path) == ("CPU", [])
+
+
+@pytest.mark.parametrize("resume", [False, True])
+def test_auto_falls_back_after_selected_device_fails(
+    tmp_path, three_second_wav, monkeypatch, resume
+):
+    from npu_scribe import cli
+    from npu_scribe.devices import Benchmark
+    from npu_scribe.engines import MockSpeechEngine
+    from npu_scribe.storage import SessionStore
+
+    attempted = []
+
+    def provider(device):
+        attempted.append(device)
+        if device == "GPU":
+            raise RuntimeError("synthetic GPU inference failure")
+        return MockSpeechEngine()
+
+    monkeypatch.setattr(cli, "make_engine_provider", lambda *args: provider)
+    monkeypatch.setattr(
+        cli,
+        "benchmark_devices",
+        lambda *args: [
+            Benchmark("GPU", "speech-chunk", 0.1, "GPU"),
+            Benchmark("CPU", "speech-chunk", 0.5, "CPU"),
+            Benchmark("NPU", "speech-chunk", 0.01, "unverified", succeeded=False),
+        ],
+    )
+    data = tmp_path / "library"
+    args = ["--data-dir", str(data)]
+    run_args = ["transcribe", str(three_second_wav), "--device", "AUTO"]
+    if resume:
+        stop = tmp_path / "pause"
+        stop.touch()
+        assert main(args + run_args + ["--stop-file", str(stop)]) == 130
+        session_id = next((data / "lectures").iterdir()).name
+        stop.unlink()
+        run_args = ["resume", session_id, "--device", "auto"]
+    assert main(args + run_args) == 0
+    assert attempted == ["GPU", "CPU"]
+    store = SessionStore(data)
+    session_id = next((data / "lectures").iterdir()).name
+    session = store.load_session(session_id)
+    assert session.diagnostics["requested_device"] == "auto"
+    assert session.diagnostics["actual_device"] == "CPU"
+    assert session.diagnostics["fallback_events"][0]["requested_device"] == "GPU"
+    assert all(record["device_used"] == "CPU" for record in session.diagnostics["chunk_records"])
+    transcript = store.load_transcript(session_id, "raw")
+    assert transcript.provenance.requested_device == "auto"
+    assert transcript.provenance.actual_device == "CPU"
+    assert "GPU" in transcript.provenance.fallback_reason
+
+
+def test_manual_failure_does_not_fall_back(tmp_path, three_second_wav, monkeypatch):
+    from npu_scribe import cli
+
+    attempted = []
+
+    def provider(device):
+        attempted.append(device)
+        raise RuntimeError("synthetic GPU inference failure")
+
+    def unexpected(*args):
+        raise AssertionError("manual selection must not benchmark")
+
+    monkeypatch.setattr(cli, "make_engine_provider", lambda *args: provider)
+    monkeypatch.setattr(cli, "benchmark_devices", unexpected)
+    assert (
+        main(
+            [
+                "--data-dir",
+                str(tmp_path / "library"),
+                "transcribe",
+                str(three_second_wav),
+                "--device",
+                "GPU",
+            ]
+        )
+        == 1
+    )
+    assert attempted == ["GPU"]
+
+
+def test_stop_file_pauses_then_cli_resumes(tmp_path, three_second_wav, capsys):
+    stop = tmp_path / "pause"
+    stop.touch()
+    data = tmp_path / "library"
+    args = ["--data-dir", str(data)]
+    assert (
+        main(
+            args
+            + [
+                "transcribe",
+                str(three_second_wav),
+                "--model",
+                "mock",
+                "--device",
+                "CPU",
+                "--stop-file",
+                str(stop),
+            ]
+        )
+        == 130
+    )
+    output = capsys.readouterr().out
+    session_id = output.split("session: ")[1].splitlines()[0]
+    assert "status: interrupted" in output
+    stop.unlink()
+    assert main(args + ["resume", session_id, "--model", "mock", "--device", "CPU"]) == 0
+    assert "status: ready" in capsys.readouterr().out
+
+
+def test_transcribe_default_has_no_overlap() -> None:
+    args = build_parser().parse_args(["transcribe", "lecture.wav"])
+    assert args.model == "whisper-tiny.en-int4-ov"
+    assert args.device == "CPU"
+    assert args.chunk_seconds == 30.0
+    assert args.overlap_seconds == 0.0
+    evaluate = build_parser().parse_args(["evaluate", "manifest.json", "--overlap-seconds", "1"])
+    assert evaluate.overlap_seconds == 1.0
 
 
 @pytest.fixture
@@ -209,3 +340,9 @@ def test_real_downloader_only_behind_live_marker_and_env_gate() -> None:
     assert forbidden_probe not in cli_tests, "collection-time reachability probes are forbidden"
     assert "@pytest.mark.live" in cli_tests
     assert 'os.environ.get("NPU_SCRIBE_RUN_LIVE")' in cli_tests
+
+
+def test_default_transcription_requires_real_model_not_mock(data_dir, three_second_wav, capsys):
+    assert main(["--data-dir", str(data_dir), "transcribe", str(three_second_wav)]) == 1
+    assert "whisper-tiny.en-int4-ov' is not installed" in capsys.readouterr().err
+    assert not (data_dir / "lectures").exists()

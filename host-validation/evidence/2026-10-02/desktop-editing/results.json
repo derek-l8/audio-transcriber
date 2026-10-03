@@ -1,0 +1,28 @@
+{
+  "scope": "Synthetic edit inputs in a copy of the completed full CS lecture; no accuracy correction or listening audit",
+  "segments": 726,
+  "revisions": 2,
+  "raw_balanced_unchanged": true,
+  "timestamps_unchanged": true,
+  "history_preserved": true,
+  "reopened_edited_text": true,
+  "json_edit_revision_matches": true,
+  "exports": [
+    {
+      "format": "text",
+      "bytes": 35554
+    },
+    {
+      "format": "markdown",
+      "bytes": 45091
+    },
+    {
+      "format": "srt",
+      "bytes": 60750
+    },
+    {
+      "format": "json",
+      "bytes": 137446
+    }
+  ]
+}

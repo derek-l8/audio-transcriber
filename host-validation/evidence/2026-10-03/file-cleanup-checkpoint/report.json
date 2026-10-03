@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-03",
+  "scope": "Windows x64 source checkpoint; no installer or live dictation",
+  "offline_tests": {
+    "passed": 204,
+    "skipped": 1,
+    "deselected_live": 1
+  },
+  "checks": {
+    "ruff_lint": "passed",
+    "ruff_format": "passed",
+    "mypy_source_files": 24,
+    "source_and_wheel_content_inspection": "passed",
+    "installed_synthetic_launchers_pause_resume_and_eight_exports": "passed"
+  },
+  "source_cpu_speech_auto_gpu_cleanup_and_summary": {
+    "source_duration_seconds": 72.0,
+    "raw_words": 192,
+    "ai_words": 192,
+    "summary_words": 101,
+    "cleanup_device": "GPU",
+    "summary_device": "GPU",
+    "cleanup_blocks": [
+      {
+        "block": 0,
+        "seconds": 22.9159,
+        "used_source": false,
+        "warnings": [],
+        "actual_device": "GPU",
+        "device_fallback": null
+      }
+    ],
+    "summary_blocks": [
+      {
+        "block": 0,
+        "seconds": 6.1558,
+        "used_source": false,
+        "warnings": [],
+        "actual_device": "GPU",
+        "device_fallback": null
+      }
+    ],
+    "original_hashes_preserved": true,
+    "summary_review_seconds": 6.168
+  },
+  "installed_wheel_cpu_speech_cleanup_and_summary": {
+    "installed_import_verified": true,
+    "speech_device": "CPU",
+    "cleanup_device": "CPU",
+    "summary_device": "CPU",
+    "raw_words": 31,
+    "ai_words": 29,
+    "summary_words": 46,
+    "source_hashes_preserved": true,
+    "cleanup_blocks": [
+      {
+        "block": 0,
+        "seconds": 32.6704,
+        "used_source": false,
+        "warnings": [],
+        "actual_device": "CPU",
+        "device_fallback": null
+      }
+    ],
+    "summary_blocks": [
+      {
+        "block": 0,
+        "seconds": 35.1674,
+        "used_source": false,
+        "warnings": [],
+        "actual_device": "CPU",
+        "device_fallback": null
+      }
+    ],
+    "summary_wall_seconds": 35.647
+  },
+  "summary_method": "summary-v2: validated source-passage selection, headings, and deterministic formatting",
+  "implementation_sha256": {
+    "ai_cleanup.py": "35f359be09544dc02158457994d35b139d8c5cdc18e510028e5c112bda63ef9e",
+    "cli.py": "c50054f13303cd18e11b2de804eefa9c5e41e9e86069d0e3664f28363480cb0d",
+    "desktop_ui.py": "9ef3b0b07d5b9fe87b2929683ceb02473863d60c799dcc731b6fafe990a6ebc7"
+  },
+  "observations": [
+    "Freeform summary candidates invented details; digit checks rejected some but not every error.",
+    "Source-selected summary bodies contained selected transcript passages, not generated replacement claims.",
+    "Recognition errors remain in summary source text; selection can omit important context.",
+    "The 15-second excerpt was too short for compression: headings made its notes longer."
+  ],
+  "limits": [
+    "One host and two existing lecture excerpts; no reference scoring or representative summary-quality estimate.",
+    "Wall/block times include verification/loading and are execution smoke, not a warmed speed comparison.",
+    "AUTO fallback failure paths used controlled test fixtures; actual explicit CPU and GPU model execution succeeded.",
+    "No new NPU quality/performance study was run for summary-v2.",
+    "No microphone, hotkey, insertion, installer, public CI or broader-hardware validation."
+  ]
+}

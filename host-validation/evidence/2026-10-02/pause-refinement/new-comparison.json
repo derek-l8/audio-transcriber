@@ -1,0 +1,68 @@
+[
+  {
+    "model_id": "whisper-base.en-int4-ov",
+    "case_id": "new-eeb122-natural-selection",
+    "reference_words": 809,
+    "fixed_errors": 67,
+    "v1_errors": 46,
+    "v2_errors": 54,
+    "fixed_wer": 0.082818,
+    "v1_wer": 0.05686,
+    "v2_wer": 0.066749
+  },
+  {
+    "model_id": "whisper-base.en-int4-ov",
+    "case_id": "new-econ159-dominant-strategies",
+    "reference_words": 1098,
+    "fixed_errors": 210,
+    "v1_errors": 164,
+    "v2_errors": 174,
+    "fixed_wer": 0.191257,
+    "v1_wer": 0.149362,
+    "v2_wer": 0.15847
+  },
+  {
+    "model_id": "whisper-base.en-int4-ov",
+    "case_id": "new-phil176-self-identity",
+    "reference_words": 1123,
+    "fixed_errors": 71,
+    "v1_errors": 62,
+    "v2_errors": 68,
+    "fixed_wer": 0.063224,
+    "v1_wer": 0.055209,
+    "v2_wer": 0.060552
+  },
+  {
+    "model_id": "whisper-tiny.en-int4-ov",
+    "case_id": "new-eeb122-natural-selection",
+    "reference_words": 809,
+    "fixed_errors": 72,
+    "v1_errors": 56,
+    "v2_errors": 59,
+    "fixed_wer": 0.088999,
+    "v1_wer": 0.069221,
+    "v2_wer": 0.07293
+  },
+  {
+    "model_id": "whisper-tiny.en-int4-ov",
+    "case_id": "new-econ159-dominant-strategies",
+    "reference_words": 1098,
+    "fixed_errors": 238,
+    "v1_errors": 250,
+    "v2_errors": 243,
+    "fixed_wer": 0.216758,
+    "v1_wer": 0.227687,
+    "v2_wer": 0.221311
+  },
+  {
+    "model_id": "whisper-tiny.en-int4-ov",
+    "case_id": "new-phil176-self-identity",
+    "reference_words": 1123,
+    "fixed_errors": 96,
+    "v1_errors": 85,
+    "v2_errors": 82,
+    "fixed_wer": 0.085485,
+    "v1_wer": 0.07569,
+    "v2_wer": 0.073019
+  }
+]

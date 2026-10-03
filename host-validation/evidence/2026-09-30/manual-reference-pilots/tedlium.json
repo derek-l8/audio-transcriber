@@ -1,0 +1,90 @@
+{
+  "manifest": "tedlium-manual-talk-pilot",
+  "normalization": "Unicode casefold; tokens [a-z0-9]+ with internal apostrophes; punctuation ignored; numbers retained",
+  "rows": [
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "tedlium-validation-blaise_agueray_arcas",
+      "reference_words": 1394,
+      "hypothesis_words": 1329,
+      "word_errors": 238,
+      "normalized_wer": 0.1707,
+      "inference_seconds": 8.847,
+      "rtf": 0.0232,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "tedlium-validation-brian_cox",
+      "reference_words": 590,
+      "hypothesis_words": 615,
+      "word_errors": 109,
+      "normalized_wer": 0.1847,
+      "inference_seconds": 4.477,
+      "rtf": 0.0239,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "tedlium-test-garyflake",
+      "reference_words": 1102,
+      "hypothesis_words": 1133,
+      "word_errors": 102,
+      "normalized_wer": 0.0926,
+      "inference_seconds": 7.093,
+      "rtf": 0.0205,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "tedlium-validation-blaise_agueray_arcas",
+      "reference_words": 1394,
+      "hypothesis_words": 1332,
+      "word_errors": 205,
+      "normalized_wer": 0.1471,
+      "inference_seconds": 12.437,
+      "rtf": 0.0326,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "tedlium-validation-brian_cox",
+      "reference_words": 590,
+      "hypothesis_words": 608,
+      "word_errors": 84,
+      "normalized_wer": 0.1424,
+      "inference_seconds": 6.886,
+      "rtf": 0.0367,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "tedlium-test-garyflake",
+      "reference_words": 1102,
+      "hypothesis_words": 1138,
+      "word_errors": 92,
+      "normalized_wer": 0.0835,
+      "inference_seconds": 11.172,
+      "rtf": 0.0324,
+      "actual_device": "CPU",
+      "fallback_events": []
+    }
+  ],
+  "summary": {
+    "whisper-tiny.en-int4-ov": {
+      "pooled_wer": 0.1455,
+      "mean_case_wer": 0.1493,
+      "audio_seconds": 913.74
+    },
+    "whisper-base.en-int4-ov": {
+      "pooled_wer": 0.1235,
+      "mean_case_wer": 0.1243,
+      "audio_seconds": 913.74
+    }
+  }
+}

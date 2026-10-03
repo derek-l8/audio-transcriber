@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "manifest": "ami-manual-test-pilot",
+  "results": [
+    {
+      "case_id": "ami-es2004a-720-840",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.3102,
+      "cer": 0.2218,
+      "rtf": 0.0354,
+      "load_seconds": null,
+      "inference_seconds": 4.244,
+      "audio_seconds": 120.0,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "ami-es2004a-840-960",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.3357,
+      "cer": 0.2199,
+      "rtf": 0.0375,
+      "load_seconds": null,
+      "inference_seconds": 4.496,
+      "audio_seconds": 120.0,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "ami-es2014a-720-840",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.4525,
+      "cer": 0.2618,
+      "rtf": 0.0342,
+      "load_seconds": null,
+      "inference_seconds": 4.103,
+      "audio_seconds": 120.0,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "ami-es2014a-840-960",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.2674,
+      "cer": 0.1536,
+      "rtf": 0.0365,
+      "load_seconds": null,
+      "inference_seconds": 4.386,
+      "audio_seconds": 120.0,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    }
+  ],
+  "selection": {
+    "rejected_real_time_or_slower": [],
+    "eligible_ids": [],
+    "preferred_rtf_le_05": false,
+    "selected_model_id": null,
+    "note": "Compare at least two models on identical measured cases and one device."
+  }
+}

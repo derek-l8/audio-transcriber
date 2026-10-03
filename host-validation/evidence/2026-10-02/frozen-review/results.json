@@ -1,0 +1,69 @@
+{
+  "scope": "Production frozen Windows GUI through owned UI Automation; silent synthetic audio and mock transcription; no visual review, real speech accuracy or device inference claim.",
+  "fixture_seconds": 61,
+  "fixture_chunks": 3,
+  "gui_sha256": "e0331ecc69fa7dd19555cd73ec61d4afc46fa46e6039fdbf04d523c3367e7c69",
+  "worker_sha256": "4cebf98d22822ef5e376ffb8379f25f71eca5f7d38d5e9a3d3fd39be32d6b379",
+  "native": {
+    "runs": [
+      {
+        "exit_code": 0,
+        "lock_removed": true,
+        "history_revisions": 2,
+        "newest_revision_preview_matches": true,
+        "history_read_only": true,
+        "older_revision_preview_matches": true,
+        "edited_layer_matches": true
+      },
+      {
+        "exit_code": 0,
+        "lock_removed": true,
+        "history_revisions": 2,
+        "newest_revision_preview_matches": true,
+        "history_read_only": true,
+        "older_revision_preview_matches": true,
+        "edited_layer_matches": true
+      }
+    ],
+    "playback": {
+      "requested_ms": 5000,
+      "displayed_position_matches": true,
+      "advanced_ms": 6344,
+      "segment_seek_ms": 0
+    },
+    "edits_saved": 2,
+    "search_selection_matches": true,
+    "reopened_history_persisted": true,
+    "native_exports": 12,
+    "dropdown_selection": true,
+    "dropdowns": [
+      "Speech model",
+      "Transcription device",
+      "Transcript layer",
+      "Export format"
+    ]
+  },
+  "raw_balanced_unchanged": true,
+  "timestamps_unchanged": true,
+  "source_hash_preserved": true,
+  "edited_uncertainty_persisted": true,
+  "revisions": 2,
+  "previous_revision_preserved_on_disk": true,
+  "unverified": [
+    "visual/manual usability",
+    "another Windows host"
+  ],
+  "regression_from_previous_pass": {
+    "passed": 160,
+    "skipped": 2,
+    "skip_reasons": [
+      "Windows symlink privilege unavailable",
+      "live network test not opted in"
+    ],
+    "ruff_lint": "passed",
+    "ruff_format_files": 60,
+    "mypy_source_files": 23,
+    "git_diff_check": "passed"
+  },
+  "follow_up_job_close": "job-close-results.json"
+}

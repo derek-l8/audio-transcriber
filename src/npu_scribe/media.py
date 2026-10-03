@@ -2,7 +2,8 @@
 
 Ordinary transcription accepts WAV, MP3, M4A, and MP4 here and always receives
 normalized mono 16 kHz PCM. Direct PCM WAV inspection stays available without an
-external decoder; every other container requires a configured FFmpeg binary.
+external decoder; every other container requires FFmpeg, selected explicitly
+or discovered on the current machine's PATH.
 
 Security rules enforced in this module:
 - FFmpeg is never invoked through a shell; arguments are a fixed array.
@@ -96,6 +97,18 @@ class PcmWavDecoder:
         return NormalizedAudio(source.resolve(), rate, channels, frames, self.identity)
 
 
+def resolve_ffmpeg(configured: str | None = None) -> str | None:
+    """Prefer an explicit executable; otherwise discover this machine's FFmpeg.
+
+    Invalid explicit paths are preserved so decoding reports an error rather
+    than silently substituting a different executable.
+    """
+    if configured:
+        expanded = str(Path(configured).expanduser())
+        return shutil.which(expanded) or expanded
+    return shutil.which("ffmpeg")
+
+
 def build_ffmpeg_args(ffmpeg_path: str, source: Path, destination: Path) -> list[str]:
     """Fixed argument array; the only caller-supplied value is one validated path."""
     return [
@@ -119,7 +132,7 @@ def build_ffmpeg_args(ffmpeg_path: str, source: Path, destination: Path) -> list
 
 
 class FFmpegDecoder:
-    """Adapter around an explicitly configured, pinned FFmpeg binary.
+    """Adapter around a user-selected or locally discovered FFmpeg binary.
 
     The binary is not bundled yet; packaging will pin, license-review, and validate it.
     """

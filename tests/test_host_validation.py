@@ -118,12 +118,15 @@ def test_devices_come_from_openvino_enumeration(script: str) -> None:
     assert "-notcontains $optional" in script or "unavailable" in device_section
 
 
-def test_actual_device_provenance_is_parsed_not_inferred(script: str) -> None:
+def test_device_smoke_parses_cli_fields_and_requires_success(script: str) -> None:
     assert '"actual_device"' in script
-    assert "requested=$device but provenance reports actual=" in script or (
-        "provenance reports actual" in script
-    )
-    # NPU success requires provenance equality; no unconditional pass on exit code alone.
+    assert '$actual = $run.values["actual_device"]' in script
+    assert '$requested = $run.values["requested_device"]' in script
+    assert "$requested -eq $device -and $actual -eq $device" in script
+    assert '$run.values["status"] -eq "ready"' in script
+    assert '$run.values["fallback_events"] -eq "0"' in script
+    # The CLI's actual_device field reflects successful requested-device binding;
+    # it is not an independent internal hardware query.
 
 
 def test_interruption_and_resume_are_automated(script: str) -> None:

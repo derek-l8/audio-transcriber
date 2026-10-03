@@ -11,7 +11,7 @@ from .models import SCHEMA_VERSION, Transcript
 from .storage import atomic_write
 
 FORMATS = {"json", "markdown", "text", "srt"}
-LAYERS = {"raw", "balanced"}
+LAYERS = {"raw", "balanced", "edited", "ai", "summary"}
 
 
 class ExportError(Exception):
@@ -19,6 +19,8 @@ class ExportError(Exception):
 
 
 def plain_text(transcript: Transcript) -> str:
+    if transcript.transformation:
+        return "\n\n".join(s.text.strip() for s in transcript.segments if s.text.strip()) + "\n"
     return transcript.text + "\n"
 
 
@@ -30,8 +32,9 @@ def markdown(transcript: Transcript, title: str) -> str:
 
 def srt(transcript: Transcript) -> str:
     blocks = [
-        f"{i}\n{_srt_stamp(s.start)} --> {_srt_stamp(s.end)}\n{s.text.strip()}"
-        for i, s in enumerate(transcript.segments, 1)
+        f"{i}\n{_srt_stamp(s.start)} --> {_srt_stamp(s.end)}\n"
+        + "\n".join(line.strip() for line in s.text.splitlines() if line.strip())
+        for i, s in enumerate((s for s in transcript.segments if s.text.strip()), 1)
     ]
     return "\n\n".join(blocks) + ("\n" if blocks else "")
 
@@ -65,12 +68,16 @@ def structured_json(transcript: Transcript, layer: str) -> str:
         "provenance": asdict(transcript.provenance),
         "segments": [asdict(segment) for segment in transcript.segments],
     }
+    if transcript.transformation:
+        value["transformation"] = transcript.transformation
     return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
 
 
 def render(transcript: Transcript, layer: str, fmt: str, title: str) -> str:
     if layer not in LAYERS:
         raise ExportError(f"unknown transcript layer '{layer}'")
+    if layer == "summary" and fmt == "srt":
+        raise ExportError("summaries are notes, not subtitles; choose text, markdown, or json")
     if fmt == "json":
         return structured_json(transcript, layer)
     if fmt == "markdown":
@@ -80,10 +87,15 @@ def render(transcript: Transcript, layer: str, fmt: str, title: str) -> str:
             f"- model: {transcript.provenance.model}\n"
             f"- actual device: {transcript.provenance.actual_device}\n"
         )
-        body = "\n".join(
-            f"- [{_stamp(s.start)}] {s.text}{' (uncertain)' if s.uncertain else ''}"
-            for s in transcript.segments
-        )
+        if transcript.transformation:
+            header += "- timing: source blocks; AI words are not individually aligned\n"
+        if transcript.transformation:
+            body = "\n\n".join(s.text for s in transcript.segments)
+        else:
+            body = "\n".join(
+                f"- [{_stamp(s.start)}] {s.text}{' (uncertain)' if s.uncertain else ''}"
+                for s in transcript.segments
+            )
         return header + "\n" + body + "\n"
     if fmt == "text":
         return plain_text(transcript)
@@ -103,9 +115,28 @@ def write_export(
     out_path: Path | None = None,
 ) -> Path:
     """Deterministic, atomic export; existing files are never silently replaced."""
-    transcript = store.load_transcript(session_id, layer)
+    revision = None
+    if layer == "edited":
+        from .editing import load_revision
+
+        revision = load_revision(store, session_id)
+        transcript = revision.transcript
+    else:
+        transcript = store.load_transcript(session_id, layer)
     session = store.load_session(session_id)
     content = render(transcript, layer, fmt, session.title)
+    if revision is not None and fmt == "json":
+        payload = json.loads(content)
+        payload["edit_provenance"] = {
+            "author": "user",
+            "operation": "manual-segment-edit",
+            "revision": revision.revision,
+            "parent": revision.parent,
+            "base_layer": revision.base_layer,
+            "base_sha256": revision.base_sha256,
+            "changed_segment": revision.changed_segment,
+        }
+        content = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     extension = {"markdown": "md"}.get(fmt, fmt)
     destination = out_path or store.exports_dir(session_id) / f"{session_id}.{layer}.{extension}"
     if destination.exists() and not overwrite:
@@ -121,8 +152,7 @@ def _stamp(seconds: float) -> str:
 
 
 def _srt_stamp(seconds: float) -> str:
-    whole = int(seconds)
-    millis = round((seconds - whole) * 1000)
+    whole, millis = divmod(round(seconds * 1000), 1000)
     return f"{_stamp(whole)},{millis:03}"
 
 

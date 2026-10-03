@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-02",
+  "python": "3.12.14",
+  "openvino": "2026.3.0",
+  "openvino_genai": "2026.3.0.0",
+  "models": {
+    "whisper-tiny.en-int4-ov": "2c4a4cb35a33f827f324c55f474d9197c586b485",
+    "whisper-base.en-int4-ov": "b0da25f7e43548df7f35fb69fc7609c08242150a"
+  },
+  "cases": [
+    {
+      "id": "new-eeb122-natural-selection",
+      "audio_sha256": "bc7e6ca4e516367bb984bd8920f2a5f6aa95e2c4e98d4f6ac00e34a45de4f3de",
+      "expected_size_bytes": 10432200,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/ecology-and-evolutionary-biology/eeb-122/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring09/eeb122/mp3/eeb122_01_011209.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 3e097aee09a19d8ca03595f7e68a098aaa3b06678ad990ea384f81e745540098; HTML SHA-256 386a44800f1c05f949a5e2efc46afe330682c2cb679efb611347635b55331706; chapter 3 959-1285s (published chapter bounds 959-1285s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 326.0
+    },
+    {
+      "id": "new-econ159-dominant-strategies",
+      "audio_sha256": "90406318b51c200adaaa38fd4b033ee037f1634ebd530282389f059bedf9beb9",
+      "expected_size_bytes": 15200462,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/economics/econ-159/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/fall07/econ159/mp3/econ159_01_090507.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 90a6f59d05cdc9b3ed96cbbcb0438afe9500676f8d94ebd94efa4bc4f8bf41d9; HTML SHA-256 80fda2720e78c47845e23c48a70be4a5f91b3dac807a859d776fc09f57f1a9e0; chapter 5 1298-1773s (published chapter bounds 1298-1773s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 475.0
+    },
+    {
+      "id": "new-phil176-self-identity",
+      "audio_sha256": "0ac75cecb98fd9b39b238f19cafb3ce2d408d7584be376bef1bea743de237fc3",
+      "expected_size_bytes": 15136470,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/philosophy/phil-176/lecture-2",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring07/phil176/mp3//phil176_02_011807.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 68c96035fd44cb0fbe3408838387f04e7785d0e24f468c4d388a2b5be6304d62; HTML SHA-256 69bc6914b07995158d3352937cccf639f845ed5e426e34591e43ce061feb03c5; chapter 2 805-1278s (published chapter bounds 805-1278s); FFmpeg mono 16 kHz PCM; ASR-assisted gross alignment; reference starts at an original transcript paragraph because the published chapter marker falls inside the chapter in the MP3; not listening-verified",
+      "audio_seconds": 473.0
+    }
+  ]
+}

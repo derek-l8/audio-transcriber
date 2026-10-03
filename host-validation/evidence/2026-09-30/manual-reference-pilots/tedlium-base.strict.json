@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "manifest": "tedlium-manual-talk-pilot",
+  "results": [
+    {
+      "case_id": "tedlium-validation-blaise_agueray_arcas",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.2425,
+      "cer": 0.1238,
+      "rtf": 0.0326,
+      "load_seconds": null,
+      "inference_seconds": 12.437,
+      "audio_seconds": 381.08,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "tedlium-validation-brian_cox",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.2373,
+      "cer": 0.1167,
+      "rtf": 0.0367,
+      "load_seconds": null,
+      "inference_seconds": 6.886,
+      "audio_seconds": 187.45,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    },
+    {
+      "case_id": "tedlium-test-garyflake",
+      "model_id": "whisper-base.en-int4-ov",
+      "requested_device": "CPU",
+      "actual_device": "CPU",
+      "wer": 0.1806,
+      "cer": 0.0838,
+      "rtf": 0.0324,
+      "load_seconds": null,
+      "inference_seconds": 11.172,
+      "audio_seconds": 345.21006,
+      "peak_memory_mb": null,
+      "runtime_version": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "status": "measured",
+      "notes": ""
+    }
+  ],
+  "selection": {
+    "rejected_real_time_or_slower": [],
+    "eligible_ids": [],
+    "preferred_rtf_le_05": false,
+    "selected_model_id": null,
+    "note": "Compare at least two models on identical measured cases and one device."
+  }
+}

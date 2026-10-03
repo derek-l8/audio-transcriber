@@ -1,0 +1,30 @@
+{
+  "source_folder": "User-supplied local lecture recordings (location omitted)",
+  "checks": "Fingerprint and full audio decode, not an external authenticity comparison or full video decode",
+  "files": [
+    {
+      "file": "video (1).mp4",
+      "bytes": 183304414,
+      "sha256": "af837d8531ae53a223d609ea5ed32f61c6f71d9345d52d0fcc7c9bf3526fa9c5",
+      "duration": "00:54:06.82",
+      "audio_decode_exit_code": 0,
+      "audio_decode_errors": ""
+    },
+    {
+      "file": "video (2).mp4",
+      "bytes": 234512198,
+      "sha256": "4a91612ff88e322d4ccf77591e1202a6d9d7ef4e4b6924a1f25b83dbdba40b64",
+      "duration": "01:07:14.72",
+      "audio_decode_exit_code": 0,
+      "audio_decode_errors": ""
+    },
+    {
+      "file": "video.mp4",
+      "bytes": 163269532,
+      "sha256": "c879e79eca7e522155d3f94eaa2e31788b559b48b5546c721efb9e6cb2f429b4",
+      "duration": "00:47:20.29",
+      "audio_decode_exit_code": 0,
+      "audio_decode_errors": ""
+    }
+  ]
+}

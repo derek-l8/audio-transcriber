@@ -5,16 +5,16 @@ license, checksum, and expected size. Downloads are explicit evaluation actions;
 ordinary transcription remains offline.
 
 Selection policy (recorded per candidate):
-1. reject any model whose measured real-time factor is >= 1.0 on the tested device;
-2. prefer models reaching RTF <= 0.5;
-3. among eligible models choose the lowest measured word error rate.
+1. compare at least two models on identical measured cases and one device;
+2. reject a model with RTF >= 1.0 on any case and prefer RTF <= 0.5 throughout;
+3. among eligible models choose the lowest mean case word error rate.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import resource
+import sys
 import urllib.request
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
@@ -139,41 +139,75 @@ def _verify_file(path: Path, case: dict[str, Any]) -> None:
 
 
 def peak_memory_mb() -> float | None:
+    if sys.platform == "win32":
+        # The Windows validation harness measures process peak working set.
+        return None
     try:
+        import resource
+
         usage = resource.getrusage(resource.RUSAGE_SELF)
-        # Linux reports KiB, macOS bytes; Windows returns None and the owner harness
-        # measures peak memory instead.
-        return round(usage.ru_maxrss / 1024.0, 2)
+        # Linux reports KiB; macOS reports bytes.
+        scale = 1024.0 if sys.platform != "darwin" else 1024.0 * 1024.0
+        return round(usage.ru_maxrss / scale, 2)
     except (OSError, ValueError):
         return None
 
 
 def select_model(results: list[CaseResult]) -> dict[str, Any]:
-    """Apply the recorded selection policy to measured results."""
-    measured: list[tuple[CaseResult, float]] = [
-        (r, r.rtf) for r in results if r.status == "measured" and r.rtf is not None
-    ]
-    rejected_rtf = [r.case_id for r, rtf in measured if rtf >= 1.0]
-    eligible = [(r, rtf) for r, rtf in measured if rtf < 1.0]
-    preferred = sorted(
-        ((r, rtf) for r, rtf in eligible if rtf <= 0.5),
-        key=lambda item: item[0].wer if item[0].wer is not None else 1.0,
+    """Compare complete, matched case sets on the same device by mean WER."""
+    groups: dict[str, list[CaseResult]] = {}
+    for result in results:
+        groups.setdefault(result.model_id, []).append(result)
+    case_ids = {result.case_id for result in results}
+    comparable = len(groups) >= 2 and bool(case_ids)
+    for group in groups.values():
+        comparable &= (
+            len(group) == len(case_ids)
+            and {item.case_id for item in group} == case_ids
+            and all(
+                item.status == "measured" and item.wer is not None and item.rtf is not None
+                for item in group
+            )
+        )
+    comparable &= len({item.actual_device for item in results}) == 1
+    rejected_rtf = sorted(
+        model_id
+        for model_id, group in groups.items()
+        if any(item.rtf is not None and item.rtf >= 1.0 for item in group)
     )
-    pool = preferred or sorted(eligible, key=lambda item: item[1])
+    eligible = sorted(model_id for model_id in groups if model_id not in rejected_rtf)
+    if not comparable:
+        return {
+            "rejected_real_time_or_slower": rejected_rtf,
+            "eligible_ids": [],
+            "preferred_rtf_le_05": False,
+            "selected_model_id": None,
+            "note": "Compare at least two models on identical measured cases and one device.",
+        }
+    preferred = [
+        model_id
+        for model_id in eligible
+        if all(item.rtf is not None and item.rtf <= 0.5 for item in groups[model_id])
+    ]
+    pool = preferred or eligible
     chosen = (
-        min(pool, key=lambda item: item[0].wer if item[0].wer is not None else 1.0)
+        min(
+            pool,
+            key=lambda model_id: sum(item.wer or 0.0 for item in groups[model_id])
+            / len(groups[model_id]),
+        )
         if pool
         else None
     )
     return {
         "rejected_real_time_or_slower": rejected_rtf,
-        "eligible_ids": [item[0].model_id for item in eligible],
+        "eligible_ids": eligible,
         "preferred_rtf_le_05": bool(preferred),
-        "selected_model_id": chosen[0].model_id if chosen is not None else None,
+        "selected_model_id": chosen,
         "note": (
-            "No final default is declared until representative results exist."
+            "No eligible model met the measured real-time requirement."
             if chosen is None
-            else "Provisional selection from the listed measured runs only."
+            else "Provisional selection by mean WER on matched cases; review reference quality."
         ),
     }
 
@@ -204,7 +238,7 @@ def evaluate_case(
         result.cer = round(cer(str(case["reference_text"]), hypothesis), 4)
         result.peak_memory_mb = peak_memory_mb()
     except Exception as error:  # noqa: BLE001 - a failed case is data, not a crash
-        result.status = "awaiting-windows-validation"
+        result.status = "failed"
         result.notes = type(error).__name__
     return result
 

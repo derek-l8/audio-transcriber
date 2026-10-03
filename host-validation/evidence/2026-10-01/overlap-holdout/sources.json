@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-01",
+  "python": "3.12.14",
+  "openvino": "2026.3.0-22451-8a17657b995-releases/2026/3",
+  "openvino_genai": "2026.3.0.0-3277-bd8d6542e3c",
+  "models": {
+    "whisper-tiny.en-int4-ov": "2c4a4cb35a33f827f324c55f474d9197c586b485",
+    "whisper-base.en-int4-ov": "b0da25f7e43548df7f35fb69fc7609c08242150a"
+  },
+  "cases": [
+    {
+      "id": "holdout-beng100-disease-control",
+      "official_source": "https://oyc.yale.edu/biomedical-engineering/beng-100/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring08/beng100/mp3/beng100_01_011508.mp3",
+      "audio_sha256": "41f1a7dc353b33685aedb424f015a994ba75ce668e190e122d12937ca94feecb",
+      "expected_size_bytes": 15700324,
+      "audio_seconds": 490.62,
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 ea0e62b1581b43602f064b79f20e1a7c29d7668b85155a232d87a7760c0840c6; HTML SHA-256 b94ebdaf4a3212d4b2d27b7aa46db331254714a08a2ded1fb48c301e821eb72d; chapter 4 1368.4-1859.02s (published chapter bounds 1379-1870s); ASR-assisted boundary alignment before overlap comparison; FFmpeg mono 16 kHz PCM"
+    },
+    {
+      "id": "holdout-psyc110-neuroscience",
+      "official_source": "https://oyc.yale.edu/psychology/psyc-110/lecture-2",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring07/psyc110/mp3/psyc110_02_012207.mp3",
+      "audio_sha256": "2b0f60e52e667172b697f8b991c8fe623eb41584f2943907fb9f5fb2eae8dabe",
+      "expected_size_bytes": 14163682,
+      "audio_seconds": 442.6,
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 7f74b3321b348ce4acef8212133b4d5fe7ad4d0febe10cf2205d499edb549284; HTML SHA-256 ef07a73282bc34fd8005d65cad16d966eecb4721aa5579f4091989843822d95d; chapter 2 714.62-1157.22s (published chapter bounds 726-1168s); ASR-assisted boundary alignment before overlap comparison; FFmpeg mono 16 kHz PCM"
+    },
+    {
+      "id": "holdout-mcdb150-population-biology",
+      "official_source": "https://oyc.yale.edu/molecular-cellular-and-developmental-biology/mcdb-150/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring09/mcdb150/mp3/mcdb150_01_011309.mp3",
+      "audio_sha256": "3fdfc07da9a721eec2b93899d4cc52644b10d33b42eec8ea09267de726f5790e",
+      "expected_size_bytes": 15968178,
+      "audio_seconds": 499.0,
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 0a7040df7d2204618b01034d8e5e06f021d4772ef929e974a3855973d0fa5863; HTML SHA-256 977db13101629aa1332487b2d0e018a8b43ac6bff03b19c46c3bc25f70d49634; chapter 1 0-499s (published chapter bounds 0-499s); FFmpeg mono 16 kHz PCM"
+    }
+  ]
+}
