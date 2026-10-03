@@ -1,0 +1,113 @@
+{
+  "case_id": "lec08-op-amps",
+  "rows": [
+    {
+      "model": "tiny",
+      "device": "CPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 6.05,
+      "rtf": 0.0509,
+      "status": "measured"
+    },
+    {
+      "model": "tiny",
+      "device": "CPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 2.442,
+      "rtf": 0.0206,
+      "status": "measured"
+    },
+    {
+      "model": "tiny",
+      "device": "GPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 15.12,
+      "rtf": 0.1273,
+      "status": "measured"
+    },
+    {
+      "model": "tiny",
+      "device": "GPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 13.484,
+      "rtf": 0.1135,
+      "status": "measured"
+    },
+    {
+      "model": "tiny",
+      "device": "NPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 55.956,
+      "rtf": 0.4712,
+      "status": "measured"
+    },
+    {
+      "model": "tiny",
+      "device": "NPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 74.286,
+      "rtf": 0.6255,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "CPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 3.925,
+      "rtf": 0.033,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "CPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 3.804,
+      "rtf": 0.032,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "GPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 6.922,
+      "rtf": 0.0583,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "GPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 13.942,
+      "rtf": 0.1174,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "NPU",
+      "run": "initial",
+      "audio_seconds": 118.76,
+      "inference_seconds": 139.996,
+      "rtf": 1.1788,
+      "status": "measured"
+    },
+    {
+      "model": "base",
+      "device": "NPU",
+      "run": "repeat",
+      "audio_seconds": 118.76,
+      "inference_seconds": 185.162,
+      "rtf": 1.5591,
+      "status": "measured"
+    }
+  ]
+}

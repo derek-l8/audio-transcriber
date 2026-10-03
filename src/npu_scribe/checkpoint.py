@@ -9,7 +9,7 @@ from typing import Any
 
 from .models import SCHEMA_VERSION, utc_now
 
-CHECKPOINT_SCHEMA_VERSION = 1
+CHECKPOINT_SCHEMA_VERSION = 2
 CHECKPOINT_NAME = "checkpoint.json"
 
 
@@ -40,6 +40,8 @@ class Checkpoint:
     chunk_spec_identity: str = ""
     chunk_seconds: float = 0.0
     overlap_seconds: float = 0.0
+    chunk_strategy: str = "fixed"
+    chunk_plan: list[dict[str, Any]] = field(default_factory=list)
     completed_chunks: list[int] = field(default_factory=list)
     total_chunks: int = 0
     segments: list[dict[str, Any]] = field(default_factory=list)
@@ -61,6 +63,7 @@ def save_checkpoint(path: Path, checkpoint: Checkpoint) -> None:
     """Atomic write-then-rename; a torn write never corrupts a durable checkpoint."""
     from .storage import atomic_json
 
+    checkpoint.schema_version = CHECKPOINT_SCHEMA_VERSION
     checkpoint.updated_at = utc_now()
     atomic_json(path, checkpoint.to_dict())
 
@@ -74,7 +77,7 @@ def load_checkpoint(path: Path) -> Checkpoint:
         raise CheckpointError(f"checkpoint is unreadable: {error}") from error
     if not isinstance(value, dict):
         raise CheckpointError("checkpoint has an unexpected structure")
-    if value.get("schema_version") != CHECKPOINT_SCHEMA_VERSION:
+    if value.get("schema_version") not in (1, CHECKPOINT_SCHEMA_VERSION):
         raise CheckpointError(
             f"unsupported checkpoint schema version: {value.get('schema_version')!r}"
         )

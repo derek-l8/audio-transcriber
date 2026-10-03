@@ -92,3 +92,17 @@ def test_validate_resume_mismatch_refusals() -> None:
 
 def test_schema_version_is_recorded() -> None:
     assert sample_checkpoint().schema_version == CHECKPOINT_SCHEMA_VERSION
+
+
+def test_legacy_fixed_checkpoint_loads_and_upgrades(tmp_path: Path) -> None:
+    path = tmp_path / "checkpoint.json"
+    value = sample_checkpoint().to_dict()
+    value["schema_version"] = 1
+    value.pop("chunk_plan")
+    value.pop("chunk_strategy")
+    path.write_text(json.dumps(value), encoding="utf-8")
+    checkpoint = load_checkpoint(path)
+    assert checkpoint.chunk_strategy == "fixed"
+    assert checkpoint.chunk_plan == []
+    save_checkpoint(path, checkpoint)
+    assert json.loads(path.read_text())["schema_version"] == 2

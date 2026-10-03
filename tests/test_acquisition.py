@@ -75,7 +75,7 @@ def test_bundled_manifest_entries_are_safe() -> None:
         assert spec.license
         assert spec.revision and len(spec.revision) >= 40
         total = spec.download_bytes
-        assert 0 < total <= 2 * 1024**3, f"{spec.id} exceeds the ~2 GB budget"
+        assert 0 < total <= 6 * 1024**3, f"{spec.id} exceeds the text-model asset budget"
         names = [f.name for f in spec.files]
         assert len(names) == len(set(names))
         assert all(not n.endswith((".py", ".pkl", ".pt", ".pth")) for n in names)
@@ -152,7 +152,12 @@ def test_symlinked_stage_entry_rejected(tmp_path: Path, tiny_fixture: Path, monk
 
     def link_fetch(url: str, destination: Path, expected_size: int) -> None:
         if destination.name == "openvino_encoder_model.bin":
-            os.symlink("/etc/hostname", destination)
+            try:
+                os.symlink(tiny_fixture / destination.name, destination)
+            except OSError as error:
+                if os.name == "nt" and error.winerror == 1314:
+                    pytest.skip("Windows symlink privilege is unavailable")
+                raise
         else:
             local_fetcher(tiny_fixture)(url, destination, expected_size)
 
@@ -200,3 +205,27 @@ def test_no_runtime_network_for_transcription(
     runner = BatchRunner(store, lambda device: MockSpeechEngine(), [], options)
     session = runner.run_new(three_second_wav)
     assert session.status == "ready"
+
+
+def test_large_model_range_download_checks_server_range_and_contents(tmp_path, monkeypatch):
+    import io
+
+    import npu_scribe.acquisition as acquisition
+
+    payload = b"verified model bytes"
+
+    class Response(io.BytesIO):
+        status = 206
+        headers = {"Content-Range": f"bytes 0-{len(payload) - 1}/{len(payload)}"}
+
+    def open_request(request, timeout):
+        assert request.get_header("Range") == f"bytes=0-{len(payload) - 1}"
+        return Response(payload)
+
+    monkeypatch.setattr(acquisition.urllib.request, "urlopen", open_request)
+    destination = tmp_path / "model.bin"
+    acquisition._fetch_ranges("https://huggingface.co/model", destination, len(payload))
+    assert destination.read_bytes() == payload
+    Response.headers = {"Content-Range": "bytes 1-10/99"}
+    with pytest.raises(AcquisitionError, match="unexpected byte range"):
+        acquisition._fetch_ranges("https://huggingface.co/model", destination, len(payload))

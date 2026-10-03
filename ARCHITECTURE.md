@@ -4,11 +4,12 @@ The design is a single packaged Python application with UI-independent core
 services and replaceable platform adapters. `DECISIONS.md` contains the recorded
 decisions and alternatives.
 
-## Core layers (all UI-independent, Linux-testable)
+## UI-independent core layers
 
 - `acquisition.py` — manifest-approved model downloads: HTTPS host allowlist,
   staged temp directory, per-file SHA-256 + size verification, symlink/path-escape
-  rejection, atomic rename promotion. Ordinary transcription never imports it.
+  rejection, atomic rename promotion. Ordinary transcription imports manifest
+  definitions but does not invoke the downloader.
 - `media.py` — the media-decoder boundary. Direct PCM WAV inspection plus an
   FFmpeg adapter that validates inputs (type, regular file, size, extension),
   passes a fixed argument array with no shell, decodes in a private temp dir,
@@ -23,7 +24,8 @@ decisions and alternatives.
   decoder identity, or chunking settings.
 - `storage.py` — `SessionStore`: atomic write-then-rename everywhere, validated
   identifiers, imported source copies with fingerprints, immutable raw/balanced
-  transcript files, exports directories, recovery marking.
+  transcript files, exports directories, recovery marking. `editing.py` keeps
+  separate versioned manual edits with source hashes and revision checks.
 - `engines.py` — `SpeechEngine` protocol, deterministic `MockSpeechEngine`, and
   lazy `OpenVINOWhisperEngine`. The engine parses the pinned OpenVINO GenAI
   result structure (`WhisperDecodedResults.chunks` with `start_ts`/`end_ts`
@@ -42,16 +44,37 @@ decisions and alternatives.
   `cli.py` — deterministic Balanced cleanup, explicit-only dictionary rules,
   four export formats, manifest-driven evaluation, metrics, CLI.
 
-## Planned outer adapters
+- `ai_cleanup.py` — a separate lazy OpenVINO LLM pipeline with independent
+  CPU/GPU/NPU selection and GPU-to-CPU fallback for AUTO. Fresh chat history per bounded source block,
+  lecture/dictation prompts and light/medium styles. Concrete numeric/negation/
+  text-size checks retain the source on warnings; these are not semantic proofs.
+  Summary requests structured source-passage selections, validates indices and
+  headings, and renders source text with conservative rules. Its output/history
+  are separate; selection permits omissions and is not a semantic proof.
+  Completed results retain immutable AI snapshots and atomically publish a latest
+  file with source hash, original speech provenance, and cleanup settings.
 
-PySide6 multimedia/UI, Win32 global shortcut/focus/insertion, bundled+licensed
-FFmpeg binary, and PyInstaller/Inno Setup packaging must depend inward on these
-core interfaces. No core operation may access the network.
+## Desktop and outer adapters
 
-Process isolation was considered but rejected for v1: long inference runs behind
-the same engine interface so a future UI thread stays responsive without IPC.
+The PySide6 desktop provides a lecture library, playback, editing and exports.
+It starts CLI transcription and cleanup through `QProcess`. Transcription checks
+a stop-file between chunks; cleanup checks cancellation between source blocks
+and during generation. Model compilation must finish before cancellation can
+complete. The GUI and CLI share the same storage and pipeline.
+Source installations start a worker with the current Python interpreter. The
+experimental frozen recipe uses a separate console worker beside the GUI.
 
-## Data directory layout (platform-appropriate app data, never the repo)
+Win32 dictation shortcuts/insertion and a bundled FFmpeg decoder executable
+remain unimplemented. Earlier PyInstaller bundles and the Inno Setup recipe
+passed [one-host installation and lifecycle checks](host-validation/evidence/2026-10-02/package-validation/README.md)
+and [native frozen review checks](host-validation/evidence/2026-10-02/frozen-review/README.md).
+Those builds predate AI cleanup; the current cleanup-enabled executable and
+installer have not been rebuilt and exercised. Wizard/startup/version-upgrade
+checks and complete redistribution notices also remain pending. See
+[packaging](packaging/README.md).
+Only explicit acquisition/evaluation commands initiate network downloads.
+
+## Data directory layout
 
 ```
 <data>/lectures/<session-id>/
@@ -61,11 +84,18 @@ the same engine interface so a future UI thread stays responsive without IPC.
     checkpoint.json         atomic per-chunk progress (removed on finalize)
     raw-transcript.json     create-once immutable
     balanced-transcript.json create-once immutable
+    edits/                  retained manual revision snapshots
+    ai-transcript.json      latest complete AI result (optional)
+    ai-cleanup-history/     retained complete AI snapshots
+    summary-transcript.json latest complete excerpt notes (optional)
+    summary-history/        retained complete summary snapshots
     exports/                generated, never silently overwritten
 <data>/models/<model-id>/   checksum-verified installs
+<data>/cache/cleanup/       separate text-model compilation caches
 <data>/device-benchmarks.json
 <data>/evaluation/          evaluation media and reports
 ```
 
 Default location comes from `platformdirs`; override with `--data-dir` or
-`NPUSCRIBE_DATA_DIR`.
+`NPUSCRIBE_DATA_DIR`. The application does not prevent an override into the
+repository or a cloud-synced folder. See [Privacy](PRIVACY.md).

@@ -1,0 +1,56 @@
+{
+  "model": "whisper-tiny.en-int4-ov",
+  "requested_device": "CPU",
+  "actual_device": "CPU",
+  "pause_committed_chunks": 2,
+  "resumed_chunks": 3,
+  "status": "ready",
+  "resume_matches_uninterrupted_segments": true,
+  "fallback_events": 0,
+  "qt_heartbeats": 467,
+  "elapsed_seconds": 15.56,
+  "exports": [
+    {
+      "layer": "raw",
+      "format": "text",
+      "bytes": 1102
+    },
+    {
+      "layer": "raw",
+      "format": "markdown",
+      "bytes": 1471
+    },
+    {
+      "layer": "raw",
+      "format": "srt",
+      "bytes": 1840
+    },
+    {
+      "layer": "raw",
+      "format": "json",
+      "bytes": 4395
+    },
+    {
+      "layer": "balanced",
+      "format": "text",
+      "bytes": 1107
+    },
+    {
+      "layer": "balanced",
+      "format": "markdown",
+      "bytes": 1481
+    },
+    {
+      "layer": "balanced",
+      "format": "srt",
+      "bytes": 1845
+    },
+    {
+      "layer": "balanced",
+      "format": "json",
+      "bytes": 4405
+    }
+  ],
+  "search_selection": true,
+  "scope": "One Windows host, offscreen Qt, real CPU inference; no microphone or visual interaction validation"
+}

@@ -1,0 +1,184 @@
+{
+  "environment": {
+    "os": "Windows 11 build 26200",
+    "python": "3.12.14",
+    "packages": {
+      "PyInstaller": "6.22.3",
+      "pyinstaller-hooks-contrib": "2026.8",
+      "PySide6": "6.8.2.1",
+      "openvino": "2026.3.0",
+      "openvino-genai": "2026.3.0.0",
+      "numpy": "2.5.3",
+      "hatchling": "1.27.0",
+      "build": "1.6.1"
+    }
+  },
+  "fresh_dependency_install": {
+    "pip_check": "passed",
+    "default_tests_passed": 159,
+    "tests_skipped": 1,
+    "live_tests_deselected": 1,
+    "mypy_source_files": 23
+  },
+  "clean_wheel_install": {
+    "environment": "separate base-only environment",
+    "launchers": "both passed",
+    "model_listing": "passed",
+    "synthetic_pause_resume": "passed",
+    "synthetic_chunks": 2,
+    "nonempty_exports": 8,
+    "speech_model": "mock"
+  },
+  "source_qt_with_frozen_worker": {
+    "model": "whisper-tiny.en-int4-ov",
+    "requested_device": "CPU",
+    "actual_device": "CPU",
+    "pause_committed_chunks": 2,
+    "resumed_chunks": 3,
+    "status": "ready",
+    "resume_matches_uninterrupted_segments": true,
+    "fallback_events": 0,
+    "qt_heartbeats": 555,
+    "elapsed_seconds": 18.11,
+    "exports": [
+      {
+        "layer": "raw",
+        "format": "text",
+        "bytes": 1102
+      },
+      {
+        "layer": "raw",
+        "format": "markdown",
+        "bytes": 1471
+      },
+      {
+        "layer": "raw",
+        "format": "srt",
+        "bytes": 1840
+      },
+      {
+        "layer": "raw",
+        "format": "json",
+        "bytes": 4396
+      },
+      {
+        "layer": "balanced",
+        "format": "text",
+        "bytes": 1107
+      },
+      {
+        "layer": "balanced",
+        "format": "markdown",
+        "bytes": 1481
+      },
+      {
+        "layer": "balanced",
+        "format": "srt",
+        "bytes": 1845
+      },
+      {
+        "layer": "balanced",
+        "format": "json",
+        "bytes": 4406
+      }
+    ],
+    "search_selection": true,
+    "source_duration_seconds": 72.0,
+    "player_duration_ms": 72072,
+    "muted_playback_advanced": true,
+    "transcript_segment_seek": true,
+    "workflow": "import-pause-resume",
+    "worker": "frozen-executable",
+    "inference_seconds": 5.651,
+    "scope": "One Windows host, offscreen Qt, real CPU inference; source Qt UI; no microphone or visual interaction validation"
+  },
+  "frozen_gui_startup": {
+    "frozen_gui_started": true,
+    "headless_event_loop_alive_after_seconds": 6,
+    "library_lock_created": true,
+    "scope": "Frozen GUI startup only; offscreen platform; no jobs started; test process then terminated."
+  },
+  "bundle": {
+    "exe_sha256": {
+      "NPU Scribe.exe": "f2d923cc62cd61343a4b544abe560460f09c34492dcac0a3d47a74e6fdc6c57a",
+      "npu-scribe-worker.exe": "ebfe8d6273a2005458f6b4637a9bbf5e1beaec020a8bddc5b786f8880f1fa7df"
+    },
+    "tokenizer_extension_included": true,
+    "project_license_notices_included": true,
+    "tested_executable_and_tokenizer_hashes_match_final_bundle": true,
+    "ffmpeg_decoder_executable_bundled": false,
+    "qt_playback_codec_libraries_present": true
+  },
+  "unverified": [
+    "first-run model-folder/FFmpeg selection and visual/manual usability",
+    "installer wizard, startup shortcut, and upgrade between different versions",
+    "forced bundled Auto fallback",
+    "another Windows machine",
+    "complete redistribution notices",
+    "remote CI"
+  ],
+  "scope": "One Windows host; workflow/package validation only. No WER or accuracy scoring.",
+  "installer_validation": {
+    "compiler_version": "7.1.0",
+    "compile": "passed",
+    "installer_sha256": "2af442e7ab8a8dbd83678660ed2dd24758d620e20a159404f38dde11d0c07776",
+    "payload_files_verified": 1295,
+    "fresh_install": "passed",
+    "startup_default": "unchecked",
+    "shortcuts_created": false,
+    "installed_worker_cpu_inference": "passed",
+    "reinstall": "passed",
+    "uninstall": "passed",
+    "installed_payload_removed": true,
+    "validation_registration_removed": true,
+    "inside_library_files_preserved": 5,
+    "separate_library_files_preserved": 6,
+    "unknown_nested_file_preserved": true,
+    "frozen_window": {
+      "runs": [
+        {
+          "exit_code": 0,
+          "native_window_found": true,
+          "lock_removed": true
+        },
+        {
+          "exit_code": 0,
+          "native_window_found": true,
+          "lock_removed": true
+        }
+      ],
+      "scope": "Native Windows frozen GUI idle close and reopen; minimal PATH; no UI workflow interaction."
+    },
+    "scope": "One Windows x64 host; separate validation identity, silent install/reinstall/uninstall, no shortcuts; public clip CPU inference; idle native GUI lifecycle. No visual installer wizard or GUI workflow validation."
+  },
+  "frozen_device_smoke": {
+    "runs": [
+      {
+        "requested_device": "GPU",
+        "actual_device": "GPU",
+        "status": "ready",
+        "chunks": 3,
+        "fallback_events": 0
+      },
+      {
+        "requested_device": "NPU",
+        "actual_device": "NPU",
+        "status": "ready",
+        "chunks": 3,
+        "fallback_events": 0
+      },
+      {
+        "requested_device": "auto",
+        "actual_device": "CPU",
+        "status": "ready",
+        "chunks": 3,
+        "fallback_events": 0
+      }
+    ],
+    "model": "whisper-tiny.en-int4-ov",
+    "source_duration_seconds": 72,
+    "minimal_path": true,
+    "scope": "One-host frozen-worker device binding and completion only. No WER, quality comparison, performance comparison, or forced fallback."
+  },
+  "follow_up_frozen_review": "../frozen-review/results.json"
+}

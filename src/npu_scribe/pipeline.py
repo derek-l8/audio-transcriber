@@ -7,7 +7,7 @@ import shutil
 import time
 import uuid
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -26,12 +26,13 @@ from .chunking import (
     iter_source_windows,
     merge_overlap,
     read_chunk,
+    restore_windows,
     validate_segment_times,
 )
 from .cleanup import deterministic_cleanup
 from .devices import Benchmark, device_order
 from .engines import SpeechEngine
-from .media import FFmpegDecoder, MediaDecoder, MediaError, PcmWavDecoder
+from .media import FFmpegDecoder, MediaDecoder, MediaError, PcmWavDecoder, resolve_ffmpeg
 from .models import InferenceProvenance, Segment, Session, Transcript
 from .storage import SessionStore
 
@@ -45,6 +46,7 @@ class BatchOptions:
     chunk_seconds: float = DEFAULT_CHUNK_SECONDS
     overlap_seconds: float = DEFAULT_OVERLAP_SECONDS
     ffmpeg_path: str | None = None
+    chunk_strategy: str = "fixed"
 
 
 EngineProvider = Callable[[str], Any]
@@ -72,11 +74,13 @@ def new_session_id() -> str:
 def select_decoder(suffix: str, ffmpeg_path: str | None) -> MediaDecoder:
     if suffix.casefold() == ".wav":
         return PcmWavDecoder()
-    if not ffmpeg_path:
+    executable = resolve_ffmpeg(ffmpeg_path)
+    if not executable:
         raise MediaError(
-            f"decoding '{suffix}' media requires --ffmpeg pointing at a pinned FFmpeg binary"
+            f"decoding '{suffix}' media requires FFmpeg; install it on PATH "
+            "or select its executable with --ffmpeg"
         )
-    return FFmpegDecoder(ffmpeg_path)
+    return FFmpegDecoder(executable)
 
 
 def start_transcription(
@@ -98,6 +102,7 @@ def start_transcription(
             "chunk_spec_identity": _spec_identity(options),
             "chunk_seconds": options.chunk_seconds,
             "overlap_seconds": options.overlap_seconds,
+            "chunk_strategy": options.chunk_strategy,
         }
     )
     store.save_session(session)
@@ -105,7 +110,9 @@ def start_transcription(
 
 
 def _spec_identity(options: BatchOptions) -> str:
-    return ChunkSpec(options.chunk_seconds, options.overlap_seconds).identity
+    return ChunkSpec(
+        options.chunk_seconds, options.overlap_seconds, strategy=options.chunk_strategy
+    ).identity
 
 
 def _normalized_audio(store: SessionStore, session: Session, options: BatchOptions) -> Any:
@@ -150,6 +157,7 @@ def _initial_checkpoint(
         chunk_spec_identity=_spec_identity(options),
         chunk_seconds=options.chunk_seconds,
         overlap_seconds=options.overlap_seconds,
+        chunk_strategy=options.chunk_strategy,
         total_chunks=total_chunks,
     )
 
@@ -164,12 +172,14 @@ class BatchRunner:
         benchmarks: list[Benchmark],
         options: BatchOptions,
         dictionary: Any | None = None,
+        cancel_requested: Callable[[], bool] | None = None,
     ):
         self.store = store
         self.engine_provider = engine_provider
         self.benchmarks = benchmarks
         self.options = options
         self.dictionary = dictionary
+        self.cancel_requested = cancel_requested
 
     # -- public API -----------------------------------------------------------------
 
@@ -183,11 +193,16 @@ class BatchRunner:
                 "channels": audio.channels,
                 "frames": audio.frames,
             }
-            spec = ChunkSpec(self.options.chunk_seconds, self.options.overlap_seconds)
+            spec = ChunkSpec(
+                self.options.chunk_seconds,
+                self.options.overlap_seconds,
+                strategy=self.options.chunk_strategy,
+            )
             windows = list(iter_source_windows(audio, spec))
             checkpoint = _initial_checkpoint(
                 self.store, session, fingerprint, info, self.options, len(windows)
             )
+            checkpoint.chunk_plan = [asdict(window) for window in windows]
             save_checkpoint(self.store.checkpoint_path(session.id), checkpoint)
         except Exception as error:
             self._fail(session, "prepare-source", error)
@@ -238,6 +253,7 @@ class BatchRunner:
                 chunk_spec_identity=str(expected_chunking),
                 chunk_seconds=float(diag.get("chunk_seconds", DEFAULT_CHUNK_SECONDS)),
                 overlap_seconds=float(diag.get("overlap_seconds", DEFAULT_OVERLAP_SECONDS)),
+                chunk_strategy=str(diag.get("chunk_strategy", "fixed")),
             )
         validate_resume(
             checkpoint,
@@ -250,10 +266,34 @@ class BatchRunner:
             chunk_spec_identity=str(expected_chunking or checkpoint.chunk_spec_identity),
         )
         audio_info = _normalized_audio(self.store, session, self.options)
-        spec_chunk = ChunkSpec(checkpoint.chunk_seconds, checkpoint.overlap_seconds)
-        windows = list(iter_source_windows(audio_info, spec_chunk))
-        if any(i >= len(windows) for i in checkpoint.completed_chunks):
+        if not checkpoint.normalized_properties:
+            checkpoint.normalized_properties = {
+                "duration": audio_info.duration,
+                "sample_rate": audio_info.sample_rate,
+                "channels": audio_info.channels,
+                "frames": audio_info.frames,
+            }
+            checkpoint.source_duration_seconds = audio_info.duration
+        spec_chunk = ChunkSpec(
+            checkpoint.chunk_seconds, checkpoint.overlap_seconds, strategy=checkpoint.chunk_strategy
+        )
+        if checkpoint.chunk_plan:
+            try:
+                windows = restore_windows(checkpoint.chunk_plan, audio_info.frames, spec_chunk)
+            except (TypeError, ValueError) as error:
+                raise CheckpointError(f"resume refused; {error}") from error
+        else:
+            if checkpoint.chunk_strategy != "fixed" and checkpoint.completed_chunks:
+                raise CheckpointError("resume refused; pause chunk plan is missing")
+            windows = list(iter_source_windows(audio_info, spec_chunk))
+            checkpoint.chunk_plan = [asdict(window) for window in windows]
+        if spec_chunk.identity != checkpoint.chunk_spec_identity:
+            raise CheckpointError("resume refused; chunk strategy identity mismatch")
+        save_checkpoint(self.store.checkpoint_path(session.id), checkpoint)
+        if any(i < 0 or i >= len(windows) for i in checkpoint.completed_chunks):
             raise CheckpointError("resume refused; completed chunks exceed the planned chunk count")
+        session.status = "processing"
+        self.store.save_session(session)
         return self._run(session, checkpoint, windows)
 
     # -- internals --------------------------------------------------------------------
@@ -271,14 +311,23 @@ class BatchRunner:
         duration = float(checkpoint.normalized_properties.get("duration", 0.0)) or None
         accumulated = list(checkpoint.segments)
         pending = [w for w in windows if w.index not in set(checkpoint.completed_chunks)]
+        engines: dict[str, Any] = {}
         for window in pending:
+            if self.cancel_requested is not None and self.cancel_requested():
+                session.status = "interrupted"
+                save_checkpoint(self.store.checkpoint_path(session.id), checkpoint)
+                self.store.save_session(session)
+                return session
             samples = read_chunk(_audio_path(self.store, session), window)
             engine = None
             while True:
-                engine = self.engine_provider(devices[device_index])
+                device = devices[device_index]
                 started = time.perf_counter()
                 try:
-                    chunk_transcript = engine.transcribe_samples(samples, devices[device_index])
+                    if device not in engines:
+                        engines[device] = self.engine_provider(device)
+                    engine = engines[device]
+                    chunk_transcript = engine.transcribe_samples(samples, device)
                     break
                 except Exception as error:
                     category = error_category(error)
@@ -299,8 +348,8 @@ class BatchRunner:
             elapsed = time.perf_counter() - started
             incoming = [
                 {
-                    "start": round(float(s.start) + window.start_seconds, 3),
-                    "end": round(float(s.end) + window.start_seconds, 3),
+                    "start": float(s.start) + window.start_seconds,
+                    "end": float(s.end) + window.start_seconds,
                     "text": s.text,
                     "confidence": s.confidence,
                     "uncertain": s.uncertain,

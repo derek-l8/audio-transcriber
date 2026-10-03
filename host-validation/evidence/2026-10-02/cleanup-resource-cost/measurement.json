@@ -1,0 +1,216 @@
+{
+  "scope": "Actual CPU Whisper tiny engine resident; actual pinned Qwen2.5 7B INT4 cleanup on each device; separate synthetic hardware D3D11 browser graphics workload",
+  "inference_model": "qwen2.5-7b-instruct-int4-ov",
+  "model_revision": "51f38f02586876c08ca2a604224da20ea61685b8",
+  "prompt_version": "cleanup-v2",
+  "devices": {
+    "GPU": {
+      "moderate": {
+        "cleanup_seconds_median": 1.136222750064917,
+        "cleanup_calls": 36,
+        "cleanup_cpu_percent_mean": 10.098956320175596,
+        "resident_working_set_gib": 4.671337945120675,
+        "idle_fps": [
+          60.13028239320803,
+          60.13028239320803,
+          60.08010816691481
+        ],
+        "active_fps": [
+          60.06277924160843,
+          60.06188179301475
+        ],
+        "idle_fps_mean": 60.11355765111029,
+        "active_fps_mean": 60.062330517311594,
+        "active_frame_interval_p95_ms": [
+          16.899999976158142,
+          16.899999976158142
+        ],
+        "active_draw_p95_ms": [
+          5.400000095367432,
+          5.400000095367432
+        ],
+        "burst_fps": 59.5659531628961,
+        "burst_cpu_percent": 1.7693433266198841,
+        "startup_seconds": 7.6049933433532715,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": 0.08521727177754901
+      },
+      "heavy": {
+        "cleanup_seconds_median": 7.777468200016301,
+        "cleanup_calls": 4,
+        "cleanup_cpu_percent_mean": 7.179163942336521,
+        "resident_working_set_gib": 4.669196319580078,
+        "idle_fps": [
+          59.0,
+          59.64912622872219,
+          59.14786599848918
+        ],
+        "active_fps": [
+          55.783859226931355,
+          54.9909855228025
+        ],
+        "idle_fps_mean": 59.26566407573712,
+        "active_fps_mean": 55.38742237486693,
+        "active_frame_interval_p95_ms": [
+          19.600000023841858,
+          19.899999976158142
+        ],
+        "active_draw_p95_ms": [
+          18.61500000953674,
+          18.700000047683716
+        ],
+        "burst_fps": 55.482878009652715,
+        "burst_cpu_percent": 6.53962891710889,
+        "startup_seconds": 18.258033752441406,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": 6.543825605183617
+      }
+    },
+    "NPU": {
+      "moderate": {
+        "cleanup_seconds_median": 3.0631518499576487,
+        "cleanup_calls": 14,
+        "cleanup_cpu_percent_mean": 0.9630479663829719,
+        "resident_working_set_gib": 5.459966447618273,
+        "idle_fps": [
+          59.93637988074521,
+          60.17048263244395,
+          60.18054289131197
+        ],
+        "active_fps": [
+          60.05834307117935,
+          60.05714285714286
+        ],
+        "idle_fps_mean": 60.09580180150038,
+        "active_fps_mean": 60.05774296416111,
+        "active_frame_interval_p95_ms": [
+          16.95500004291534,
+          17.0
+        ],
+        "active_draw_p95_ms": [
+          10.600000023841858,
+          10.600000023841858
+        ],
+        "burst_fps": 60.041567529764194,
+        "burst_cpu_percent": 1.1375408539990983,
+        "startup_seconds": 13.755697250366211,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": 0.06333027632275945
+      },
+      "heavy": {
+        "cleanup_seconds_median": 5.249219999997877,
+        "cleanup_calls": 6,
+        "cleanup_cpu_percent_mean": 1.0110488607034147,
+        "resident_working_set_gib": 5.467898368835449,
+        "idle_fps": [
+          60.483871956242496,
+          57.78894444667421,
+          57.459678358430374
+        ],
+        "active_fps": [
+          39.057002006340156,
+          38.64927589108539
+        ],
+        "idle_fps_mean": 58.57749825378236,
+        "active_fps_mean": 38.85313894871277,
+        "active_frame_interval_p95_ms": [
+          31.0,
+          31.799999952316284
+        ],
+        "active_draw_p95_ms": [
+          29.70000002980232,
+          30.09000002145767
+        ],
+        "burst_fps": 45.475495444493646,
+        "burst_cpu_percent": 2.1870805541123395,
+        "startup_seconds": 18.73982310295105,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": 33.672245987043304
+      }
+    },
+    "CPU": {
+      "moderate": {
+        "cleanup_seconds_median": 2.638593250012491,
+        "cleanup_calls": 16,
+        "cleanup_cpu_percent_mean": 27.851600535430542,
+        "resident_working_set_gib": 8.476986779106987,
+        "idle_fps": [
+          59.69899646510569,
+          60.17048263244395,
+          60.17048263244395
+        ],
+        "active_fps": [
+          60.05865119435892,
+          60.0520750770614
+        ],
+        "idle_fps_mean": 60.013320576664526,
+        "active_fps_mean": 60.05536313571017,
+        "active_frame_interval_p95_ms": [
+          16.800000071525574,
+          16.799999952316284
+        ],
+        "active_draw_p95_ms": [
+          9.600000023841858,
+          9.600000023841858
+        ],
+        "burst_fps": 60.04077063149698,
+        "burst_cpu_percent": 7.574008451172592,
+        "startup_seconds": 36.747719049453735,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": -0.07005537877533552
+      },
+      "heavy": {
+        "cleanup_seconds_median": 7.302968299947679,
+        "cleanup_calls": 5,
+        "cleanup_cpu_percent_mean": 18.45364689183556,
+        "resident_working_set_gib": 8.477418375015258,
+        "idle_fps": [
+          58.350096069008025,
+          59.85915027768927,
+          59.00151876136787
+        ],
+        "active_fps": [
+          53.70021073842781,
+          53.19676217090811
+        ],
+        "idle_fps_mean": 59.07025503602172,
+        "active_fps_mean": 53.44848645466796,
+        "active_frame_interval_p95_ms": [
+          20.699999928474426,
+          20.784999966621402
+        ],
+        "active_draw_p95_ms": [
+          19.899999976158142,
+          20.09999990463257
+        ],
+        "burst_fps": 53.743171587872325,
+        "burst_cpu_percent": 16.680288882985526,
+        "startup_seconds": 63.66406774520874,
+        "unique_cleanup_outputs": [
+          "The results were ready yesterday, and we were waiting for Priya to review them."
+        ],
+        "fps_reduction_percent": 9.517088724139654
+      }
+    }
+  },
+  "limits": [
+    "Synthetic hardware browser proxy, not real desktop interaction, video editing, gaming or network page loading.",
+    "One fresh model worker per device and workload, two sustained generation windows per worker.",
+    "Other apps and thermals were uncontrolled. Idle windows bracket active windows.",
+    "Short single sentence; matched multi-case quality and speed evidence is separate.",
+    "Model pipelines kept loaded; current desktop per-job startup adds additional latency.",
+    "Windows Neural utilization counters on GPU returned impossible readings above 100%; excluded from capacity claims.",
+    "Accelerator memory counters also expose NPU adapter allocations. Do not label NPU memory as graphics GPU usage.",
+    "Full working set includes shared resident model pages; do not add accelerator shared memory to it."
+  ]
+}

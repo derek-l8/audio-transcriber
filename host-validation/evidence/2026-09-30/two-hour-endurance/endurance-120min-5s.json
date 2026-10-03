@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "source_duration_seconds": 7200,
+  "source_sha256": "f4b25f96437b5c10ea484d52c52058a142d9fd9e6e5f9152c6b65822be506dc7",
+  "model_id": "whisper-base.en-int4-ov",
+  "requested_device": "CPU",
+  "session_id": "0870808f7794",
+  "completed": true,
+  "exit_code": 0,
+  "wall_seconds": 89.9,
+  "chunks_completed": 249,
+  "fallback_events": 0,
+  "checkpoint_observed": true,
+  "source_copy_hash_matches": true,
+  "raw_and_balanced_saved": true,
+  "sample_interval_seconds": 5,
+  "memory_scope": "root process and descendants; working set",
+  "sample_count": 15,
+  "sampled_peak_mb": 396.9,
+  "post_warmup_first_quarter_median_mb": 387.3,
+  "post_warmup_last_quarter_median_mb": 387.6,
+  "samples": [
+    {
+      "elapsed_seconds": 5.8,
+      "tree_working_set_mb": 396.9,
+      "completed_chunks": 11
+    },
+    {
+      "elapsed_seconds": 11.5,
+      "tree_working_set_mb": 385.7,
+      "completed_chunks": 28
+    },
+    {
+      "elapsed_seconds": 17.1,
+      "tree_working_set_mb": 387.9,
+      "completed_chunks": 45
+    },
+    {
+      "elapsed_seconds": 22.8,
+      "tree_working_set_mb": 388.5,
+      "completed_chunks": 61
+    },
+    {
+      "elapsed_seconds": 28.4,
+      "tree_working_set_mb": 388.1,
+      "completed_chunks": 77
+    },
+    {
+      "elapsed_seconds": 34.0,
+      "tree_working_set_mb": 387.0,
+      "completed_chunks": 93
+    },
+    {
+      "elapsed_seconds": 39.6,
+      "tree_working_set_mb": 387.6,
+      "completed_chunks": 109
+    },
+    {
+      "elapsed_seconds": 45.3,
+      "tree_working_set_mb": 387.9,
+      "completed_chunks": 124
+    },
+    {
+      "elapsed_seconds": 51.0,
+      "tree_working_set_mb": 388.0,
+      "completed_chunks": 140
+    },
+    {
+      "elapsed_seconds": 56.6,
+      "tree_working_set_mb": 390.1,
+      "completed_chunks": 156
+    },
+    {
+      "elapsed_seconds": 62.3,
+      "tree_working_set_mb": 387.9,
+      "completed_chunks": 173
+    },
+    {
+      "elapsed_seconds": 67.9,
+      "tree_working_set_mb": 387.9,
+      "completed_chunks": 189
+    },
+    {
+      "elapsed_seconds": 73.5,
+      "tree_working_set_mb": 388.3,
+      "completed_chunks": 205
+    },
+    {
+      "elapsed_seconds": 79.2,
+      "tree_working_set_mb": 387.9,
+      "completed_chunks": 222
+    },
+    {
+      "elapsed_seconds": 84.8,
+      "tree_working_set_mb": 387.3,
+      "completed_chunks": 238
+    }
+  ],
+  "stderr_category": "none",
+  "stderr_last_line": null
+}

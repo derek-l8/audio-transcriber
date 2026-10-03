@@ -1,0 +1,43 @@
+{
+  "scope": "One-host native frozen GUI close during real CPU inference and GUI resume; repeated public speech excerpt, not an uninterrupted lecture or accuracy result.",
+  "fixture_seconds": 600,
+  "chunks": 20,
+  "model": "whisper-tiny.en-int4-ov",
+  "actual_device": "CPU",
+  "gui_sha256": "e0331ecc69fa7dd19555cd73ec61d4afc46fa46e6039fdbf04d523c3367e7c69",
+  "worker_sha256": "4cebf98d22822ef5e376ffb8379f25f71eca5f7d38d5e9a3d3fd39be32d6b379",
+  "native": {
+    "runs": [
+      {
+        "stage": "close_during_job",
+        "exit_code": 0,
+        "lock_removed": true,
+        "busy_when_requested": true,
+        "chunks_before_close": 1,
+        "chunks_after_close": 2,
+        "total_chunks": 20,
+        "status": "interrupted",
+        "owned_workers_exited": true,
+        "pause_marker_removed": true
+      },
+      {
+        "stage": "reopen_resume_close",
+        "exit_code": 0,
+        "lock_removed": true,
+        "status": "ready"
+      }
+    ],
+    "native_import_file_picker": true,
+    "native_resume_button": true
+  },
+  "source_hashes_preserved": true,
+  "ordered_unique_chunks": true,
+  "committed_segments_preserved": true,
+  "fallback_events": 0,
+  "static_checks": {
+    "ruff_lint": "passed",
+    "ruff_format_files": 61,
+    "powershell_drivers_parsed": 3,
+    "git_diff_check": "passed"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "scope": "GPU AI cleanup only; CPU speech recognizer and live capture not included",
+  "model": "qwen2.5-7b-instruct-int4-ov",
+  "runtime_device": "GPU",
+  "raw_probe": {
+    "phases": {
+      "startup": {
+        "samples": 9,
+        "sampled_seconds": 4.2929879,
+        "mean_engine_percent": 7.807469012433042,
+        "median_engine_percent": 0.0,
+        "max_engine_percent": 71.7407188379731,
+        "min_engine_percent": 0.0,
+        "shared_memory_gib": 4.265743255615234,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.512275695800781,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      },
+      "loaded_idle_before": {
+        "samples": 11,
+        "sampled_seconds": 4.3177806,
+        "mean_engine_percent": 0.0,
+        "median_engine_percent": 0.0,
+        "max_engine_percent": 0.0,
+        "min_engine_percent": 0.0,
+        "shared_memory_gib": 4.265743255615234,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.512187957763672,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      },
+      "sustained_generation": {
+        "samples": 60,
+        "sampled_seconds": 24.9370466,
+        "mean_engine_percent": 91.15779612811086,
+        "median_engine_percent": 100.58434057683326,
+        "max_engine_percent": 148.3369336438505,
+        "min_engine_percent": 24.917400167015046,
+        "shared_memory_gib": 4.313896179199219,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.563007354736328,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      },
+      "loaded_idle_between": {
+        "samples": 11,
+        "sampled_seconds": 4.2740678,
+        "mean_engine_percent": 0.0,
+        "median_engine_percent": 0.0,
+        "max_engine_percent": 0.0,
+        "min_engine_percent": 0.0,
+        "shared_memory_gib": 4.2630767822265625,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.512500762939453,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      },
+      "dictation_bursts": {
+        "samples": 75,
+        "sampled_seconds": 29.1749419,
+        "mean_engine_percent": 6.361574622364543,
+        "median_engine_percent": 0.0,
+        "max_engine_percent": 127.91512745271537,
+        "min_engine_percent": 0.0,
+        "shared_memory_gib": 4.2630767822265625,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.512691497802734,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      },
+      "loaded_idle_after": {
+        "samples": 11,
+        "sampled_seconds": 4.1938074,
+        "mean_engine_percent": 0.0,
+        "median_engine_percent": 0.0,
+        "max_engine_percent": 0.0,
+        "min_engine_percent": 0.0,
+        "shared_memory_gib": 4.2630767822265625,
+        "dedicated_memory_gib": 0.0,
+        "process_working_set_gib": 4.512493133544922,
+        "engines": [
+          "13_engtype_Neural"
+        ]
+      }
+    },
+    "load_seconds": 3.606859300052747,
+    "sustained_calls": 28,
+    "burst_seconds": [
+      0.923494299990125,
+      0.9384471999946982,
+      0.9067118000239134
+    ],
+    "counter_method": "per-worker busiest-engine running-time delta / timestamp delta; phase boundaries excluded"
+  },
+  "cooked_counter_confirmation": {
+    "one_second_samples": 17,
+    "active_mean_percent": 95.50627901695586,
+    "active_median_percent": 92.58225639596569,
+    "active_max_percent": 134.91294568168374,
+    "active_min_percent": 64.31135913949268,
+    "total_calls": 22,
+    "active_seconds": 20.31372046470642,
+    "values": [
+      84.41117617360882,
+      97.31502655863625,
+      64.31135913949268,
+      78.0934867554434,
+      134.91294568168374,
+      123.98536701119467,
+      117.9754653058477,
+      85.97833808024706,
+      117.82520993562787,
+      86.27221526877837,
+      75.92722410663208,
+      94.827409200387,
+      77.66535280233927,
+      92.58225639596569,
+      98.46849631422104,
+      84.10747992554397,
+      108.94793463260011
+    ]
+  },
+  "interpretation": {
+    "continuous_busy_engine_estimate_percent": [
+      90,
+      95
+    ],
+    "observed_loaded_idle_percent": 0,
+    "observed_three_bursts_per_30_seconds_average_percent": 6.361574622364543,
+    "persistent_gpu_shared_memory_gib": 4.2630767822265625,
+    "limitations": [
+      "Some raw and cooked individual samples exceed 100 percent; precise peak utilization cannot be trusted",
+      "Busy-engine time is not a fraction of theoretical arithmetic throughput or all GPU resources",
+      "One host, one short phrase, three periodic bursts and two brief sustained probes",
+      "No end-to-end live dictation workload or gaming/rendering contention measurement",
+      "GPU-shared memory overlaps the process working set; do not add them together"
+    ]
+  },
+  "metric_reference": "https://devblogs.microsoft.com/directx/gpus-in-the-task-manager/"
+}

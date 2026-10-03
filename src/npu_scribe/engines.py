@@ -99,7 +99,12 @@ class OpenVINOWhisperEngine:
 
     def _pipeline(self, device: str) -> tuple[Any, float]:
         requested = device.upper()
-        if requested not in self._pipelines:
+        # On the tested OpenVINO NPU, a second generate() call on the same
+        # WhisperPipeline returned only a few stale words. A fresh pipeline
+        # transcribed that same chunk correctly, so do not reuse NPU state.
+        # Upstream tracks a matching 2026.3.0 reset symptom:
+        # https://github.com/openvinotoolkit/openvino/issues/37937
+        if requested == "NPU" or requested not in self._pipelines:
             import openvino as ov  # type: ignore[import-untyped]
             import openvino_genai  # type: ignore[import-untyped]
 
@@ -111,6 +116,8 @@ class OpenVINOWhisperEngine:
             started = time.perf_counter()
             pipeline = openvino_genai.WhisperPipeline(str(self.model_dir), requested)
             loaded = time.perf_counter() - started
+            if requested == "NPU":
+                return pipeline, loaded
             self._pipelines[requested] = (pipeline, loaded)
         return self._pipelines[requested]
 
@@ -138,12 +145,23 @@ class OpenVINOWhisperEngine:
             text = str(chunk.text).strip()
             if not text:
                 continue
-            start = float(chunk.start_ts)
+            start = max(0.0, float(chunk.start_ts))
             end = min(float(chunk.end_ts), duration)
-            if end < start:
-                end = start
+            # Some runtime results place hallucinated text at or beyond the
+            # chunk boundary. Such spans contain no audio and cannot be given
+            # a trustworthy timestamp.
+            if start >= duration or end <= start:
+                continue
+            # Runtime float timestamps can put adjacent boundaries a few
+            # microseconds apart. Snap only this numerical drift.
+            if segments and 0 < segments[-1].end - start <= 1e-5 and end > segments[-1].end:
+                start = segments[-1].end
             segments.append(Segment(start, end, text))
-        if not segments:
+        if any(right.start < left.end for left, right in zip(segments, segments[1:], strict=False)):
+            # Substantial overlap invalidates sentence timing, not the words.
+            # Retain valid-span text in runtime order with explicit uncertainty.
+            segments = [Segment(0.0, duration, " ".join(s.text for s in segments), uncertain=True)]
+        if not chunks:
             texts = [str(t).strip() for t in result.texts]
             joined = " ".join(t for t in texts if t)
             if joined:

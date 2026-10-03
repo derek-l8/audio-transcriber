@@ -41,6 +41,7 @@ class Transcript:
     segments: tuple[Segment, ...]
     provenance: InferenceProvenance
     created_at: str = field(default_factory=utc_now)
+    transformation: dict[str, Any] | None = None
 
     @property
     def text(self) -> str:

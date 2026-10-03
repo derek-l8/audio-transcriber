@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-01",
+  "python": "3.12.14",
+  "openvino": "2026.3.0",
+  "openvino_genai": "2026.3.0.0",
+  "models": {
+    "whisper-base.en-int4-ov": "b0da25f7e43548df7f35fb69fc7609c08242150a",
+    "whisper-tiny.en-int4-ov": "2c4a4cb35a33f827f324c55f474d9197c586b485"
+  },
+  "cases": [
+    {
+      "id": "yale-phys200-rigid-bodies",
+      "audio_sha256": "7aacb1944cdf1a3dfaa1c02f291a1f2fc8b38f88323a1590d63a352713d9bcc0",
+      "expected_size_bytes": 15840496,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/physics/phys-200/lecture-9",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/fall06/phys200/mp3/phys200_09_100906.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 6252b457c4aaefa7c90896ad74fadbbcf76f0f43aa3466f911e7bc46ddcfdf79; HTML SHA-256 62e0ef9885495370d0bfd5293d72d341ea57f7ab81f3cb1cf8bd1ca307d630e5; chapter 1 0-495s (published next chapter at 495s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 495.0
+    },
+    {
+      "id": "yale-astr160-course-topics",
+      "audio_sha256": "f6d3ca8a3afd0c715cde5ab6714c8fdac66d4f0783d1c8e978a28e75c8b7b7de",
+      "expected_size_bytes": 14048476,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/astronomy/astr-160/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring07/astr160/mp3/astr160_01_011607.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 19304bbeea52c64f03af6aaeef9d5bc5b0a08772b59f50749897027268a03314; HTML SHA-256 6c64e14a014659eba61ac8444292998f9da6d638c2df802129706626b0d69db8; chapter 2 338-777s (published next chapter at 777s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 439.0
+    },
+    {
+      "id": "yale-chem125a-orbital-plots",
+      "audio_sha256": "528e991ce3df5c8274abdc0a2363b1f53fe977de6b99e8cbbcbe1429276dbbff",
+      "expected_size_bytes": 18560098,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/chemistry/chem-125a/lecture-10",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/fall08/chem125/mp3/chem125_10_092408.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 2e2fb076b583f116a957d76f78a2d3e46df45526dda8c82d096ba4019bb72653; HTML SHA-256 1351a35f2595992ec960c35619fdabd65bdc7c77904e584c5a733110bed45f08; chapter 1 0-580s (published next chapter at 847s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 580.0
+    },
+    {
+      "id": "holdout-beng100-disease-control",
+      "audio_sha256": "41f1a7dc353b33685aedb424f015a994ba75ce668e190e122d12937ca94feecb",
+      "expected_size_bytes": 15700324,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/biomedical-engineering/beng-100/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring08/beng100/mp3/beng100_01_011508.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 ea0e62b1581b43602f064b79f20e1a7c29d7668b85155a232d87a7760c0840c6; HTML SHA-256 b94ebdaf4a3212d4b2d27b7aa46db331254714a08a2ded1fb48c301e821eb72d; chapter 4 1368.4-1859.02s (published chapter bounds 1379-1870s); ASR-assisted boundary alignment before overlap comparison; FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 490.62
+    },
+    {
+      "id": "holdout-psyc110-neuroscience",
+      "audio_sha256": "2b0f60e52e667172b697f8b991c8fe623eb41584f2943907fb9f5fb2eae8dabe",
+      "expected_size_bytes": 14163682,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/psychology/psyc-110/lecture-2",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring07/psyc110/mp3/psyc110_02_012207.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 7f74b3321b348ce4acef8212133b4d5fe7ad4d0febe10cf2205d499edb549284; HTML SHA-256 ef07a73282bc34fd8005d65cad16d966eecb4721aa5579f4091989843822d95d; chapter 2 714.62-1157.22s (published chapter bounds 726-1168s); ASR-assisted boundary alignment before overlap comparison; FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 442.6
+    },
+    {
+      "id": "holdout-mcdb150-population-biology",
+      "audio_sha256": "3fdfc07da9a721eec2b93899d4cc52644b10d33b42eec8ea09267de726f5790e",
+      "expected_size_bytes": 15968178,
+      "license": "CC BY-NC-SA 3.0, Yale Open Courses; local noncommercial evaluation",
+      "official_source": "https://oyc.yale.edu/molecular-cellular-and-developmental-biology/mcdb-150/lecture-1",
+      "source_audio_url": "https://oyc.yale.edu/sites/default/files/courses/spring09/mcdb150/mp3/mcdb150_01_011309.mp3",
+      "reference_provenance": "Yale Open Courses chapter transcript; Yale does not document word-level audio verification",
+      "preparation": "MP3 SHA-256 0a7040df7d2204618b01034d8e5e06f021d4772ef929e974a3855973d0fa5863; HTML SHA-256 977db13101629aa1332487b2d0e018a8b43ac6bff03b19c46c3bc25f70d49634; chapter 1 0-499s (published chapter bounds 0-499s); FFmpeg mono 16 kHz PCM",
+      "audio_seconds": 499.0
+    }
+  ]
+}

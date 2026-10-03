@@ -1,0 +1,90 @@
+{
+  "manifest": "Yale continuous physics astronomy and chemistry chapters",
+  "normalization": "Unicode casefold; Unicode letter/digit words with internal apostrophes; punctuation ignored; numbers retained",
+  "rows": [
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "yale-phys200-rigid-bodies",
+      "reference_words": 1428,
+      "hypothesis_words": 1465,
+      "word_errors": 149,
+      "normalized_wer": 0.1043,
+      "inference_seconds": 8.7,
+      "rtf": 0.0176,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "yale-astr160-course-topics",
+      "reference_words": 1247,
+      "hypothesis_words": 1314,
+      "word_errors": 113,
+      "normalized_wer": 0.0906,
+      "inference_seconds": 8.666,
+      "rtf": 0.0197,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-tiny.en-int4-ov",
+      "case_id": "yale-chem125a-orbital-plots",
+      "reference_words": 1475,
+      "hypothesis_words": 1539,
+      "word_errors": 225,
+      "normalized_wer": 0.1525,
+      "inference_seconds": 9.727,
+      "rtf": 0.0168,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "yale-phys200-rigid-bodies",
+      "reference_words": 1428,
+      "hypothesis_words": 1456,
+      "word_errors": 126,
+      "normalized_wer": 0.0882,
+      "inference_seconds": 15.05,
+      "rtf": 0.0304,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "yale-astr160-course-topics",
+      "reference_words": 1247,
+      "hypothesis_words": 1316,
+      "word_errors": 118,
+      "normalized_wer": 0.0946,
+      "inference_seconds": 14.255,
+      "rtf": 0.0325,
+      "actual_device": "CPU",
+      "fallback_events": []
+    },
+    {
+      "model_id": "whisper-base.en-int4-ov",
+      "case_id": "yale-chem125a-orbital-plots",
+      "reference_words": 1475,
+      "hypothesis_words": 1518,
+      "word_errors": 190,
+      "normalized_wer": 0.1288,
+      "inference_seconds": 17.173,
+      "rtf": 0.0296,
+      "actual_device": "CPU",
+      "fallback_events": []
+    }
+  ],
+  "summary": {
+    "whisper-tiny.en-int4-ov": {
+      "pooled_wer": 0.1173,
+      "mean_case_wer": 0.1158,
+      "audio_seconds": 1514.0
+    },
+    "whisper-base.en-int4-ov": {
+      "pooled_wer": 0.1046,
+      "mean_case_wer": 0.1039,
+      "audio_seconds": 1514.0
+    }
+  }
+}

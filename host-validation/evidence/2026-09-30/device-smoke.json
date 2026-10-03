@@ -1,0 +1,121 @@
+{
+  "schema_version": 3,
+  "generated_utc": "2026-09-30T07:55:41.2678935Z",
+  "duration_seconds": 94.31,
+  "scope_note": "Silence fixtures prove runtime/device execution only; never accuracy.",
+  "privacy": "No audio, transcript text, clipboard content, username, credential, or absolute personal path is included. Review before sharing.",
+  "metrics": {
+    "python": "Python 3.12.14",
+    "package_versions": {
+      "npu_scribe": "0.1.0",
+      "openvino": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "openvino_genai": "2026.3.0.0-3277-bd8d6542e3c"
+    },
+    "model_revisions": {
+      "whisper-tiny.en-int4-ov": "2c4a4cb35a33f827f324c55f474d9197c586b485",
+      "whisper-base.en-int4-ov": "b0da25f7e43548df7f35fb69fc7609c08242150a"
+    },
+    "device_smoke_CPU": {
+      "requested": "CPU",
+      "actual": "CPU",
+      "status": "ready"
+    },
+    "device_smoke_GPU": {
+      "requested": "GPU",
+      "actual": "GPU",
+      "status": "ready"
+    },
+    "device_smoke_NPU": {
+      "requested": "NPU",
+      "actual": "NPU",
+      "status": "ready"
+    }
+  },
+  "checks": [
+    {
+      "id": "python-version",
+      "status": "pass",
+      "detail": "Python 3.12.14"
+    },
+    {
+      "id": "setup-environment",
+      "status": "skip",
+      "detail": "-SetupEnvironment not supplied; no changes made"
+    },
+    {
+      "id": "imports",
+      "status": "pass",
+      "detail": "npu_scribe 0.1.0; openvino 2026.3.0-22451-8a17657b995-releases/2026/3; openvino_genai 2026.3.0.0-3277-bd8d6542e3c"
+    },
+    {
+      "id": "openvino-devices",
+      "status": "pass",
+      "detail": "enumerated: CPU, GPU, NPU"
+    },
+    {
+      "id": "models-list",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "model-whisper-tiny.en-int4-ov",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "model-whisper-base.en-int4-ov",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "smoke-fixture",
+      "status": "pass",
+      "detail": "RIFF/WAVE fixture validated through inspect_pcm_wav (silence: runtime/device smoke only, NOT accuracy)"
+    },
+    {
+      "id": "transcribe-CPU",
+      "status": "pass",
+      "detail": "e1e80bedb0c4; ready; CPU; CPU; 1; 0"
+    },
+    {
+      "id": "transcribe-CPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: CPU"
+    },
+    {
+      "id": "transcribe-GPU",
+      "status": "pass",
+      "detail": "a048368042c3; ready; GPU; GPU; 1; 0"
+    },
+    {
+      "id": "transcribe-GPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: GPU"
+    },
+    {
+      "id": "transcribe-NPU",
+      "status": "pass",
+      "detail": "1aeda7f400f0; ready; NPU; NPU; 1; 0"
+    },
+    {
+      "id": "transcribe-NPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: NPU"
+    },
+    {
+      "id": "resume-test",
+      "status": "skip",
+      "detail": "-LongFile not supplied"
+    },
+    {
+      "id": "endurance-60min",
+      "status": "skip",
+      "detail": "-LongFile not supplied"
+    },
+    {
+      "id": "evaluation",
+      "status": "skip",
+      "detail": "-EvaluationManifest not supplied; no WER/CER claimed"
+    }
+  ]
+}

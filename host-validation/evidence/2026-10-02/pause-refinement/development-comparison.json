@@ -1,0 +1,35 @@
+[
+  {
+    "model_id": "whisper-tiny.en-int4-ov",
+    "case_id": "holdout-beng100-disease-control",
+    "reference_words": 1305,
+    "fixed_errors": 87,
+    "v1_errors": 104,
+    "v2_errors": 86,
+    "fixed_wer": 0.066667,
+    "v1_wer": 0.079693,
+    "v2_wer": 0.0659
+  },
+  {
+    "model_id": "whisper-tiny.en-int4-ov",
+    "case_id": "holdout-mcdb150-population-biology",
+    "reference_words": 1224,
+    "fixed_errors": 127,
+    "v1_errors": 131,
+    "v2_errors": 122,
+    "fixed_wer": 0.103758,
+    "v1_wer": 0.107026,
+    "v2_wer": 0.099673
+  },
+  {
+    "model_id": "whisper-base.en-int4-ov",
+    "case_id": "holdout-psyc110-neuroscience",
+    "reference_words": 1054,
+    "fixed_errors": 60,
+    "v1_errors": 62,
+    "v2_errors": 70,
+    "fixed_wer": 0.056926,
+    "v1_wer": 0.058824,
+    "v2_wer": 0.066414
+  }
+]

@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
+from argparse import Namespace
 from pathlib import Path
 
 import pytest
 
+from npu_scribe import cli
+from npu_scribe.engines import MockSpeechEngine
 from npu_scribe.evaluate import (
     CaseResult,
     EvaluationError,
@@ -85,29 +89,47 @@ def test_evaluate_case_measures_accuracy_and_speed(tmp_path: Path, silent_wav: P
     assert result.rtf == pytest.approx(0.2)
     assert result.actual_device == "CPU"
     assert result.runtime_version == "test-runtime"
-    assert result.peak_memory_mb and result.peak_memory_mb > 0
+    if sys.platform == "win32":
+        assert result.peak_memory_mb is None
+    else:
+        assert result.peak_memory_mb and result.peak_memory_mb > 0
 
 
 def test_selection_policy_rejects_real_time_or_slower() -> None:
     results = [
-        CaseResult("a", "slow-model", "auto", "CPU", wer=0.05, rtf=1.2),
-        CaseResult("b", "mid-model", "auto", "CPU", wer=0.08, rtf=0.7),
-        CaseResult("c", "good-model", "auto", "CPU", wer=0.12, rtf=0.4),
-        CaseResult("d", "better-wer-slow-rtf", "auto", "CPU", wer=0.03, rtf=0.45),
+        CaseResult("a", "slow-model", "CPU", "CPU", wer=0.05, rtf=1.2),
+        CaseResult("b", "slow-model", "CPU", "CPU", wer=0.02, rtf=0.4),
+        CaseResult("a", "mid-model", "CPU", "CPU", wer=0.08, rtf=0.7),
+        CaseResult("b", "mid-model", "CPU", "CPU", wer=0.08, rtf=0.7),
+        CaseResult("a", "good-model", "CPU", "CPU", wer=0.12, rtf=0.4),
+        CaseResult("b", "good-model", "CPU", "CPU", wer=0.12, rtf=0.4),
+        CaseResult("a", "better-wer", "CPU", "CPU", wer=0.03, rtf=0.45),
+        CaseResult("b", "better-wer", "CPU", "CPU", wer=0.13, rtf=0.45),
     ]
     selection = select_model(results)
-    assert selection["rejected_real_time_or_slower"] == ["a"]
+    assert selection["rejected_real_time_or_slower"] == ["slow-model"]
     assert selection["preferred_rtf_le_05"] is True
-    # Among eligible preferred models, lowest WER wins.
-    assert selection["selected_model_id"] == "better-wer-slow-rtf"
+    # Among complete preferred models, lowest mean WER wins.
+    assert selection["selected_model_id"] == "better-wer"
 
 
 def test_selection_without_representative_results_declares_nothing() -> None:
     empty = select_model([])
     assert empty["selected_model_id"] is None
-    assert "No final default" in empty["note"]
+    assert "at least two models" in empty["note"]
     only_slow = select_model([CaseResult("a", "m", "auto", "CPU", wer=0.1, rtf=2.0)])
     assert only_slow["eligible_ids"] == []
+    only_fast = select_model([CaseResult("a", "m", "CPU", "CPU", wer=0.1, rtf=0.2)])
+    assert only_fast["selected_model_id"] is None
+
+
+def test_selection_requires_matched_cases() -> None:
+    results = [
+        CaseResult("a", "tiny", "CPU", "CPU", wer=0.1, rtf=0.3),
+        CaseResult("a", "base", "CPU", "CPU", wer=0.05, rtf=0.4),
+        CaseResult("b", "base", "CPU", "CPU", wer=0.05, rtf=0.4),
+    ]
+    assert select_model(results)["selected_model_id"] is None
 
 
 def test_report_write_is_atomic_json(tmp_path: Path) -> None:
@@ -116,3 +138,28 @@ def test_report_write_is_atomic_json(tmp_path: Path) -> None:
     write_report(report, destination)
     value = json.loads(destination.read_text())
     assert value["manifest"] == "demo"
+
+
+def test_failed_evaluation_writes_report_and_returns_failure(
+    tmp_path: Path, silent_wav: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FailingEngine(MockSpeechEngine):
+        def transcribe_samples(self, samples: list[float], device: str = "CPU"):
+            raise RuntimeError("synthetic inference failure")
+
+    monkeypatch.setattr(
+        cli,
+        "make_engine_provider",
+        lambda model_id, data_dir, model_root=None: lambda device: FailingEngine(),
+    )
+    monkeypatch.setattr(cli, "resolve_device", lambda *args: ("CPU", []))
+    manifest = manifest_file(tmp_path, valid_case(tmp_path, silent_wav))
+    result = cli.run_evaluate(
+        Namespace(manifest=manifest, model="mock", device="CPU"), tmp_path / "data"
+    )
+    report = json.loads(
+        (tmp_path / "data" / "evaluation" / "reports" / "eval-manifest.report.json").read_text()
+    )
+    assert result == 1
+    assert report["results"][0]["status"] == "failed"
+    assert report["selection"]["selected_model_id"] is None

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import wave
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,48 @@ def make_runner(
         Benchmark("GPU", "speech-chunk", 0.2, "GPU"),
     ]
     return BatchRunner(store, factory, benchmarks, BatchOptions(model_id="mock", **options))
+
+
+def test_safe_pause_keeps_committed_chunks_and_resume_matches_uninterrupted(
+    tmp_path: Path, three_second_wav: Path
+) -> None:
+    store = SessionStore(tmp_path / "paused")
+    calls = 0
+
+    def provider(device: str):
+        class Counting(MockSpeechEngine):
+            def transcribe_samples(self, samples, device="CPU"):
+                nonlocal calls
+                calls += 1
+                return super().transcribe_samples(samples, device)
+
+        return Counting([Segment(0, 0.5, "words in a chunk")])
+
+    options = BatchOptions(model_id="mock", requested_device="CPU", **CHUNK_OPTIONS)
+    runner = BatchRunner(store, provider, [], options, cancel_requested=lambda: calls == 1)
+    paused = runner.run_new(three_second_wav)
+    assert paused.status == "interrupted"
+    checkpoint = read_json(store.checkpoint_path(paused.id))
+    assert checkpoint["completed_chunks"] == [0]
+    assert checkpoint["segments"]
+    assert not (store.session_dir(paused.id) / "raw-transcript.json").exists()
+    assert store.source_copy(paused.id).exists()
+
+    def resumed_provider(device: str):
+        assert store.load_session(paused.id).status == "processing"
+        return provider(device)
+
+    resumed = BatchRunner(store, resumed_provider, [], options).resume(paused.id)
+    uninterrupted_store = SessionStore(tmp_path / "uninterrupted")
+    uninterrupted = BatchRunner(uninterrupted_store, provider, [], options).run_new(
+        three_second_wav
+    )
+    assert resumed.status == "ready"
+    assert not store.checkpoint_path(resumed.id).exists()
+    assert (
+        store.load_transcript(resumed.id, "raw").segments
+        == uninterrupted_store.load_transcript(uninterrupted.id, "raw").segments
+    )
 
 
 def read_json(path: Path) -> dict:
@@ -102,6 +145,88 @@ def test_end_to_end_multi_chunk(tmp_path: Path, three_second_wav: Path) -> None:
     assert (directory / "balanced-transcript.json").is_file()
     assert not (directory / "checkpoint.json").exists()
     assert len(session.diagnostics["chunk_records"]) == 4
+
+
+@pytest.mark.parametrize("strategy", ["pause-v1", "pause-v2"])
+def test_pause_resume_uses_saved_plan(
+    tmp_path: Path, three_second_wav: Path, monkeypatch, strategy: str
+) -> None:
+    options = dict(chunk_seconds=1.0, overlap_seconds=0.0, chunk_strategy=strategy)
+    reference_store = SessionStore(tmp_path / "reference")
+    reference = make_runner(reference_store, failing_after(10**9), **options).run_new(
+        three_second_wav
+    )
+    store = SessionStore(tmp_path / "data")
+    with pytest.raises(PipelineError):
+        make_runner(store, failing_after(1), **options).run_new(three_second_wav)
+    session_id = only_session_id(store)
+    partial = read_json(store.checkpoint_path(session_id))
+    assert partial["chunk_plan"]
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("resume must not select new pause boundaries")
+
+    monkeypatch.setattr("npu_scribe.pipeline.iter_source_windows", forbidden)
+    resumed = make_runner(store, failing_after(10**9), **options).resume(session_id)
+    assert resumed.status == "ready"
+    assert (
+        raw_transcript(store, session_id)["segments"]
+        == raw_transcript(reference_store, reference.id)["segments"]
+    )
+
+
+@pytest.mark.parametrize("damage", ["missing", "gap"])
+def test_pause_resume_refuses_damaged_plan(
+    tmp_path: Path, three_second_wav: Path, damage: str
+) -> None:
+    options = dict(chunk_seconds=1.0, overlap_seconds=0.0, chunk_strategy="pause-v1")
+    store = SessionStore(tmp_path / "data")
+    with pytest.raises(PipelineError):
+        make_runner(store, failing_after(1), **options).run_new(three_second_wav)
+    session_id = only_session_id(store)
+    checkpoint_path = store.checkpoint_path(session_id)
+    checkpoint = read_json(checkpoint_path)
+    assert checkpoint["completed_chunks"] == [0]
+    if damage == "missing":
+        checkpoint["chunk_plan"] = []
+    else:
+        checkpoint["chunk_plan"][1]["start_frame"] += 1
+    checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+    with pytest.raises(CheckpointError, match="plan"):
+        make_runner(store, failing_after(10**9), **options).resume(session_id)
+
+
+def test_segment_at_non_millisecond_audio_end_is_valid(tmp_path: Path) -> None:
+    source = tmp_path / "fractional-duration.wav"
+    frames = 134_734  # 8.420875 seconds at 16 kHz.
+    with wave.open(str(source), "wb") as target:
+        target.setnchannels(1)
+        target.setsampwidth(2)
+        target.setframerate(16_000)
+        target.writeframes(b"\0\0" * frames)
+    duration = frames / 16_000
+    store = SessionStore(tmp_path / "data")
+
+    session = make_runner(
+        store,
+        lambda device: MockSpeechEngine([Segment(0.0, duration, "speech through end")]),
+    ).run_new(source)
+
+    assert session.status == "ready"
+    assert raw_transcript(store, session.id)["segments"][0]["end"] == duration
+
+
+def test_multi_chunk_reuses_engine_within_run(tmp_path: Path, three_second_wav: Path) -> None:
+    store = SessionStore(tmp_path / "data")
+    created: list[str] = []
+
+    def factory(device: str) -> MockSpeechEngine:
+        created.append(device)
+        return MockSpeechEngine()
+
+    session = make_runner(store, factory, **CHUNK_OPTIONS).run_new(three_second_wav)
+    assert len(session.diagnostics["chunk_records"]) == 4
+    assert created == ["GPU"]
 
 
 def test_source_copy_survives_original_deletion(tmp_path: Path, three_second_wav: Path) -> None:

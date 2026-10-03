@@ -1,0 +1,22 @@
+{
+  "strategy": "pause-v2",
+  "frozen_before_new_lecture_wer": true,
+  "search_seconds": 3,
+  "lookahead_seconds": 0.3,
+  "block_seconds": 0.02,
+  "minimum_quiet_seconds": 0.24,
+  "absolute_rms_cap_dbfs": -45,
+  "relative_peak_rms_fraction": 0.1,
+  "cut_seconds_after_quiet_start": 0.12,
+  "require_observed_quiet_start": true,
+  "maximum_chunk_seconds": 30,
+  "overlap_seconds": 0,
+  "fallback": "maximum-length cut",
+  "reason": "Reject weak/short gaps and reduce chunk-ending quiet tails; no transcript deletion or audio removal.",
+  "code_sha256": {
+    "src/npu_scribe/chunking.py": "f709180f3bdad84c7936ca8542ba76518b1d8ea77c28319dac3ec195781436de",
+    "src/npu_scribe/engines.py": "0e30388bfb5025278b6ee38fa556d46be1408c7469422c870d6a89b3bd7ffd38",
+    "src/npu_scribe/pipeline.py": "bf0da968ddf0c7e7a0b2240baef946784f757acc02e7468fea4639dd11c960cc",
+    "host-validation/Measure-OverlapPilot.py": "5a23b3711e1f7aa659a65db38c613d0b1298e50ab9f350901e6ad8151db37be3"
+  }
+}

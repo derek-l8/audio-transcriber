@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.pytest-*/
 .mypy_cache/
 .ruff_cache/
 .coverage
@@ -18,7 +19,9 @@ diagnostics/
 failed-dictation-audio/
 *.wav
 *.mp3
+*.m4a
 *.mp4
+lectures/
 *.onnx
 *.bin
 *.blob
@@ -26,3 +29,9 @@ host-validation/reports/
 
 .stubs/
 .scratch*
+
+# Local coding-assistant instructions and state are not product source.
+/AGENTS.md
+/.agent/
+/.agents/
+/.codex/

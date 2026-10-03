@@ -1,0 +1,65 @@
+{
+  "openvino": "2026.3.0-22451-8a17657b995-releases/2026/3",
+  "openvino_genai": "2026.3.0.0-3277-bd8d6542e3c",
+  "available_devices": [
+    "CPU",
+    "GPU",
+    "NPU"
+  ],
+  "npu": {
+    "FULL_DEVICE_NAME": "Intel(R) AI Boost",
+    "DEVICE_ARCHITECTURE": "5010",
+    "NPU_DRIVER_VERSION": "1005540",
+    "NPU_COMPILER_TYPE": "CompilerType.PREFER_PLUGIN",
+    "NPU_COMPILER_VERSION": "524290"
+  },
+  "decisions": {
+    "whisper-tiny.en-int4-ov": {
+      "auto_device": "CPU",
+      "benchmarks": [
+        {
+          "device": "CPU",
+          "workload": "speech-chunk",
+          "median_seconds": 0.7306949999765493,
+          "succeeded": true
+        },
+        {
+          "device": "GPU",
+          "workload": "speech-chunk",
+          "median_seconds": 0.8067171000293456,
+          "succeeded": true
+        },
+        {
+          "device": "NPU",
+          "workload": "speech-chunk",
+          "median_seconds": 12.300449700036552,
+          "succeeded": true
+        }
+      ]
+    },
+    "whisper-base.en-int4-ov": {
+      "auto_device": "CPU",
+      "benchmarks": [
+        {
+          "device": "CPU",
+          "workload": "speech-chunk",
+          "median_seconds": 1.0052622000221163,
+          "succeeded": true
+        },
+        {
+          "device": "GPU",
+          "workload": "speech-chunk",
+          "median_seconds": 1.063139699981548,
+          "succeeded": true
+        },
+        {
+          "device": "NPU",
+          "workload": "speech-chunk",
+          "median_seconds": 29.345797199988738,
+          "succeeded": true
+        }
+      ]
+    }
+  },
+  "limitation": "Automatic selection uses the application's one-second silence benchmark. It is not a sustained lecture performance benchmark."
+}

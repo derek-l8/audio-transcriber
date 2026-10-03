@@ -1,18 +1,72 @@
 from __future__ import annotations
 
 import wave
+from array import array
+from dataclasses import asdict
 from pathlib import Path
 
 import pytest
 
 from npu_scribe.chunking import (
     ChunkSpec,
+    iter_source_windows,
     merge_overlap,
     normalize_for_dedup,
     plan_chunks,
     read_chunk,
+    restore_windows,
     validate_segment_times,
 )
+from npu_scribe.media import PcmWavDecoder
+
+
+def test_pause_cut_covers_audio_and_avoids_speech(tmp_path: Path) -> None:
+    path = tmp_path / "speech-and-pause.wav"
+    samples = array("h", [8000] * (61 * 16000))
+    samples[28 * 16000 : 29 * 16000] = array("h", [0] * 16000)
+    with wave.open(str(path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(samples.tobytes())
+    spec = ChunkSpec(strategy="pause-v1")
+    windows = list(iter_source_windows(PcmWavDecoder().decode(path), spec))
+    assert windows[0].end_seconds == 28.5
+    assert windows[1].end_seconds == 58.5  # No quiet interval: fixed fallback.
+    assert windows[-1].end_seconds == 61
+    assert sum(w.end_frame - w.start_frame for w in windows) == len(samples)
+    assert all(w.end_frame - w.start_frame <= 480000 for w in windows)
+    assert restore_windows([asdict(w) for w in windows], len(samples), spec) == windows
+    broken = [asdict(w) for w in windows]
+    broken[1]["start_frame"] += 1
+    with pytest.raises(ValueError, match="invalid saved"):
+        restore_windows(broken, len(samples), spec)
+
+
+def test_pause_strategy_rejects_overlap() -> None:
+    with pytest.raises(ValueError, match="zero overlap"):
+        ChunkSpec(strategy="pause-v1", overlap_seconds=1)
+
+
+@pytest.mark.parametrize(
+    "quiet_value,quiet_seconds,expected", [(0, 1.0, 28.12), (300, 1.0, 30.0), (0, 0.18, 30.0)]
+)
+def test_pause_v2_requires_deeper_longer_quiet_run(
+    tmp_path: Path, quiet_value: int, quiet_seconds: float, expected: float
+) -> None:
+    path = tmp_path / "quiet.wav"
+    samples = array("h", [8000] * (61 * 16000))
+    count = round(quiet_seconds * 16000)
+    samples[28 * 16000 : 28 * 16000 + count] = array("h", [quiet_value] * count)
+    with wave.open(str(path), "wb") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(16000)
+        handle.writeframes(samples.tobytes())
+    audio = PcmWavDecoder().decode(path)
+    windows = list(iter_source_windows(audio, ChunkSpec(strategy="pause-v2")))
+    assert windows[0].end_seconds == expected
+    assert sum(w.end_frame - w.start_frame for w in windows) == len(samples)
 
 
 def make_wav(path: Path, seconds: float, rate: int = 16_000) -> Path:
@@ -34,6 +88,14 @@ def test_plan_chunks_bounds_and_overlap() -> None:
         assert shared == pytest.approx(1.0)
         assert current.index == previous.index + 1
     assert windows[-1].end_seconds == pytest.approx(90.5)
+
+
+def test_default_chunks_do_not_repeat_audio() -> None:
+    spec = ChunkSpec()
+    assert spec.overlap_seconds == 0
+    windows = plan_chunks(60 * spec.sample_rate, spec)
+    assert [window.start_seconds for window in windows] == [0, 30]
+    assert windows[0].end_frame == windows[1].start_frame
 
 
 def test_plan_chunks_rejects_bad_input() -> None:
@@ -99,6 +161,14 @@ def test_legitimate_repetition_outside_overlap_is_preserved() -> None:
     }
     _, dropped = merge_overlap(accumulated, [repeated_later], boundary=30.0)
     assert dropped == 0
+
+
+def test_repeated_text_at_zero_overlap_boundary_is_preserved() -> None:
+    accumulated = [{"start": 28.0, "end": 30.0, "text": "Repeat that."}]
+    incoming = [{"start": 30.0, "end": 32.0, "text": "Repeat that."}]
+    merged, dropped = merge_overlap(accumulated, incoming, boundary=30.0)
+    assert dropped == 0
+    assert merged == accumulated + incoming
 
 
 def test_normalize_for_dedup_is_conservative() -> None:

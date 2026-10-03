@@ -63,8 +63,38 @@ def test_srt_format_and_validation() -> None:
         )  # non-monotonic
 
 
+def test_srt_rounding_carries_across_second_minute_and_hour() -> None:
+    transcript = Transcript(
+        (
+            Segment(0.9998, 1.25, "first"),
+            Segment(59.9998, 60.25, "minute"),
+            Segment(3599.9998, 3600.25, "hour"),
+        ),
+        sample().provenance,
+    )
+    content = render(transcript, "raw", "srt", "Rounding boundaries")
+    assert "00:00:01,000 --> 00:00:01,250" in content
+    assert "00:01:00,000 --> 00:01:00,250" in content
+    assert "01:00:00,000 --> 01:00:00,250" in content
+    assert ",1000" not in content
+
+
 def test_render_rejects_unknown_layer_and_format() -> None:
     with pytest.raises(ExportError, match="layer"):
         render(sample(), "aggressive", "text", "T")
     with pytest.raises(ExportError, match="format"):
         render(sample(), "raw", "docx", "T")
+
+
+def test_srt_blank_lines_in_segment_do_not_create_extra_cues() -> None:
+    transcript = Transcript(
+        (
+            Segment(0, 2, "First line.\n\nSecond line."),
+            Segment(2, 2.5, " \n "),
+            Segment(2.5, 3, "Next cue."),
+        ),
+        sample().provenance,
+    )
+    content = render(transcript, "raw", "srt", "Multiline speech")
+    assert "First line.\nSecond line." in content
+    assert len(content.strip().split("\n\n")) == 2

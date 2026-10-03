@@ -1,0 +1,135 @@
+{
+  "schema_version": 3,
+  "generated_utc": "2026-09-30T08:20:04.0716247Z",
+  "duration_seconds": 310.72,
+  "scope_note": "Silence fixtures prove runtime/device execution only; never accuracy.",
+  "privacy": "No audio, transcript text, clipboard content, username, credential, or absolute personal path is included. Review before sharing.",
+  "metrics": {
+    "python": "Python 3.12.14",
+    "package_versions": {
+      "npu_scribe": "0.1.0",
+      "openvino": "2026.3.0-22451-8a17657b995-releases/2026/3",
+      "openvino_genai": "2026.3.0.0-3277-bd8d6542e3c"
+    },
+    "device_smoke_CPU": {
+      "requested": "CPU",
+      "actual": "CPU",
+      "status": "ready"
+    },
+    "device_smoke_GPU": {
+      "requested": "GPU",
+      "actual": "GPU",
+      "status": "ready"
+    },
+    "device_smoke_NPU": {
+      "requested": "NPU",
+      "actual": "NPU",
+      "status": "ready"
+    },
+    "interruption_resume": {
+      "session_id": "42f45a0f5772",
+      "completed_before_kill": 3,
+      "resumed_status": "ready",
+      "actual_device": "CPU"
+    },
+    "endurance": {
+      "wall_minutes": 2.4,
+      "chunks_completed": "125",
+      "actual_device": "CPU",
+      "sampled_peak_working_set_mb": 1211.8,
+      "memory_scope": "process tree, sampled every 10 seconds"
+    }
+  },
+  "checks": [
+    {
+      "id": "python-version",
+      "status": "pass",
+      "detail": "Python 3.12.14"
+    },
+    {
+      "id": "setup-environment",
+      "status": "skip",
+      "detail": "-SetupEnvironment not supplied; no changes made"
+    },
+    {
+      "id": "imports",
+      "status": "pass",
+      "detail": "npu_scribe 0.1.0; openvino 2026.3.0-22451-8a17657b995-releases/2026/3; openvino_genai 2026.3.0.0-3277-bd8d6542e3c"
+    },
+    {
+      "id": "openvino-devices",
+      "status": "pass",
+      "detail": "enumerated: CPU, GPU, NPU"
+    },
+    {
+      "id": "model-download",
+      "status": "skip",
+      "detail": "-DownloadModels not supplied; no network action taken"
+    },
+    {
+      "id": "model-tiny-integrity",
+      "status": "pass",
+      "detail": "installed files match pinned sizes and SHA-256 hashes"
+    },
+    {
+      "id": "smoke-fixture",
+      "status": "pass",
+      "detail": "RIFF/WAVE fixture validated through inspect_pcm_wav (silence: runtime/device smoke only, NOT accuracy)"
+    },
+    {
+      "id": "transcribe-CPU",
+      "status": "pass",
+      "detail": "803d75c39189; ready; CPU; CPU; 1; 0"
+    },
+    {
+      "id": "transcribe-CPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: CPU"
+    },
+    {
+      "id": "transcribe-GPU",
+      "status": "pass",
+      "detail": "7817e85366d6; ready; GPU; GPU; 1; 0"
+    },
+    {
+      "id": "transcribe-GPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: GPU"
+    },
+    {
+      "id": "transcribe-NPU",
+      "status": "pass",
+      "detail": "02680e827198; ready; NPU; NPU; 1; 0"
+    },
+    {
+      "id": "transcribe-NPU-verified",
+      "status": "pass",
+      "detail": "actual compiled/executed device matches: NPU"
+    },
+    {
+      "id": "resume-test",
+      "status": "pass",
+      "detail": "42f45a0f5772; ready; CPU; 125"
+    },
+    {
+      "id": "resume-completed-chunks-once",
+      "status": "pass",
+      "detail": "resumed session reached ready; pre-kill completed chunks: 3 (chunk_records unique/monotonic checked below)"
+    },
+    {
+      "id": "chunks-not-repeated",
+      "status": "pass",
+      "detail": "chunk indexes are unique and ordered"
+    },
+    {
+      "id": "endurance-60min",
+      "status": "pass",
+      "detail": "completed in 2.4 min; 125 chunks"
+    },
+    {
+      "id": "evaluation",
+      "status": "skip",
+      "detail": "-EvaluationManifest not supplied; no WER/CER claimed"
+    }
+  ]
+}
