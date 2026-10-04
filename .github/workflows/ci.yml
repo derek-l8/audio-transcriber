@@ -41,7 +41,7 @@ jobs:
       - run: python -m ruff format --check .
       - run: python -m ruff check .
       - run: python -m mypy src
-      - run: python -m pytest -m "not live" --basetemp .scratch/ci-tests ${{ matrix.pytest-options }}
+      - run: python -m pytest -m "not live" --basetemp .pytest-ci-tests ${{ matrix.pytest-options }}
 
   package:
     name: package

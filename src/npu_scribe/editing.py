@@ -5,12 +5,12 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
 
 from .models import InferenceProvenance, Segment, Transcript, utc_now
 from .storage import SessionStore, atomic_json, sha256_file
@@ -46,16 +46,14 @@ def edit_lock(folder: Path) -> Iterator[None]:
             handle.flush()
         handle.seek(0)
         try:
-            if os.name == "nt":
+            if sys.platform == "win32":
                 import msvcrt
 
                 msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
             else:
                 import fcntl
 
-                # Windows typing stubs omit these Unix-only names.
-                portable_lock: Any = fcntl
-                portable_lock.flock(handle.fileno(), portable_lock.LOCK_EX | portable_lock.LOCK_NB)
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError as error:
             raise EditError(
                 "Another process is saving an edit; retry after it finishes."
@@ -64,10 +62,10 @@ def edit_lock(folder: Path) -> Iterator[None]:
             yield
         finally:
             handle.seek(0)
-            if os.name == "nt":
+            if sys.platform == "win32":
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
             else:
-                portable_lock.flock(handle.fileno(), portable_lock.LOCK_UN)
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def current_revision(store: SessionStore, session_id: str) -> str | None:

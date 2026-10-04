@@ -4,7 +4,7 @@ Run from the repository root after the [development setup](DEVELOPMENT.md).
 The default suite uses synthetic media and no downloaded models or network.
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .scratch/tests
+.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .pytest-tests
 .\.venv\Scripts\python.exe -m ruff format --check .
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m mypy src
@@ -133,9 +133,9 @@ real desktop import/cleanup/formatting workflow. It also records layout guard,
 cancellation, history, export, and model-reuse checks. Formatting checks enforce
 complete passage coverage. Mixed/Structured can fall back to prose.
 
-GitHub's latest inspected project CI run did not start tests because its actions
-policy rejected the official pinned checkout/setup-python actions. See
-[development](DEVELOPMENT.md#ci-and-dependencies) for the required repository setting.
+The [October 3 PR run](https://github.com/derek-l8/npu-scribe/actions/runs/37163191173)
+passed packaging but failed Linux type checking and Windows test setup. The local
+fixes need a new CI run. See [development](DEVELOPMENT.md#ci-and-dependencies).
 
 
 ## Full class lecture validation
@@ -151,7 +151,7 @@ endings, lost uncertainty wording, and added uncertainty labels.
 ## Remaining validation
 
 - Real-device results come from one Windows computer. Other hardware and operating
-  systems need their own runs; GitHub CI is currently blocked by its action policy.
+  systems need their own runs; CI results for the local fixes are pending.
 - A current installer still needs build and execution checks.
 - Synthetic tests cover program behavior. Full-lecture word error rate needs a
   checked audio reference; cleanup fidelity, summary selection, and layout quality

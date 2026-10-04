@@ -76,6 +76,7 @@ class LectureWindow(QMainWindow):
         self.before_ids: set[str] = set()
         self.stop_file: Path | None = None
         self.output = ""
+        self._job_active = False
         self.closing = False
         self.job_kind = "transcription"
         self.process = QProcess(self)
@@ -304,7 +305,7 @@ class LectureWindow(QMainWindow):
 
     @property
     def busy(self) -> bool:
-        return self.process.state() != QProcess.ProcessState.NotRunning
+        return self._job_active
 
     def _folder_labels(self) -> None:
         self.models_label.setText(f"Models: {self.model_root}")
@@ -494,6 +495,7 @@ class LectureWindow(QMainWindow):
             else "Preparing lecture… Pause waits for the current chunk to finish."
         )
         self.progress.setRange(0, 0)
+        self._job_active = True
         self.process.start()
         self.timer.start()
         self._buttons()
@@ -531,6 +533,7 @@ class LectureWindow(QMainWindow):
             self._finished(1, QProcess.ExitStatus.CrashExit)
 
     def _finished(self, code: int, exit_status: QProcess.ExitStatus) -> None:
+        self._job_active = False
         self._read_output()
         self.timer.stop()
         cleanup_error = ""

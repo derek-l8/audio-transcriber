@@ -404,6 +404,23 @@ raise SystemExit(cli.main(sys.argv[1:]))
     assert window.summary_button.isEnabled()
 
 
+def test_job_stays_busy_until_completion_is_handled(app, window, three_second_wav):
+    # Hold completion delivery to exercise a worker exit before the UI updates.
+    window.process.finished.disconnect(window._finished)
+    try:
+        window.start_import(three_second_wav)
+        assert window.process.waitForFinished(10_000), window.output
+        assert window.busy
+        assert not window.import_button.isEnabled()
+    finally:
+        window.process.finished.connect(window._finished)
+        window._finished(window.process.exitCode(), window.process.exitStatus())
+    assert not window.busy
+    assert window.import_button.isEnabled()
+    assert window.layer.currentText() == "Raw"
+    assert "synthetic transcript" in window.transcript.toPlainText()
+
+
 def test_pause_at_speech_completion_does_not_start_cleanup(app, window, three_second_wav):
     from PySide6.QtCore import QProcess
 

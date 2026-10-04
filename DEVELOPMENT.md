@@ -18,7 +18,7 @@ not implemented, so sounddevice is not a desktop dependency.
 .\.venv\Scripts\python.exe -m ruff format --check .
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m mypy src
-.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .scratch/dev-tests
+.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .pytest-dev-tests
 .\.venv\Scripts\python.exe -m build
 .\.venv\Scripts\python.exe scripts/check_distributions.py dist
 ```
@@ -46,12 +46,11 @@ The workflow has read-only repository permissions and uses pinned commits for
 [checkout](https://github.com/actions/checkout) and
 [setup-python](https://github.com/actions/setup-python). Dependabot is configured
 for weekly package/action updates, with OpenVINO and GenAI updates grouped.
-The October 3 run on `e26205c` failed before starting jobs because the repository
-allowed actions only from repositories owned by `derek-l8`. In GitHub's
-**Settings > Actions > General > Actions permissions**, allow the official
-`actions/checkout` and `actions/setup-python` repositories (or GitHub-authored
-actions), keeping the workflow's commit pins. Then rerun CI. No successful project
-CI run is available yet. Branch requirements must be set in GitHub.
+The [October 3 PR run](https://github.com/derek-l8/npu-scribe/actions/runs/37163191173)
+started all jobs and passed the package check. Linux type checking and Windows
+test setup failed; the local platform-guard and temporary-folder fixes need a
+new CI run after publication. Keep official actions allowed and workflow commit
+pins intact. Branch requirements must be set in GitHub.
 
 Keep recordings, transcripts, models, logs, and generated build output outside
 publication candidates. Tests use synthetic media. New device behavior needs
