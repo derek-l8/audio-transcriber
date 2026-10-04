@@ -489,3 +489,72 @@ def test_invalid_summary_selection_retains_source(ready):
     notes = store.load_transcript(session.id, "summary")
     assert notes.text == store.load_transcript(session.id, "raw").text
     assert notes.transformation["blocks"][0]["warnings"] == ["invalid-summary-selection"]
+
+
+@pytest.mark.parametrize(
+    "source,candidate",
+    [
+        (
+            "If a test fails, try it yourself and you'll",
+            "If a test fails, try it yourself and you'll see where you went wrong.",
+        ),
+        (
+            "We have not measured power use yet, so",
+            "We have not measured power use yet, so it might be efficient.",
+        ),
+    ],
+)
+def test_lecture_clipped_end_cannot_be_completed(source, candidate):
+    assert "unfinished-tail-change" in check_candidate(source, candidate, "lecture")
+
+
+def test_clipped_ending_allows_punctuation_hesitation_and_repeat_cleanup():
+    source = "um if a test fails you try it yourself and and you'll uh"
+    candidate = "If a test fails, you try it yourself and you'll"
+    assert not check_candidate(source, candidate, "lecture")
+    assert not check_candidate("It is ready for you", "It is ready for you.", "lecture")
+    assert not check_candidate("send the reply", "Send the reply.", "dictation")
+
+
+def test_new_uncertainty_annotation_is_guarded_but_source_labels_are_retained():
+    assert "invented-annotation" in check_candidate(
+        "The supply is five volts", "The supply is [inaudible] volts", "lecture"
+    )
+    assert not check_candidate(
+        "The supply is [inaudible] volts", "The supply is [inaudible] volts.", "lecture"
+    )
+
+
+def test_unsafe_clipped_completion_retains_full_source_block():
+    class Completes:
+        def generate(self, *args):
+            return "If a test fails, try it yourself and you'll see where you went wrong."
+
+    source = "If a test fails try it yourself and you'll"
+    text, records = cleanup_text(source, Completes(), "lecture", "light")
+    assert text == source
+    assert records[0]["used_source"]
+    assert "unfinished-tail-change" in records[0]["warnings"]
+
+
+@pytest.mark.parametrize(
+    "source,candidate",
+    [
+        (
+            "It looked like there would be enough demand to open a section.",
+            "There would be enough demand to open a section.",
+        ),
+        ("The supply might be faulty.", "The supply is faulty."),
+        ("I think the result is useful.", "The result is useful."),
+    ],
+)
+def test_lecture_uncertainty_cannot_be_dropped(source, candidate):
+    assert "uncertainty-loss" in check_candidate(source, candidate, "lecture")
+
+
+def test_uncertainty_punctuation_and_equivalent_marker_are_allowed():
+    assert not check_candidate(
+        "um the supply might be faulty", "The supply might be faulty.", "lecture"
+    )
+    assert not check_candidate("The supply might be faulty", "The supply may be faulty.", "lecture")
+    assert not check_candidate("maybe call Alex", "Call Alex.", "dictation")

@@ -12,8 +12,8 @@ work. The matrix retains those gaps without making them source v0.1 release gate
 
 Status values are **verified-sandbox**, **verified-windows-one-host**,
 **implemented-unverified**, **partial**, **pending**, and **out-of-scope**.
-Verification applies to the exercised paths and recorded inputs. One-host checks
-do not establish broad compatibility, representative accuracy, or semantic fidelity.
+Verification covers the recorded inputs and exercised paths. See
+[remaining validation](TESTING.md#remaining-validation) for open checks.
 
 ## Implementation matrix
 
@@ -29,6 +29,7 @@ do not establish broad compatibility, representative accuracy, or semantic fidel
 | Chunking, overlap, checkpoints, resume | Fixed 30-second zero-overlap default; optional pause-v1/v2 remain experimental. Saved chunk plans and mismatch checks; real resumed/uninterrupted equivalence on short speech, two-hour synthetic CPU endurance and full lecture completion | verified-windows-one-host for exercised paths; chunk-boundary accuracy incomplete |
 | JSON, Markdown, text, SRT exports | `export.py`: Raw/Balanced/Edited/AI layers, separate provenance, no-overwrite and atomic writes; source cleanup exports and twelve native frozen Raw/Balanced/Edited exports checked. AI SRT retains coarse source-block timings | verified-windows-one-host for exercised exports |
 | Speech WER/CER/RTF/load/latency/memory evaluation | Product-path harness plus MIT, AMI, TED-LIUM, 100 NPTEL clips, continuous Yale overlap/pause studies and an independent three-lecture refinement check. Reference quality varies; Windows per-case memory is null, with separate process-tree samples | partial |
+| Independent formatting | Mostly prose without AI; Mixed/Structured source-passage layout plans, complete coverage/order validation, source-backed headings and restricted tables/steps, independent desktop controls, retained versions, CLI chaining/model reuse and document exports. General semantic grouping remains unverified | partial |
 | Raw/Balanced/AI cleanup | Conservative Balanced rules; separate pinned local Qwen2.5 7B with lecture/dictation and Off/Light/Medium controls, automatic selected cleanup after desktop import/resume, guarded source fallback, retained complete versions and GUI/CLI exports. Repeated CPU/GPU/NPU quality/speed and contention studies; arbitrary semantic fidelity remains unverified | partial |
 | Personal dictionary substitution | `dictionary.py`; only explicit rules replace terms | verified-sandbox; UI pending |
 | Lecture import, progress and recovery | Desktop child-process import, progress, pause/resume and library reopening; real short MP3 and full 47-minute MP4 checks. Forced termination of a processing session still needs explicit CLI recovery; microphone/live recording pending | partial |

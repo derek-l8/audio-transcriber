@@ -1,0 +1,687 @@
+{
+  "date": "2026-10-03",
+  "base_revision": "e26205ce5b22917d08a5f75269902fd92010c78f",
+  "changes": "local, uncommitted and unpushed; validation-tool fixes and independent formatting",
+  "platform": "Windows x64; Python 3.12.14; one host",
+  "versions": {
+    "openvino": "2026.4.0",
+    "openvino-genai": "2026.4.0.0",
+    "PySide6": "6.11.2",
+    "platformdirs": "4.12.2",
+    "pytest": "9.1.1",
+    "ruff": "0.16.9",
+    "mypy": "2.3.1",
+    "hatchling": "1.32.4",
+    "build": "1.6.1"
+  },
+  "ci": {
+    "url": "https://github.com/derek-l8/npu-scribe/actions/runs/37147819964",
+    "conclusion": "startup_failure",
+    "jobs_started": 0,
+    "reason": "Repository action policy allowed only repositories owned by derek-l8; rejected official pinned actions/checkout and actions/setup-python",
+    "remote_settings_changed": false
+  },
+  "published_baseline": {
+    "tests_passed": 204,
+    "skipped": 1,
+    "live_deselected": 1,
+    "pip_check": "passed",
+    "ruff_check": "passed",
+    "ruff_format": "one adjustment in evaluate.py",
+    "mypy": "explicit urllib.parse import required",
+    "real_lecture": {
+      "source_duration_seconds": 72.0,
+      "raw_words": 192,
+      "ai_words": 192,
+      "summary_words": 101,
+      "cleanup_device": "GPU",
+      "summary_device": "GPU",
+      "cleanup_blocks": [
+        {
+          "block": 0,
+          "seconds": 34.219,
+          "used_source": false,
+          "warnings": [],
+          "actual_device": "GPU",
+          "device_fallback": null
+        }
+      ],
+      "summary_blocks": [
+        {
+          "block": 0,
+          "seconds": 7.4309,
+          "used_source": false,
+          "warnings": [],
+          "actual_device": "GPU",
+          "device_fallback": null
+        }
+      ],
+      "original_hashes_preserved": true
+    },
+    "text_identical_to_prior_checkpoint": [
+      "raw",
+      "ai",
+      "summary"
+    ]
+  },
+  "dependency_device_compatibility": [
+    {
+      "device": "CPU",
+      "exit": 0,
+      "wall_seconds": 44.924,
+      "speech_provenance": {
+        "engine": "batch-v1",
+        "model": "whisper-tiny.en-int4-ov",
+        "requested_device": "CPU",
+        "actual_device": "CPU",
+        "fallback_reason": null,
+        "load_seconds": null,
+        "inference_seconds": 1.72
+      },
+      "cleanup_provenance": {
+        "engine": "openvino-genai-cleanup",
+        "model": "qwen2.5-7b-instruct-int4-ov",
+        "requested_device": "CPU",
+        "actual_device": "CPU",
+        "fallback_reason": null,
+        "load_seconds": 12.03912750002928,
+        "inference_seconds": 25.737972499970716
+      },
+      "cleanup_blocks": [
+        {
+          "block": 0,
+          "seconds": 37.7771,
+          "used_source": false,
+          "warnings": [],
+          "actual_device": "CPU",
+          "device_fallback": null
+        }
+      ]
+    },
+    {
+      "device": "NPU",
+      "exit": 0,
+      "wall_seconds": 244.536,
+      "speech_provenance": {
+        "engine": "batch-v1",
+        "model": "whisper-tiny.en-int4-ov",
+        "requested_device": "NPU",
+        "actual_device": "NPU",
+        "fallback_reason": null,
+        "load_seconds": null,
+        "inference_seconds": 22.959
+      },
+      "cleanup_provenance": {
+        "engine": "openvino-genai-cleanup",
+        "model": "qwen2.5-7b-instruct-int4-ov",
+        "requested_device": "NPU",
+        "actual_device": "NPU",
+        "fallback_reason": null,
+        "load_seconds": 208.77179969998542,
+        "inference_seconds": 7.3878003000145895
+      },
+      "cleanup_blocks": [
+        {
+          "block": 0,
+          "seconds": 216.1596,
+          "used_source": false,
+          "warnings": [],
+          "actual_device": "NPU",
+          "device_fallback": null
+        }
+      ]
+    }
+  ],
+  "gpu_speech_compatibility": {
+    "audio_seconds": 15,
+    "exit": 0,
+    "requested_device": "GPU",
+    "actual_device": "GPU"
+  },
+  "desktop": {
+    "completed": true,
+    "source_seconds": 72,
+    "speech": "CPU",
+    "cleanup": "GPU",
+    "formatting": "prose",
+    "source_layer": "ai",
+    "source_hashes_preserved": true,
+    "playback_search_layers_reopen_checked": true,
+    "wall_seconds": 50.778
+  },
+  "formatting": {
+    "prompt_version": "format-v3",
+    "max_passages": 8,
+    "lecture": [
+      {
+        "style": "prose",
+        "wall_seconds": 0.0527,
+        "actual_device": "none",
+        "blocks": [
+          {
+            "block": 0,
+            "seconds": 0.0004,
+            "used_source": false,
+            "actual_device": "none",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 1,
+            "seconds": 0.0,
+            "used_source": false,
+            "actual_device": "none",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 2,
+            "seconds": 0.0001,
+            "used_source": false,
+            "actual_device": "none",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 3,
+            "seconds": 0.0,
+            "used_source": false,
+            "actual_device": "none",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [],
+            "passage_count": 1
+          }
+        ],
+        "source_hashes_preserved": true
+      },
+      {
+        "style": "mixed",
+        "wall_seconds": 11.8751,
+        "actual_device": "GPU",
+        "blocks": [
+          {
+            "block": 0,
+            "seconds": 6.9307,
+            "used_source": false,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [
+              {
+                "kind": "paragraph",
+                "passages": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ]
+              },
+              {
+                "kind": "paragraph",
+                "passages": [
+                  5,
+                  6,
+                  7
+                ]
+              }
+            ],
+            "passage_count": 8
+          },
+          {
+            "block": 1,
+            "seconds": 2.1067,
+            "used_source": true,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [
+              "invalid-layout: heading must quote its source block"
+            ],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 2,
+            "seconds": 1.6958,
+            "used_source": false,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [
+              {
+                "kind": "paragraph",
+                "passages": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7
+                ]
+              }
+            ],
+            "passage_count": 8
+          },
+          {
+            "block": 3,
+            "seconds": 1.0937,
+            "used_source": false,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [
+              {
+                "kind": "paragraph",
+                "passages": [
+                  0
+                ]
+              }
+            ],
+            "passage_count": 1
+          }
+        ],
+        "source_hashes_preserved": true
+      },
+      {
+        "style": "structured",
+        "wall_seconds": 12.9624,
+        "actual_device": "GPU",
+        "blocks": [
+          {
+            "block": 0,
+            "seconds": 2.3516,
+            "used_source": true,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [
+              "invalid-layout: heading must quote its source block"
+            ],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 1,
+            "seconds": 5.2974,
+            "used_source": false,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [
+              {
+                "kind": "paragraph",
+                "passages": [
+                  0,
+                  1
+                ]
+              },
+              {
+                "kind": "paragraph",
+                "passages": [
+                  2,
+                  3
+                ]
+              },
+              {
+                "kind": "paragraph",
+                "passages": [
+                  4,
+                  5
+                ]
+              },
+              {
+                "kind": "paragraph",
+                "passages": [
+                  6,
+                  7
+                ]
+              }
+            ],
+            "passage_count": 8
+          },
+          {
+            "block": 2,
+            "seconds": 3.9197,
+            "used_source": true,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [
+              "invalid-layout: heading must quote its source block"
+            ],
+            "plan": [],
+            "passage_count": 8
+          },
+          {
+            "block": 3,
+            "seconds": 1.3486,
+            "used_source": false,
+            "actual_device": "GPU",
+            "device_fallback": null,
+            "warnings": [],
+            "plan": [
+              {
+                "kind": "paragraph",
+                "passages": [
+                  0
+                ]
+              }
+            ],
+            "passage_count": 1
+          }
+        ],
+        "source_hashes_preserved": true
+      }
+    ],
+    "fixtures": [
+      {
+        "style": "mixed",
+        "source": [
+          "Pump A: 4 watts.",
+          "Pump B: 7 watts.",
+          "Flow rate has not been measured."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"table\",\"passages\":[0,1]},{\"kind\":\"paragraph\",\"passages\":[2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "| Item | Source text |\n| --- | --- |\n| Pump A | 4 watts. |\n| Pump B | 7 watts. |\n\nFlow rate has not been measured.",
+        "plan": [
+          {
+            "kind": "table",
+            "passages": [
+              0,
+              1
+            ],
+            "heading": ""
+          },
+          {
+            "kind": "paragraph",
+            "passages": [
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.654
+      },
+      {
+        "style": "mixed",
+        "source": [
+          "First, disconnect the 12 volt supply.",
+          "Then, replace the fuse.",
+          "Finally, reconnect the supply."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"steps\",\"passages\":[0,1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "1. First, disconnect the 12 volt supply.\n2. Then, replace the fuse.\n3. Finally, reconnect the supply.",
+        "plan": [
+          {
+            "kind": "steps",
+            "passages": [
+              0,
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.2906
+      },
+      {
+        "style": "mixed",
+        "source": [
+          "The gain is uncertain.",
+          "Do not replace the 9 volt supply with 90 volts.",
+          "We have not tested other circuits."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"paragraph\",\"passages\":[0,1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "The gain is uncertain. Do not replace the 9 volt supply with 90 volts. We have not tested other circuits.",
+        "plan": [
+          {
+            "kind": "paragraph",
+            "passages": [
+              0,
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.0664
+      },
+      {
+        "style": "mixed",
+        "source": [
+          "The resistor limits current.",
+          "Its resistance changes as it warms.",
+          "Temperature affects the current."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"paragraph\",\"passages\":[0,1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "The resistor limits current. Its resistance changes as it warms. Temperature affects the current.",
+        "plan": [
+          {
+            "kind": "paragraph",
+            "passages": [
+              0,
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.031
+      },
+      {
+        "style": "structured",
+        "source": [
+          "Pump A: 4 watts.",
+          "Pump B: 7 watts.",
+          "Flow rate has not been measured."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"table\",\"heading\":\"Pump Power Comparison\",\"passages\":[0,1]},\"paragraph\":{\"passages\":[2]}}]",
+        "valid": false,
+        "error": "Expecting ',' delimiter: line 1 column 91 (char 90)",
+        "rendered": "Pump A: 4 watts. Pump B: 7 watts. Flow rate has not been measured.",
+        "plan": [],
+        "wall_seconds": 1.7619
+      },
+      {
+        "style": "structured",
+        "source": [
+          "First, disconnect the 12 volt supply.",
+          "Then, replace the fuse.",
+          "Finally, reconnect the supply."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"steps\",\"passages\":[0,1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "1. First, disconnect the 12 volt supply.\n2. Then, replace the fuse.\n3. Finally, reconnect the supply.",
+        "plan": [
+          {
+            "kind": "steps",
+            "passages": [
+              0,
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.0196
+      },
+      {
+        "style": "structured",
+        "source": [
+          "The gain is uncertain.",
+          "Do not replace the 9 volt supply with 90 volts.",
+          "We have not tested other circuits."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"paragraph\",\"heading\":\"The gain is uncertain.\",\"passages\":[0]},{\"kind\":\"bullets\",\"passages\":[1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "## The gain is uncertain.\n\nThe gain is uncertain.\n\n- Do not replace the 9 volt supply with 90 volts.\n- We have not tested other circuits.",
+        "plan": [
+          {
+            "kind": "paragraph",
+            "passages": [
+              0
+            ],
+            "heading": "The gain is uncertain."
+          },
+          {
+            "kind": "bullets",
+            "passages": [
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.9684
+      },
+      {
+        "style": "structured",
+        "source": [
+          "The resistor limits current.",
+          "Its resistance changes as it warms.",
+          "Temperature affects the current."
+        ],
+        "response": "{\"blocks\":[{\"kind\":\"bullets\",\"passages\":[0,1,2]}]}",
+        "valid": true,
+        "error": null,
+        "rendered": "- The resistor limits current.\n- Its resistance changes as it warms.\n- Temperature affects the current.",
+        "plan": [
+          {
+            "kind": "bullets",
+            "passages": [
+              0,
+              1,
+              2
+            ],
+            "heading": ""
+          }
+        ],
+        "wall_seconds": 1.1362
+      }
+    ],
+    "actual_device": "GPU",
+    "original_hashes_preserved": true,
+    "development_pilots": [
+      {
+        "prompt": "format-v1",
+        "lecture_passages_per_request": 25,
+        "short_layouts_valid": 4,
+        "short_requests": 8,
+        "finding": "invalid table JSON and non-source headings caused prose fallback"
+      },
+      {
+        "prompt": "format-v2",
+        "lecture_passages_per_request": 25,
+        "short_layouts_valid": 7,
+        "short_requests": 8,
+        "finding": "both full lecture layouts omitted/reordered passages; complete prose fallback"
+      },
+      {
+        "prompt": "format-v3",
+        "lecture_passages_per_request_max": 8,
+        "finding": "smaller requests; complete coverage still checked; final outcomes recorded above"
+      }
+    ]
+  },
+  "limits": [
+    "Remote CI remains blocked by repository settings; no Linux CI success established.",
+    "Short compatibility checks are not updated accuracy, warmed speed, resource or responsiveness benchmarks.",
+    "Real-model layout acceptance does not prove semantic grouping or consistent formatting quality.",
+    "Invalid layouts use complete source text in prose.",
+    "Microphone capture, configurable hotkeys, insertion and current installer validation remain outside this checkpoint.",
+    "Published evidence report was completed after building archives; archive hashes identify the tested packages, and installed module hashes matched final source."
+  ],
+  "implementation_sha256": {
+    "src/npu_scribe/acquisition.py": "f9dc4e34e218b041b475fdf5611675b66c2fd320b86c4fbf02f74637833dab77",
+    "src/npu_scribe/ai_cleanup.py": "649b6e37bb118264db124ef0638e2822b4160d2a920c5cab76c5968a0eb86bba",
+    "src/npu_scribe/checkpoint.py": "e09717fd101a3bb2ea7b7f30ef22ea542792fe032f9eafe6dadf49c275dad949",
+    "src/npu_scribe/chunking.py": "f709180f3bdad84c7936ca8542ba76518b1d8ea77c28319dac3ec195781436de",
+    "src/npu_scribe/cleanup.py": "a1595ae762c707b12608ec8870d382eadf5a16a20dc1ab589d92284d09e7f874",
+    "src/npu_scribe/cli.py": "3dd2f7c6d36e1c59e6faf12a61671ed852ebfd995a22bc40350556dca290afaa",
+    "src/npu_scribe/config.py": "d6f4071c22a67bd0feec96e6f9150ea29ddef613de377a6766f6e2573050fdb2",
+    "src/npu_scribe/desktop.py": "5437867e858061f7dc384df00971b82a4f9495955b6f53912ea3e96737e7bfd8",
+    "src/npu_scribe/desktop_editing.py": "41dbbb2881df8d013bb0b7e2d93f4ffdb068ce1b85c76c1c6b85aff27a7d139c",
+    "src/npu_scribe/desktop_player.py": "08caf0905ccb70493f66b91856a4cc54cfa76120ccde38615711455c9a60c46c",
+    "src/npu_scribe/desktop_ui.py": "f725187c80064eb820607e0077d95d095075d9dfed329c6a4685e2e4e37dcc18",
+    "src/npu_scribe/devices.py": "60472f4adf9c203ec6fc0ac9ecefe4679a92548fb8999ad9486a9eaf4c216e01",
+    "src/npu_scribe/dictionary.py": "54e7bec3e25bc6bf92021197735dcc2758c1b81c55827af7a3e511143aba1dd9",
+    "src/npu_scribe/editing.py": "6382142b1c19ae3203caaa84a3cd72d1900cb0b99a5ae0cf071e4fde07acc5ab",
+    "src/npu_scribe/engines.py": "0e30388bfb5025278b6ee38fa556d46be1408c7469422c870d6a89b3bd7ffd38",
+    "src/npu_scribe/evaluate.py": "c91b6f2134f0c4fb7be18894bee7c4f669c99e145833fe2a27554ba96893c236",
+    "src/npu_scribe/export.py": "9a0e5fefbfdeab15ccda3f6b9222fcd77c063a57bc369f36a770127414c81c13",
+    "src/npu_scribe/formatting.py": "27c7ff003fa9f6914b9a78e7a6d276de52df6f4ed6f4cd94c346b0036c2b0029",
+    "src/npu_scribe/insertion.py": "0ee42cdc73ed3afb8295e96bf83aeb8712fdc819b12f2cf78828508b6d872b3f",
+    "src/npu_scribe/media.py": "d053b238ae0f9f32326fed49049a5c091d3305debc9ac21374b26131bb50fbc9",
+    "src/npu_scribe/metrics.py": "d8842f5a92c26859737cd16a0d08ecdd9d1136b4094b75c9a3606be28c6347f1",
+    "src/npu_scribe/models.py": "8867f05988e616cd33c2e8785859e4d514758f3aecc02c56c7079b8b4ab4d389",
+    "src/npu_scribe/pipeline.py": "a46b6c5d31b69f6f1c37b7fb164366241280d5a5161a4d89ee1eafd722fd924a",
+    "src/npu_scribe/storage.py": "7d94e7152e3ebceccc958656dcc158da3587c3c3ee827df2c90eee82d1d198f7",
+    "src/npu_scribe/__init__.py": "441b65a16e94dc0d09d42e7f622924d294f1b8d0f3ffbc1fe6e49e689ea79ca4"
+  },
+  "checks": {
+    "tests_passed": 224,
+    "skipped": 1,
+    "live_deselected": 1,
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "mypy": "passed; 25 source modules",
+    "pip_check": "passed",
+    "final_desktop_after_status_label_edit": {
+      "passed": 18
+    }
+  },
+  "packaging": {
+    "build": "wheel and sdist built from final source snapshot",
+    "contents_check": "passed; required modules present and checked runtime/private artifacts absent",
+    "artifacts": {
+      "npu_scribe-0.1.0-py3-none-any.whl": "8a3ec2feda7aa5689d88e965315c275fd2f5e9cefb303a1e27332580ebeca3bd",
+      "npu_scribe-0.1.0.tar.gz": "6a1d72ec1798bf20d2d738b00e5f5ecf1457f2ecc54c3174075df63fd0f642f8"
+    },
+    "synthetic_installed_smoke": "passed; both launchers, model listing, pause/resume and eight Raw/Balanced exports",
+    "installed_real": {
+      "import_is_installed_wheel": true,
+      "all_25_source_modules_match_installed_wheel": true,
+      "speech_device": "CPU",
+      "cleanup_device": "GPU",
+      "format_device": "GPU",
+      "format_style": "mixed",
+      "source_layer": "ai",
+      "source_hash_verified": true,
+      "document_exports": [
+        "text",
+        "markdown",
+        "json"
+      ],
+      "format_blocks": [
+        {
+          "block": 0,
+          "seconds": 1.3515,
+          "used_source": false,
+          "actual_device": "GPU",
+          "device_fallback": null,
+          "warnings": []
+        }
+      ],
+      "wall_seconds": 27.829
+    },
+    "working_directory_outside_checkout": true,
+    "current_installer_tested": false
+  }
+}

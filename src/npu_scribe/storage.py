@@ -175,7 +175,7 @@ class SessionStore:
             from .editing import load_revision
 
             return load_revision(self, session_id).transcript
-        if layer not in IMMUTABLE_LAYERS | {"ai", "summary"}:
+        if layer not in IMMUTABLE_LAYERS | {"ai", "summary", "formatted"}:
             raise ValueError("unknown transcript layer")
         path = safe_child(self.lectures, session_id) / f"{layer}-transcript.json"
         if not path.is_file():

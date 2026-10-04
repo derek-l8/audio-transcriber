@@ -11,7 +11,7 @@ from .models import SCHEMA_VERSION, Transcript
 from .storage import atomic_write
 
 FORMATS = {"json", "markdown", "text", "srt"}
-LAYERS = {"raw", "balanced", "edited", "ai", "summary"}
+LAYERS = {"raw", "balanced", "edited", "ai", "summary", "formatted"}
 
 
 class ExportError(Exception):
@@ -76,8 +76,10 @@ def structured_json(transcript: Transcript, layer: str) -> str:
 def render(transcript: Transcript, layer: str, fmt: str, title: str) -> str:
     if layer not in LAYERS:
         raise ExportError(f"unknown transcript layer '{layer}'")
-    if layer == "summary" and fmt == "srt":
-        raise ExportError("summaries are notes, not subtitles; choose text, markdown, or json")
+    if layer in ("summary", "formatted") and fmt == "srt":
+        raise ExportError(
+            "summaries and formatted documents are not subtitles; choose text, markdown, or json"
+        )
     if fmt == "json":
         return structured_json(transcript, layer)
     if fmt == "markdown":

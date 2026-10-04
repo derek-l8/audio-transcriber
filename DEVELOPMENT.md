@@ -18,7 +18,7 @@ not implemented, so sounddevice is not a desktop dependency.
 .\.venv\Scripts\python.exe -m ruff format --check .
 .\.venv\Scripts\python.exe -m ruff check .
 .\.venv\Scripts\python.exe -m mypy src
-.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .scratch/dev-tests
+.\.venv\Scripts\python.exe -m pytest -m 'not live' --basetemp .pytest-dev-tests
 .\.venv\Scripts\python.exe -m build
 .\.venv\Scripts\python.exe scripts/check_distributions.py dist
 ```
@@ -37,7 +37,8 @@ The local workflow definition runs quality checks on Linux Python 3.11/3.12 and
 Windows Python 3.12. Qt workflow tests run on Windows with an offscreen platform.
 Linux checks core tests and types; it does not establish desktop compatibility.
 The package job builds a wheel from the source distribution, checks contents,
-and installs the wheel into a fresh environment outside the checkout.
+and installs the wheel into a fresh environment under ignored `.scratch` storage.
+The smoke check runs in a separate working directory there.
 The installed smoke helper also checks both launchers, synthetic pause/resume,
 and eight Raw/Balanced exports. It refuses an import from an editable checkout.
 
@@ -45,8 +46,11 @@ The workflow has read-only repository permissions and uses pinned commits for
 [checkout](https://github.com/actions/checkout) and
 [setup-python](https://github.com/actions/setup-python). Dependabot is configured
 for weekly package/action updates, with OpenVINO and GenAI updates grouped.
-These files do not establish a successful remote run or enable branch status
-requirements. Repository settings need to be configured after real checks exist.
+The [October 3 PR run](https://github.com/derek-l8/npu-scribe/actions/runs/37163191173)
+started all jobs and passed the package check. Linux type checking and Windows
+test setup failed; the local platform-guard and temporary-folder fixes need a
+new CI run after publication. Keep official actions allowed and workflow commit
+pins intact. Branch requirements must be set in GitHub.
 
 Keep recordings, transcripts, models, logs, and generated build output outside
 publication candidates. Tests use synthetic media. New device behavior needs
@@ -69,5 +73,4 @@ particular coding environment is needed to install or use the application.
 
 The [installed engine check](host-validation/evidence/2026-10-02/portable-engine/README.md)
 ran a real CPU transcription from another directory, with a fresh library and
-relocated model/tool files. It is one Windows host's evidence, not a guarantee
-for every device or an accuracy result.
+relocated model/tool files on one Windows computer.

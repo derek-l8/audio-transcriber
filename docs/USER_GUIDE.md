@@ -46,8 +46,12 @@ systems are not fully validated.
 
    The default library is your local application-data folder. Recordings, models,
    and transcripts are stored there, separately from the code. `tiny.en` is a
-   small first-use model. Run `.\.venv\Scripts\python.exe -m npu_scribe.cli models list`
-   to see other approved choices.
+   small first-use model. For class lectures, use `whisper-base.en-int4-ov` when
+   the larger download is acceptable: it had lower error in the clip comparison
+   and improved several terms in the full lecture check. Download it with the
+   same command, replacing the model identifier, then select it in the desktop
+   or pass `--model whisper-base.en-int4-ov`. Neither model guarantees correct
+   course terms. [Measurements and limits](TESTED_DECISIONS.md).
 
 Run each step only after the previous one succeeds. The commands below use the
 environment in the source folder; no PowerShell activation script is required.
@@ -73,9 +77,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Transcription did not finish; check the messag
 ```
 
 The output contains `session: ...` and `status: ready` on completion. Copy the
-session identifier into `$Session` below. Choose `raw`, `balanced`, `edited`,
-or `ai` (which require a saved revision or completed cleanup). Use `summary` for
-saved study notes in text, Markdown, or JSON:
+session identifier into `$Session` below. Choose `raw` or `balanced`; `edited`
+requires saved corrections and `ai` requires completed cleanup. Saved `formatted`
+and `summary` versions support text, Markdown, and JSON, without SRT subtitles:
 
 ```powershell
 $Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
@@ -195,8 +199,9 @@ the initial setting. A completed import or resume automatically runs the selecte
 cleanup; Off skips the model. If cleanup fails or its model is missing, the
 transcript stays ready and can be exported. Download the model and use **Clean
 selected** to retry or change the level. Cleanup has its own AUTO/CPU/GPU/NPU setting.
-The completed result appears in **AI**. Cleanup always reads **Raw**, even if another layer is
-visible. Export the AI layer to keep its formatting. AI text is not editable in
+Cleanup is saved in **AI**. When formatting is enabled, the desktop then opens
+**Formatted**; switch back to AI to review the cleanup alone. Cleanup always reads **Raw**, even if another layer is
+visible. Export Formatted for the chosen layout or AI for cleanup alone. AI text is not editable in
 the manual segment editor; use the exported text or the Edited layer for manual
 corrections. Search and playback remain available; **Seek to segment** is disabled
 for AI because its paragraphs do not have word alignment.
@@ -208,7 +213,7 @@ for AI because its paragraphs do not have word alignment.
   edits can be imperfect. The requested “literal” escape has failed a targeted
   test, so review any wording that resembles a formatting command.
 - **Off** skips AI cleanup; **Raw** always remains available as unedited text.
-- **Light** makes minimal grammar and formatting edits. **Medium** also improves
+- **Light** requests minimal grammar edits. **Medium** also improves
   clarity and reduces redundant dictation phrasing; it does not generate a summary.
 
 For one CLI job that transcribes and then cleans, add `--cleanup light` or
@@ -252,8 +257,9 @@ cleanup model, mode/style, and block warnings. History is currently available
 as files, not through the manual **Revision history** dialog.
 
 **Limits:** the model can still change meaning, names, or dates. Heuristic checks
-compare digit quantities, negation, and large text-size changes; a failed block
-retains its source text and receives an uncertainty flag. Passing checks is not
+compare digit quantities, negation, large text-size changes, lost uncertainty
+wording, some changed unfinished endings, and newly added uncertainty labels. A failed block retains
+its source text and receives an uncertainty flag. Passing checks is not
 proof of fidelity. Corrections across input blocks (up to 1,200 characters) may
 not resolve. Review important text against Raw/audio. AI SRT uses coarse source
 block intervals, not newly aligned sentence/word timings; use Raw/Edited for
@@ -266,6 +272,54 @@ requested and successful devices, per-block devices, and any fallback reason.
 Explicit CPU/GPU/NPU selections fail rather than switching; driver/model support varies. First use includes compilation and can be slow. Stop/Pause requests are checked between blocks and during token generation;
 compilation must finish first. Cancelled/failed runs retain the previous complete
 AI version and do not resume partial output: rerun cleanup to start again.
+
+## Formatting without summarizing
+
+Formatting is a separate layer after transcription and optional cleanup.
+Choose **Mostly prose**, **Mixed**, **Mostly structured**, or **Off** before
+importing. The desktop starts with Mostly prose. With cleanup enabled, formatting
+reads the new AI version; with cleanup Off, it reads Raw.
+
+- **Mostly prose** groups passages into paragraphs without loading an AI model.
+- **Mixed** lets the text model choose paragraphs, headings, and useful lists.
+- **Mostly structured** asks for more headings and bullets. Explicit source
+  steps may become numbered lists; tables require comparable numeric rows
+  already written as `label: value`. General prose is not forced into a table.
+- **Off** skips this stage. Raw and AI remain available independently.
+
+For a completed session, choose Raw, Balanced, or AI and press **Format selected**.
+The result appears in **Formatted** with its own history. Formatting does not
+remove filler, fix recognition errors, or select a shorter account of the lecture.
+Use cleanup for wording and Summary for reduced detail.
+
+CLI example after cleanup:
+
+```powershell
+$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Session = 'SESSION_ID_FROM_OUTPUT'
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" format "$Session" --source ai --style mixed
+if ($LASTEXITCODE -ne 0) { throw 'Formatting did not finish; check the message above.' }
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --layer formatted --format markdown
+```
+
+Use `--source raw --style prose` without the text model. Add `--formatting prose`,
+`mixed`, or `structured` to `transcribe`, `resume`, or `cleanup` to run the stage
+automatically. CLI defaults to formatting Off. Formatting uses the cleanup model
+and device; a chained cleanup job reuses its loaded model. Prose adds no generation
+pass; Mixed and Mostly structured add one layout request per source block
+(up to eight passages). Invalid headings and layouts can cause prose fallback.
+
+The program validates complete passage coverage and order, renders the source
+wording, and rejects new headings or unsupported table/step layouts. A rejected
+layout becomes prose with a warning. Headings can still frame a passage poorly,
+and recognition or cleanup errors remain in the source. Review important results.
+Long recordings are handled in separate blocks, so headings can repeat.
+
+Export Formatted as text, Markdown, or JSON; use Raw/Edited for SRT subtitles.
+JSON includes source layer/hash, settings, layout plans, and warnings. Completed
+versions are retained in `formatting-history`; cancelled or failed jobs keep the
+previous complete version. This history is stored as files rather than shown in
+the manual Revision history dialog.
 
 ## Summaries and formatted study notes
 

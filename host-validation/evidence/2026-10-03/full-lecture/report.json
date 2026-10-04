@@ -1,0 +1,232 @@
+{
+  "date": "2026-10-03",
+  "base_revision": "e26205ce5b22917d08a5f75269902fd92010c78f",
+  "changes": "local, uncommitted, unpushed",
+  "host": {
+    "os": "Windows x64",
+    "cpu": "Intel Core Ultra 5 335",
+    "logical_processors": 8,
+    "usable_ram_gib": 31.51,
+    "gpu": "Intel integrated graphics",
+    "graphics_driver": "32.0.101.8826",
+    "python": "3.12.14",
+    "openvino": "2026.4.0",
+    "openvino_genai": "2026.4.0.0"
+  },
+  "input": {
+    "kind": "one private supplied class-lecture video",
+    "duration_seconds": 2840.1256,
+    "checked_audio_reference_available": false,
+    "published_course_text_or_media": false
+  },
+  "speech": {
+    "tiny": {
+      "model": "whisper-tiny.en-int4-ov",
+      "device": "CPU",
+      "wall_seconds": 93.198,
+      "inference_seconds": 74.329,
+      "raw_words": 6946,
+      "chunks": 95,
+      "resources": {
+        "samples": 19,
+        "worker_cpu_mean_percent": 20.76,
+        "worker_cpu_peak_percent": 25.84,
+        "worker_private_working_set_peak_gib": 0.229,
+        "worker_working_set_peak_gib": 0.336,
+        "system_cpu_mean_percent": 77.21,
+        "system_memory_mean_percent": 49.57,
+        "invalid_worker_gpu_counter_values": 0,
+        "highest_raw_gpu_counter": 0.0
+      }
+    },
+    "base": {
+      "model": "whisper-base.en-int4-ov",
+      "device": "CPU",
+      "wall_seconds": 145.601,
+      "inference_seconds": 125.924,
+      "raw_words": 6801,
+      "chunks": 95,
+      "resources": {
+        "samples": 30,
+        "worker_cpu_mean_percent": 22.17,
+        "worker_cpu_peak_percent": 28.36,
+        "worker_private_working_set_peak_gib": 0.282,
+        "worker_working_set_peak_gib": 0.424,
+        "system_cpu_mean_percent": 80.87,
+        "system_memory_mean_percent": 52.27,
+        "invalid_worker_gpu_counter_values": 0,
+        "highest_raw_gpu_counter": 0.0
+      }
+    }
+  },
+  "initial_cleanup": {
+    "prompt_version": "cleanup-v2",
+    "device": "GPU",
+    "load_seconds": 13.865929099963978,
+    "inference_seconds": 423.53797090003604,
+    "blocks": 32,
+    "source_fallback_blocks": 14,
+    "resources": {
+      "samples": 78,
+      "worker_cpu_mean_percent": 11.15,
+      "worker_cpu_peak_percent": 12.19,
+      "worker_private_working_set_peak_gib": 4.598,
+      "worker_working_set_peak_gib": 4.73,
+      "system_cpu_mean_percent": 61.55,
+      "system_memory_mean_percent": 60.58,
+      "invalid_worker_gpu_counter_values": 40,
+      "highest_raw_gpu_counter": 175.0
+    },
+    "quality_findings": [
+      "An invented continuation of a clipped sentence passed the old checks.",
+      "An added interpretation and uncertainty label passed the old checks."
+    ]
+  },
+  "mixed_formatting": {
+    "prompt_version": "format-v3",
+    "inference_seconds": 145.3354,
+    "requests": 78,
+    "prose_fallback_requests": 33,
+    "accepted_layout_kinds": {
+      "paragraph": 55
+    },
+    "complete_source_word_coverage_and_order_verified": true,
+    "resources": {
+      "samples": 28,
+      "worker_cpu_mean_percent": 10.77,
+      "worker_cpu_peak_percent": 12.28,
+      "worker_private_working_set_peak_gib": 4.655,
+      "worker_working_set_peak_gib": 4.787,
+      "system_cpu_mean_percent": 63.11,
+      "system_memory_mean_percent": 60.18,
+      "invalid_worker_gpu_counter_values": 14,
+      "highest_raw_gpu_counter": 174.0
+    },
+    "harness_correction": "A strict passage-boundary assertion failed because newline-delimited passages were joined and split again. Normalized word coverage/order passed; no source words were lost."
+  },
+  "final_cleanup": {
+    "prompt_version": "cleanup-v3",
+    "model": "qwen2.5-7b-instruct-int4-ov",
+    "requested_device": "AUTO",
+    "actual_device": "GPU",
+    "device_fallback": null,
+    "wall_seconds_including_prose": 459.486,
+    "load_seconds": 2.404667199938558,
+    "inference_seconds": 452.3397328000614,
+    "raw_words": 6801,
+    "ai_words": 6727,
+    "blocks": 31,
+    "source_fallback_blocks": 9,
+    "warnings": {
+      "quantity-change": 5,
+      "negation-change": 3,
+      "uncertainty-loss": 1,
+      "unfinished-tail-change": 1
+    },
+    "all_published_blocks_pass_final_heuristics": true,
+    "fallback_text_equals_source": true,
+    "source_layers_unchanged": true,
+    "resources": {
+      "samples": 83,
+      "worker_cpu_mean_percent": 10.28,
+      "worker_cpu_peak_percent": 14.7,
+      "worker_private_working_set_peak_gib": 4.53,
+      "worker_working_set_peak_gib": 4.661,
+      "system_cpu_mean_percent": 67.54,
+      "system_memory_mean_percent": 67.7,
+      "invalid_worker_gpu_counter_values": 46,
+      "highest_raw_gpu_counter": 213.0
+    }
+  },
+  "prose_formatting": {
+    "full_step_wall_seconds": 0.0192,
+    "uses_ai_model": false,
+    "source": "ai",
+    "content_and_order_preserved": true
+  },
+  "exports": {
+    "layers": [
+      "raw",
+      "ai",
+      "formatted"
+    ],
+    "formats": [
+      "text",
+      "markdown",
+      "json"
+    ],
+    "nine_initial_and_nine_final_exports_verified": true
+  },
+  "review": {
+    "checked_source_block_samples": 13,
+    "selection": "Five largest word reductions plus evenly spaced passages and technical terms. One uncertainty loss found after the first revised run; final guard retains its source.",
+    "visible_material": "Sampled lecture frames checked locally for technical terminology; frames were not an audio reference.",
+    "observations": [
+      "Base reduced conspicuous repeated text and improved several recognition terms compared with tiny.",
+      "Both models still had transcription errors in inspected passages.",
+      "Cleanup improves some grammar but can retain unclear recognition or change meaning; passing heuristics is not proof of fidelity."
+    ],
+    "no_word_error_rate_or_accuracy_percentage_claimed": true
+  },
+  "sampling_method": {
+    "scope": "Recursive owned process tree plus whole-machine counters; normal browser and other desktop apps remained open.",
+    "cpu": "Delta processor seconds / elapsed wall seconds / 8 logical processors. Arithmetic mean of sampled intervals; new/exited processes can lose first/last intervals.",
+    "memory": "Peak summed private working sets; summed working sets also retained and may count shared pages more than once. GPU/driver allocations are not fully represented.",
+    "interval": "Approximately five seconds including CIM query time; eight before-run and six after-exit samples.",
+    "gpu": "Per-process Windows GPU engine counters produced invalid values above 100; no GPU capacity percentage is reported.",
+    "limits": [
+      "One ordered run per speech model, not a randomized repeat study.",
+      "Whole-system baseline load varied; its changes are not attributable only to this program.",
+      "Applications were open; typing, page loading, graphics frame rate and power were not measured in this test.",
+      "Test/build activity overlapped portions of the final monitoring run."
+    ]
+  },
+  "checks": {
+    "tests_passed": 233,
+    "skipped": 1,
+    "live_deselected": 1,
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "mypy": "passed; 25 source modules",
+    "pip_check": "passed",
+    "installed_smoke": "passed outside checkout; launchers, listing, synthetic pause/resume and eight exports",
+    "installed_module_hash_match": 25
+  },
+  "source_sha256": {
+    "src\\npu_scribe\\acquisition.py": "f9dc4e34e218b041b475fdf5611675b66c2fd320b86c4fbf02f74637833dab77",
+    "src\\npu_scribe\\ai_cleanup.py": "a6215db240aba9cf71f1e0a688434c8d098a03ddfca2279ddafceac288179f32",
+    "src\\npu_scribe\\checkpoint.py": "e09717fd101a3bb2ea7b7f30ef22ea542792fe032f9eafe6dadf49c275dad949",
+    "src\\npu_scribe\\chunking.py": "f709180f3bdad84c7936ca8542ba76518b1d8ea77c28319dac3ec195781436de",
+    "src\\npu_scribe\\cleanup.py": "a1595ae762c707b12608ec8870d382eadf5a16a20dc1ab589d92284d09e7f874",
+    "src\\npu_scribe\\cli.py": "3dd2f7c6d36e1c59e6faf12a61671ed852ebfd995a22bc40350556dca290afaa",
+    "src\\npu_scribe\\config.py": "d6f4071c22a67bd0feec96e6f9150ea29ddef613de377a6766f6e2573050fdb2",
+    "src\\npu_scribe\\desktop.py": "5437867e858061f7dc384df00971b82a4f9495955b6f53912ea3e96737e7bfd8",
+    "src\\npu_scribe\\desktop_editing.py": "41dbbb2881df8d013bb0b7e2d93f4ffdb068ce1b85c76c1c6b85aff27a7d139c",
+    "src\\npu_scribe\\desktop_player.py": "08caf0905ccb70493f66b91856a4cc54cfa76120ccde38615711455c9a60c46c",
+    "src\\npu_scribe\\desktop_ui.py": "f725187c80064eb820607e0077d95d095075d9dfed329c6a4685e2e4e37dcc18",
+    "src\\npu_scribe\\devices.py": "60472f4adf9c203ec6fc0ac9ecefe4679a92548fb8999ad9486a9eaf4c216e01",
+    "src\\npu_scribe\\dictionary.py": "54e7bec3e25bc6bf92021197735dcc2758c1b81c55827af7a3e511143aba1dd9",
+    "src\\npu_scribe\\editing.py": "6382142b1c19ae3203caaa84a3cd72d1900cb0b99a5ae0cf071e4fde07acc5ab",
+    "src\\npu_scribe\\engines.py": "0e30388bfb5025278b6ee38fa556d46be1408c7469422c870d6a89b3bd7ffd38",
+    "src\\npu_scribe\\evaluate.py": "c91b6f2134f0c4fb7be18894bee7c4f669c99e145833fe2a27554ba96893c236",
+    "src\\npu_scribe\\export.py": "9a0e5fefbfdeab15ccda3f6b9222fcd77c063a57bc369f36a770127414c81c13",
+    "src\\npu_scribe\\formatting.py": "27c7ff003fa9f6914b9a78e7a6d276de52df6f4ed6f4cd94c346b0036c2b0029",
+    "src\\npu_scribe\\insertion.py": "0ee42cdc73ed3afb8295e96bf83aeb8712fdc819b12f2cf78828508b6d872b3f",
+    "src\\npu_scribe\\media.py": "d053b238ae0f9f32326fed49049a5c091d3305debc9ac21374b26131bb50fbc9",
+    "src\\npu_scribe\\metrics.py": "d8842f5a92c26859737cd16a0d08ecdd9d1136b4094b75c9a3606be28c6347f1",
+    "src\\npu_scribe\\models.py": "8867f05988e616cd33c2e8785859e4d514758f3aecc02c56c7079b8b4ab4d389",
+    "src\\npu_scribe\\pipeline.py": "a46b6c5d31b69f6f1c37b7fb164366241280d5a5161a4d89ee1eafd722fd924a",
+    "src\\npu_scribe\\storage.py": "7d94e7152e3ebceccc958656dcc158da3587c3c3ee827df2c90eee82d1d198f7",
+    "src\\npu_scribe\\__init__.py": "441b65a16e94dc0d09d42e7f622924d294f1b8d0f3ffbc1fe6e49e689ea79ca4"
+  },
+  "ci": {
+    "url": "https://github.com/derek-l8/npu-scribe/actions/runs/37147819964",
+    "conclusion": "startup_failure",
+    "setting_or_rerun_changed": false,
+    "reason": "Official checkout/setup-python actions rejected by repository action policy; authenticated access unavailable."
+  },
+  "packaging": {
+    "wheel_sha256": "17dd0bd2827fc4c29224b03ee81b62ad111f1f7c15794b78e16f2ec0fb0ca157",
+    "current_installer_tested": false
+  }
+}
