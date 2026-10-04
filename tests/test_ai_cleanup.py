@@ -202,7 +202,21 @@ def test_cli_requires_cleanup_model_and_never_downloads(tmp_path, monkeypatch):
     )
     assert main(["--data-dir", str(tmp_path), "cleanup", "unknown-session"]) == 1
     assert (
-        main(["--data-dir", str(tmp_path), "transcribe", "file.wav", "--model", DEFAULT_MODEL]) == 1
+        main(
+            [
+                "--data-dir",
+                str(tmp_path),
+                "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
+                "file.wav",
+                "--model",
+                DEFAULT_MODEL,
+            ]
+        )
+        == 1
     )
 
 
@@ -221,8 +235,18 @@ def test_formatted_exports_keep_paragraphs_and_lists():
     assert "- [" not in markdown
 
 
-@pytest.mark.parametrize("level", ["light", "medium"])
-def test_transcribe_chains_selected_cleanup(level, tmp_path, three_second_wav, monkeypatch):
+@pytest.mark.parametrize(
+    ("mode", "level", "override"),
+    [
+        ("lecture", "light", False),
+        ("dictation", "medium", False),
+        ("lecture", "medium", True),
+        ("dictation", "light", True),
+    ],
+)
+def test_transcribe_chains_selected_cleanup(
+    mode, level, override, tmp_path, three_second_wav, monkeypatch
+):
     import npu_scribe.cli as cli
 
     monkeypatch.setattr(cli, "make_model", lambda *args: Formatter())
@@ -236,8 +260,9 @@ def test_transcribe_chains_selected_cleanup(level, tmp_path, three_second_wav, m
                 str(three_second_wav),
                 "--model",
                 "mock",
-                "--cleanup",
-                level,
+                "--cleanup-mode",
+                mode,
+                *(["--cleanup", level] if override else []),
             ]
         )
         == 0
@@ -246,6 +271,8 @@ def test_transcribe_chains_selected_cleanup(level, tmp_path, three_second_wav, m
     session_id = next(store.lectures.iterdir()).name
     ai = store.load_transcript(session_id, "ai")
     assert ai.transformation["style"] == level
+    formatted = store.load_transcript(session_id, "formatted")
+    assert formatted.transformation["style"] == ("structured" if mode == "lecture" else "prose")
     assert store.load_session(session_id).status == "ready"
     assert store.load_transcript(session_id, "raw").text == "synthetic transcript"
 
@@ -260,7 +287,18 @@ def test_off_never_loads_cleanup_and_failure_keeps_transcript(
 
     monkeypatch.setattr(cli, "make_model", unavailable)
     library = tmp_path / "library"
-    command = ["--data-dir", str(library), "transcribe", str(three_second_wav), "--model", "mock"]
+    command = [
+        "--data-dir",
+        str(library),
+        "transcribe",
+        "--cleanup",
+        "off",
+        "--formatting",
+        "off",
+        str(three_second_wav),
+        "--model",
+        "mock",
+    ]
     assert main([*command, "--cleanup", "off"]) == 0
     assert main([*command, "--cleanup", "light"]) == 1
     assert "Transcription is ready and can be exported" in capsys.readouterr().err
@@ -409,6 +447,10 @@ def test_resume_chains_cleanup_only_after_ready(tmp_path, three_second_wav, monk
             [
                 *common,
                 "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
                 str(three_second_wav),
                 "--model",
                 "mock",

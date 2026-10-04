@@ -1,6 +1,6 @@
 # Privacy and local data
 
-Ordinary transcription, AI cleanup, playback, editing, and export operate on local files.
+Transcription, AI cleanup, dictation, playback, editing, and export operate locally.
 The application has no telemetry, analytics, crash upload, or cloud speech API.
 Default tests block network sockets, including tests of ordinary CLI commands.
 
@@ -17,6 +17,26 @@ from pointing into Git or a synced directory, and it does not yet warn about
 OneDrive redirection. Files in a synced library can be uploaded by the sync
 service independently of NPU Scribe. Local files use ordinary filesystem
 permissions; the application does not encrypt them.
+
+## Dictation
+
+The microphone is opened only when recording starts through its button or an
+enabled shortcut, and stops when you stop, release a hold shortcut, cancel, or
+reach the two-minute limit. Closing the dictation window disables its shortcut.
+The app does not listen while idle.
+
+Dictation recordings and worker sessions are kept under `dictation/jobs` and
+`dictation/engine`; raw and cleaned recovery copies are in `dictation/history`.
+Temporary native PCM is removed after successful conversion to WAV. Failed or
+cancelled capture can leave its PCM for recovery. These files are retained until
+you remove them with the app and worker stopped. There is no automatic retention
+limit or deletion UI yet.
+
+Windows UI Automation checks the focused field's process, editability, password
+flag, and field identifier. It does not read that app's text. Automatic insertion
+sends Unicode input without using the clipboard. **Copy text** writes the selected
+recovered text to the clipboard when you request it. Dictation diagnostics may
+contain transcript text and local paths; review them before sharing.
 
 ## Explicit network actions
 
@@ -35,7 +55,8 @@ missing models automatically.
 ## Sharing diagnostics and deleting data
 
 Console messages and operating-system errors can contain local paths or source
-filenames. Review them before sharing. Host validation tools sanitize their
+filenames. A failed desktop start saves `startup-error.log` in the library.
+Review these diagnostics before sharing. Host validation tools sanitize their
 published reports, but inspect any report for private paths, audio, transcripts,
 and credentials before copying it into Git or an issue.
 

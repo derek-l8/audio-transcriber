@@ -1,6 +1,6 @@
 """Compile/test an isolated installer identity; never use the normal app identity.
 
-Requires an approved local Inno compiler, complete bundle, model and public clip.
+Requires an approved local Inno compiler, complete bundle, model and short recording.
 All generated files must stay inside this checkout's ignored .scratch directory.
 """
 
@@ -78,6 +78,8 @@ def main() -> None:
     parser.add_argument("--media", type=Path, required=True)
     parser.add_argument("--model-root", type=Path, required=True)
     parser.add_argument("--ffmpeg", type=Path, required=True)
+    parser.add_argument("--check-cleanup", action="store_true")
+    parser.add_argument("--download-model", action="store_true")
     args = parser.parse_args()
     checkout = Path(__file__).resolve().parents[1]
     for name in ("OneDrive", "OneDriveConsumer", "OneDriveCommercial"):
@@ -157,6 +159,28 @@ def main() -> None:
     for key in ("PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV"):
         env.pop(key, None)
     env["PATH"] = os.pathsep.join((str(Path(env["WINDIR"]) / "System32"), env["WINDIR"]))
+    acquired_model = None
+    if args.download_model:
+        acquired_model = base / "downloaded-models"
+        run(
+            [
+                str(app_dir / "npu-scribe-worker.exe"),
+                "--data-dir",
+                str(base / "acquisition-data"),
+                "--model-root",
+                str(acquired_model),
+                "models",
+                "download",
+                "whisper-tiny.en-int4-ov",
+            ],
+            base / "model-download.log",
+            cwd=base,
+            env=env,
+        )
+        from npu_scribe.acquisition import get_spec, verify_installed
+
+        if not verify_installed(acquired_model, get_spec("whisper-tiny.en-int4-ov")):
+            raise RuntimeError("Installed-worker model download verification failed")
     inside_library = app_dir / "personal-library"
     worker = app_dir / "npu-scribe-worker.exe"
     run(
@@ -165,7 +189,7 @@ def main() -> None:
             "--data-dir",
             str(inside_library),
             "--model-root",
-            str(model_root),
+            str(model_root if args.check_cleanup else acquired_model or model_root),
             "transcribe",
             str(media),
             "--model",
@@ -174,6 +198,7 @@ def main() -> None:
             "CPU",
             "--ffmpeg",
             str(ffmpeg),
+            *([] if args.check_cleanup else ["--cleanup", "off", "--formatting", "off"]),
         ],
         base / "worker.log",
         cwd=base,
@@ -185,6 +210,44 @@ def main() -> None:
     session = json.loads(sessions[0].read_text(encoding="utf-8"))
     if session["status"] != "ready" or session["diagnostics"]["actual_device"] != "CPU":
         raise RuntimeError("Installed-worker CPU inference did not complete")
+    if not json.loads((sessions[0].parent / "raw-transcript.json").read_text(encoding="utf-8"))[
+        "segments"
+    ]:
+        raise RuntimeError("Installed-worker transcript is empty")
+    original_raw = sha256(sessions[0].parent / "raw-transcript.json")
+    if args.check_cleanup:
+        ai = json.loads((sessions[0].parent / "ai-transcript.json").read_text(encoding="utf-8"))
+        formatted = json.loads(
+            (sessions[0].parent / "formatted-transcript.json").read_text(encoding="utf-8")
+        )
+        if ai["transformation"]["style"] != "light" or ai["transformation"]["mode"] != "lecture":
+            raise RuntimeError("Installed lecture cleanup defaults differ")
+        if formatted["transformation"]["style"] != "structured":
+            raise RuntimeError("Installed lecture formatting default differs")
+        for layer, filename in (
+            ("ai", "ai-transcript.json"),
+            ("formatted", "formatted-transcript.json"),
+        ):
+            if not (sessions[0].parent / filename).is_file():
+                raise RuntimeError(f"Installed-worker {layer} result is missing")
+            run(
+                [
+                    str(worker),
+                    "--data-dir",
+                    str(inside_library),
+                    "export",
+                    session["id"],
+                    "--layer",
+                    layer,
+                    "--format",
+                    "markdown",
+                ],
+                base / f"export-{layer}.log",
+                cwd=base,
+                env=env,
+            )
+    if sha256(sessions[0].parent / "raw-transcript.json") != original_raw:
+        raise RuntimeError("Cleanup or export changed the raw transcript")
     shutil.copytree(inside_library, outside_library, dirs_exist_ok=True)
     # Test nested unknown files inside a directory also containing installed files.
     nested_note = app_dir / "_internal/personal-note.txt"
@@ -195,10 +258,10 @@ def main() -> None:
     run(
         [
             str(sys.executable),
-            str(ROOT / "host-validation/Test-FrozenWindow.py"),
+            str(ROOT / "host-validation/Test-FrozenReview.py"),
             str(app_dir / "NPU Scribe.exe"),
-            "--data-dir",
-            str(base / "gui-library"),
+            "--work-dir",
+            str(base / "gui-review"),
             "--report",
             str(base / "gui-results.json"),
         ],
@@ -214,6 +277,36 @@ def main() -> None:
         raise RuntimeError("Reinstall changed a validation library")
     if sha256(nested_note) != note_hash or any(path.exists() for path in shortcuts):
         raise RuntimeError("Reinstall changed a user file or created a shortcut")
+    run(
+        [
+            str(compiler),
+            f"--define=BundleDir={bundle}",
+            f"--define=AppName={APP_NAME}",
+            f"--define=AppId={{{APP_ID}",
+            "--define=AppVersion=0.1.1",
+            f"--output-dir={output}",
+            "--output-filename=npu-scribe-validation-upgrade",
+            str(ROOT / "packaging/npu-scribe.iss"),
+        ],
+        base / "compile-upgrade.log",
+        cwd=ROOT,
+    )
+    run(
+        [
+            str(output / "npu-scribe-validation-upgrade.exe"),
+            *common,
+            f"/LOG={base / 'upgrade-detail.log'}",
+        ],
+        base / "upgrade.log",
+        cwd=base,
+    )
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REG_KEY) as key:
+        if winreg.QueryValueEx(key, "DisplayVersion")[0] != "0.1.1":
+            raise RuntimeError("Upgrade registration did not advance")
+    if snapshot(inside_library) != original_inside or snapshot(outside_library) != original_outside:
+        raise RuntimeError("Versioned reinstall changed a validation library")
+    if sha256(nested_note) != note_hash or any(path.exists() for path in shortcuts):
+        raise RuntimeError("Versioned reinstall changed a user file or created a shortcut")
     # Uninstall only this new, verified workspace target and identity.
     if not app_dir.resolve().is_relative_to((ROOT / ".scratch").resolve()):
         raise RuntimeError("Uninstall target escaped ignored workspace storage")
@@ -246,6 +339,17 @@ def main() -> None:
         "shortcuts_created": False,
         "installed_worker_cpu_inference": "passed",
         "reinstall": "passed",
+        "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
+        "installed_worker_model_download": "passed" if args.download_model else "not requested",
+        "installed_lecture_defaults": "light / structured"
+        if args.check_cleanup
+        else "not requested",
+        "installed_worker_cleanup_and_formatting": "passed"
+        if args.check_cleanup
+        else "not requested",
+        "installed_worker_ai_and_formatted_exports": "passed"
+        if args.check_cleanup
+        else "not requested",
         "uninstall": "passed",
         "installed_payload_removed": True,
         "validation_registration_removed": True,
@@ -254,8 +358,9 @@ def main() -> None:
         "unknown_nested_file_preserved": True,
         "frozen_window": json.loads((base / "gui-results.json").read_text(encoding="utf-8")),
         "scope": "One Windows x64 host; separate validation identity, silent install/reinstall/"
-        "uninstall, no shortcuts; public clip CPU inference; idle native GUI lifecycle. "
-        "No visual installer wizard or GUI workflow validation.",
+        "uninstall, no shortcuts; supplied recording CPU inference; owned native GUI workflows "
+        "and fresh processing defaults. "
+        "No visual installer wizard or real microphone capture.",
     }
     (base / "results.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     print("Installer, reinstall, user-file preservation, and uninstall passed")

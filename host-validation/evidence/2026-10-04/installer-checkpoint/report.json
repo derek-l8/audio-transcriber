@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "application_version": "0.1.0",
+  "host": {
+    "os": "Windows",
+    "machine": "AMD64",
+    "version": "10.0.26200",
+    "hosts_tested": 1
+  },
+  "source_base_commit": "967eb9b50cbcf5d039000286dcc10c1900807d9a",
+  "source_has_uncommitted_changes": true,
+  "installer": {
+    "file": "npu-scribe-0.1.0-windows-x64.exe",
+    "size_bytes": 102618366,
+    "sha256": "056b39e56404c4215abe923ca02beeda9402b4f1d894674e9da073bb26dd3e00",
+    "signed": false,
+    "published": false
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "packages": [
+      {
+        "package": "pyinstaller",
+        "version": "6.22.3",
+        "notices": [
+          {
+            "file": "licenses/pyinstaller/licenses/COPYING.txt",
+            "sha256": "0598064c7d2718e38d7914a7d08343b2fa008e3bea9ebba2aa7a6ffa5900dd64"
+          }
+        ]
+      },
+      {
+        "package": "openvino-genai",
+        "version": "2026.4.0.0",
+        "notices": [
+          {
+            "file": "licenses/openvino-genai/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+          }
+        ]
+      },
+      {
+        "package": "openvino-tokenizers",
+        "version": "2026.4.0.0",
+        "notices": [
+          {
+            "file": "licenses/openvino-tokenizers/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+          }
+        ]
+      },
+      {
+        "package": "openvino",
+        "version": "2026.4.0",
+        "notices": [
+          {
+            "file": "licenses/openvino/licenses/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+          },
+          {
+            "file": "licenses/openvino/licenses/licensing/onednn_third-party-programs.txt",
+            "sha256": "f1b16991dfe8488f3f5f07cccba575c31c91175a9f2c8d9e1569665f86e0b2f6"
+          },
+          {
+            "file": "licenses/openvino/licenses/licensing/onetbb_third-party-programs.txt",
+            "sha256": "b10997cc50652ba6ab365e3bc43e13057681cd4a56533b46171529bd249749f3"
+          },
+          {
+            "file": "licenses/openvino/licenses/licensing/runtime-third-party-programs.txt",
+            "sha256": "caf4040a8c3043c9fdc7638ccc61078b40ce623e69e3bcd2bc544ae70a368b2f"
+          }
+        ]
+      },
+      {
+        "package": "openvino-telemetry",
+        "version": "2025.2.0",
+        "notices": [
+          {
+            "file": "licenses/openvino-telemetry/LICENSE",
+            "sha256": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6"
+          }
+        ]
+      },
+      {
+        "package": "numpy",
+        "version": "2.5.3",
+        "notices": [
+          {
+            "file": "licenses/numpy/licenses/LICENSE.txt",
+            "sha256": "a804dff0ead9fadc5293456410bcbfc32bf024be9c4513459663fb7b442d2341"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/include/numpy/libdivide/LICENSE.txt",
+            "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/src/common/pythoncapi-compat/COPYING",
+            "sha256": "aea41976c720f91bd19725c16916a1ace40eb1ea42620d340e587a5de4bbcea0"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/src/highway/LICENSE",
+            "sha256": "d208152e2777ffd0126eacc1bd21c0320d69e4e6b622d21a2a12a47e8ef73763"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/src/multiarray/dragon4_LICENSE.txt",
+            "sha256": "b0fd592d4ead563148e3977e7b589169d46a5ef2ff133c755a81af880a3fc919"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md",
+            "sha256": "a732977853530066790c42817087f4829b518dd98d340c916acbfd227e39d3cb"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/_core/src/umath/svml/LICENSE",
+            "sha256": "585483905b13d4b42f800c55ba99e89d6e2e33ccd5f503e201c07531d148ff41"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/fft/pocketfft/LICENSE.md",
+            "sha256": "8db000e158c162e7249787852d8c69764706502ccee725c06641b31c1e95c8af"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/linalg/lapack_lite/LICENSE.txt",
+            "sha256": "19060ef465e1797d682ee0fc3081bd25ab1395e995e43d25c9d13c95d9a3cd6b"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/ma/LICENSE",
+            "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/LICENSE.md",
+            "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/distributions/LICENSE.md",
+            "sha256": "cf5619f25b112d5ce7c896efffc8e610bcb345dfadcc19f2c1460aa48fff2c9e"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/mt19937/LICENSE.md",
+            "sha256": "92c10699884321f1c2947fe2a70ab23b0fbf1507f756d89dd08f38c61fc3d4fa"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/pcg64/LICENSE.md",
+            "sha256": "41190663b77bee5302386495a07b7eabfbfa571aa0ae2f11da6764162062fc4f"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/philox/LICENSE.md",
+            "sha256": "322ac46d870c8aeead6c53adcccc839296fb3c8e456eae155081297daf7f8013"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/sfc64/LICENSE.md",
+            "sha256": "28cad82ce1379dc529df30da78ec012d7d0d1d576b03ddcb93388aee53659f59"
+          },
+          {
+            "file": "licenses/numpy/licenses/numpy/random/src/splitmix64/LICENSE.md",
+            "sha256": "454ec7350e478e037061850b67395753b425b1cb0a34bbc26290b020bf89d763"
+          }
+        ]
+      },
+      {
+        "package": "PySide6",
+        "version": "6.11.2",
+        "notices": [
+          {
+            "file": "licenses/pyside6/licenses/LicenseRef-Qt-Commercial.txt",
+            "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3"
+          }
+        ]
+      },
+      {
+        "package": "PySide6_Addons",
+        "version": "6.11.2",
+        "notices": [
+          {
+            "file": "licenses/pyside6-addons/licenses/LicenseRef-Qt-Commercial.txt",
+            "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3"
+          }
+        ]
+      },
+      {
+        "package": "PySide6_Essentials",
+        "version": "6.11.2",
+        "notices": [
+          {
+            "file": "licenses/pyside6-essentials/licenses/LicenseRef-Qt-Commercial.txt",
+            "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3"
+          }
+        ]
+      },
+      {
+        "package": "shiboken6",
+        "version": "6.11.2",
+        "notices": [
+          {
+            "file": "licenses/shiboken6/licenses/LicenseRef-Qt-Commercial.txt",
+            "sha256": "4f54763ac0fe2abd8f7f8d8fe370a94a08ebf84786aa0b91045bd6628deb08a3"
+          }
+        ]
+      },
+      {
+        "package": "platformdirs",
+        "version": "4.12.2",
+        "notices": [
+          {
+            "file": "licenses/platformdirs/licenses/LICENSE",
+            "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6"
+          }
+        ]
+      }
+    ]
+  },
+  "lifecycle": {
+    "compiler_version": "7.1.0",
+    "compile": "passed",
+    "payload_files_verified": 1304,
+    "fresh_install": "passed",
+    "startup_default": "unchecked",
+    "shortcuts_created": false,
+    "installed_worker_cpu_inference": "passed",
+    "reinstall": "passed",
+    "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
+    "installed_worker_model_download": "passed",
+    "installed_worker_cleanup_and_formatting": "passed",
+    "installed_worker_ai_and_formatted_exports": "passed",
+    "uninstall": "passed",
+    "installed_payload_removed": true,
+    "validation_registration_removed": true,
+    "inside_library_files_preserved": 36,
+    "separate_library_files_preserved": 37,
+    "unknown_nested_file_preserved": true,
+    "frozen_window": {
+      "runs": [
+        {
+          "exit_code": 0,
+          "native_window_found": true,
+          "lock_removed": true
+        },
+        {
+          "exit_code": 0,
+          "native_window_found": true,
+          "lock_removed": true
+        }
+      ],
+      "scope": "Native Windows frozen GUI idle close and reopen; minimal PATH; no UI workflow interaction."
+    },
+    "scope": "One Windows x64 host; separate validation identity, silent install/reinstall/uninstall, no shortcuts; supplied recording CPU inference; idle native GUI lifecycle. No visual installer wizard or GUI workflow validation.",
+    "validation_installer_sha256": "5939a41d256940e7b51ef22fc6335d96145f654dc0eab33a4079c48459da5ac1"
+  },
+  "native_review": {
+    "scope": "Production frozen Windows GUI through owned UI Automation; silent synthetic audio and mock transcription; no visual review, real speech accuracy or device inference claim.",
+    "fixture_seconds": 61,
+    "fixture_chunks": 3,
+    "gui_sha256": "bbd1753bde138ff530c34c68329176f0bd0f84e0952706c2432353ee8da2d984",
+    "worker_sha256": "df284d5134869c85e161a1afaef3daf847ebc647194512eb337addc0bc8ab543",
+    "native": {
+      "runs": [
+        {
+          "exit_code": 0,
+          "lock_removed": true,
+          "history_revisions": 2,
+          "newest_revision_preview_matches": true,
+          "history_read_only": true,
+          "older_revision_preview_matches": true,
+          "edited_layer_matches": true
+        },
+        {
+          "exit_code": 0,
+          "lock_removed": true,
+          "history_revisions": 2,
+          "newest_revision_preview_matches": true,
+          "history_read_only": true,
+          "older_revision_preview_matches": true,
+          "edited_layer_matches": true
+        }
+      ],
+      "playback": {
+        "requested_ms": 5000,
+        "displayed_position_matches": true,
+        "advanced_ms": 6024,
+        "segment_seek_ms": 0
+      },
+      "edits_saved": 2,
+      "search_selection_matches": true,
+      "reopened_history_persisted": true,
+      "native_exports": 12,
+      "dictation_controls": true,
+      "microphone_recording_started": false,
+      "cleanup_and_formatting_selectors": true,
+      "dropdown_selection": true,
+      "dropdowns": [
+        "Speech model",
+        "Transcription device",
+        "Transcript layer",
+        "Export format"
+      ]
+    },
+    "raw_balanced_unchanged": true,
+    "timestamps_unchanged": true,
+    "source_hash_preserved": true,
+    "edited_uncertainty_persisted": true,
+    "revisions": 2,
+    "previous_revision_preserved_on_disk": true,
+    "unverified": [
+      "close during active job",
+      "visual/manual usability",
+      "another Windows host"
+    ]
+  },
+  "prerecorded_dictation": [
+    {
+      "case": "short-off",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "off",
+      "requested_cleanup_device": "AUTO",
+      "actual_cleanup_device": null,
+      "audio_seconds": 10.0,
+      "status": "ready"
+    },
+    {
+      "case": "short-light-gpu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "GPU",
+      "actual_cleanup_device": "GPU",
+      "audio_seconds": 10.0,
+      "status": "ready"
+    }
+  ],
+  "dictation_scope": "Provided recording clips normalized through the source Qt dictation interface and current frozen worker; recovery copies checked. No microphone capture or insertion from this frozen app run.",
+  "packaging_fix": {
+    "cause": "Dependency lookup included an unrelated Poppler ICU DLL. Its missing Qt converter symbols prevented desktop startup.",
+    "change": "Build PATH restricted to the active Python environment and Windows directories. Unrelated Poppler files absent from both analysis tables; native Qt startup passed."
+  },
+  "notice_hashes_verified": 30,
+  "qt_playback_ffmpeg": {
+    "version": "7.1.5",
+    "license": "LGPL version 2.1 or later",
+    "configure": "--prefix=/c/FFmpeg-n7.1.5/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static"
+  },
+  "quality_checks": {
+    "pytest": "280 passed, 1 skipped, 1 live test deselected",
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "mypy": "passed",
+    "wheel_and_source_contents": "passed; installer recipes, help, and license texts present; private/runtime artifacts excluded",
+    "local_documentation_links_and_anchors": 71
+  },
+  "remaining": [
+    "Visual installer wizard and startup shortcut checks",
+    "Another Windows computer",
+    "Different application payload upgrade migration",
+    "Corresponding Qt/PySide/FFmpeg sources and build information before binary publication"
+  ]
+}

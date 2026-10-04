@@ -320,7 +320,10 @@ def test_cleanup_defaults_and_off_persist(app, tmp_path):
     assert window.cleanup_style.currentText() == "light"
     assert window.cleanup_device.currentText() == "AUTO"
     assert window.device.currentText() == "CPU"
-    assert window.format_style.currentData() == "prose"
+    assert window.format_style.currentData() == "structured"
+    window.open_dictation()
+    assert window.dictation_window.cleanup.currentText() == "medium"
+    window.dictation_window.close()
     window.cleanup_style.setCurrentText("off")
     window.format_style.setCurrentIndex(window.format_style.findData("off"))
     window.device.setCurrentText("GPU")
@@ -496,3 +499,265 @@ raise SystemExit(cli.main(sys.argv[1:]))
         sha256_file(directory / f"{layer}-transcript.json") == digest
         for layer, digest in hashes.items()
     )
+
+
+@pytest.fixture
+def dictation(window):
+    window.open_dictation()
+    result = window.dictation_window
+    result.model.setCurrentIndex(result.model.findData("mock"))
+    result.cleanup.setCurrentText("off")
+    yield result
+    if result.busy:
+        result.cancel()
+        wait_finished(QApplication.instance(), result)
+    result.close()
+
+
+def prepare_dictation(dictation, wav):
+    import uuid
+    from datetime import UTC, datetime
+
+    dictation.ident = uuid.uuid4().hex
+    dictation.job = dictation.root / "jobs" / dictation.ident
+    dictation.job.mkdir(parents=True)
+    dictation.created_at = datetime.now(UTC).isoformat()
+    dictation.cancelled = False
+    dictation._start_worker(wav)
+
+
+def test_dictation_pipeline_saves_history_before_insertion(
+    app, window, dictation, three_second_wav
+):
+    from npu_scribe.insertion import FocusTarget, InsertResult
+
+    class Native:
+        def insert(self, text, target, allowed):
+            assert allowed()
+            assert dictation.history.records()[0]["text"] == text
+            return InsertResult(True, text)
+
+    dictation.native = Native()
+    dictation.intended = FocusTarget(1, 2, "Test", True)
+    prepare_dictation(dictation, three_second_wav)
+    assert window.busy
+    assert not window.import_button.isEnabled()
+    wait_finished(app, dictation)
+    assert "input sent" in dictation.status.text()
+    assert dictation.text.toPlainText()
+    record = dictation.history.records()[0]
+    assert record["raw"] == dictation.text.toPlainText()
+    assert dictation.store.load_transcript(record["session_id"], "formatted").text == record["text"]
+    assert not window.sessions  # Dictation has its own store, outside the file library.
+    assert window.import_button.isEnabled()
+
+
+def test_dictation_focus_change_recovers_without_insertion(app, dictation, three_second_wav):
+    from npu_scribe.insertion import FocusTarget, InsertResult
+
+    class Native:
+        def insert(self, text, target, allowed):
+            return InsertResult(False, text, "Focus changed; text was saved instead.")
+
+    dictation.native = Native()
+    dictation.intended = FocusTarget(1, 2, "Test", True)
+    prepare_dictation(dictation, three_second_wav)
+    wait_finished(app, dictation)
+    assert "Focus changed" in dictation.status.text()
+    assert dictation.text.toPlainText() == dictation.history.records()[0]["text"]
+
+
+def test_dictation_failed_cleanup_keeps_raw_and_skips_insertion(app, dictation, three_second_wav):
+    class Native:
+        def insert(self, *args):
+            raise AssertionError("A failed job must not insert text")
+
+    dictation.native = Native()
+    dictation.cleanup.setCurrentText(
+        "light"
+    )  # Model is deliberately absent from this test library.
+    prepare_dictation(dictation, three_second_wav)
+    wait_finished(app, dictation)
+    assert "Processing failed" in dictation.status.text()
+    record = dictation.history.records()[0]
+    assert record["status"] == "failed"
+    assert record["raw"] and record["text"] == record["raw"]
+
+
+def test_dictation_history_write_failure_skips_insertion(
+    app, dictation, three_second_wav, monkeypatch
+):
+    class Native:
+        def insert(self, *args):
+            raise AssertionError("Unsaved text must not be inserted")
+
+    def fail(record):
+        raise OSError("disk unavailable")
+
+    monkeypatch.setattr(dictation.history, "save", fail)
+    dictation.native = Native()
+    prepare_dictation(dictation, three_second_wav)
+    wait_finished(app, dictation)
+    assert "insertion skipped" in dictation.status.text()
+    assert dictation.text.toPlainText()
+    assert dictation.copy.isEnabled()
+
+
+def test_dictation_toggle_hold_and_repeat_behavior(dictation, monkeypatch):
+    calls = []
+    shortcut = type("Shortcut", (), {"enabled": True, "released": lambda self: True})()
+    dictation.shortcut = shortcut
+    monkeypatch.setattr(
+        dictation, "start_recording", lambda insert: calls.append(("start", insert))
+    )
+    monkeypatch.setattr(dictation, "stop_recording", lambda: calls.append(("stop",)))
+    dictation.activate_shortcut()
+    dictation.state = "preparing"
+    dictation.activate_shortcut()
+    assert calls == [("start", True)]
+    dictation.state = "recording"
+    dictation.activate_shortcut()
+    assert calls[-1] == ("stop",)
+    calls.clear()
+    dictation.mode.setCurrentText("Hold to talk")
+    dictation.state = "idle"
+    dictation.activate_shortcut()
+    assert dictation.holding
+    dictation.state = "recording"
+    dictation.started = time.monotonic()
+    dictation.activate_shortcut()  # Repeated key-down is ignored in hold mode.
+    dictation._tick()  # Release ends it.
+    assert calls == [("start", True), ("stop",)]
+    dictation.state = "idle"
+    dictation.shortcut = None
+
+
+def test_dictation_recording_limit_and_cancel(dictation, monkeypatch):
+    stopped = []
+    monkeypatch.setattr(dictation.mic, "stop", lambda: stopped.append(True))
+    dictation._state("recording")
+    dictation.cancel()
+    assert stopped and not dictation.busy
+    assert "cancelled" in dictation.status.text()
+    calls = []
+    monkeypatch.setattr(dictation, "stop_recording", lambda: calls.append(True))
+    dictation.state = "recording"
+    dictation.started = time.monotonic() - 121
+    dictation._tick()
+    assert calls == [True]
+    dictation.state = "idle"
+
+
+def test_dictation_normalization_then_worker(app, dictation, three_second_wav):
+    import uuid
+    import wave
+    from datetime import UTC, datetime
+
+    dictation.ident = uuid.uuid4().hex
+    dictation.created_at = datetime.now(UTC).isoformat()
+    dictation.job = dictation.root / "jobs" / dictation.ident
+    dictation.job.mkdir(parents=True)
+    with wave.open(str(three_second_wav), "rb") as wav:
+        (dictation.job / "capture.pcm").write_bytes(b"\x00\x10" * wav.getnframes())
+    dictation.mic.stop = lambda: (16000, 1, "int16")
+    dictation._state("recording")
+    dictation.stop_recording()
+    wait_finished(app, dictation)
+    assert dictation.history.records()[0]["status"] == "ready"
+    assert not (dictation.job / "capture.pcm").exists()
+    assert (dictation.job / "recording.wav").is_file()
+
+
+def test_dictation_settings_restore_without_enabling_shortcut(window, dictation):
+    from npu_scribe.desktop_dictation import DictationWindow
+
+    dictation.hotkey_text.setText("Ctrl+Shift+F9")
+    dictation.mode.setCurrentText("Hold to talk")
+    dictation.device.setCurrentText("GPU")
+    dictation._save_settings()
+    restored = DictationWindow(window)
+    assert restored.hotkey_text.text() == "Ctrl+Shift+F9"
+    assert restored.mode.currentText() == "Hold to talk"
+    assert restored.device.currentText() == "GPU"
+    assert restored.cleanup.currentText() == "off"
+    assert not restored.enable.isChecked()
+    restored.close()
+
+
+def test_dictation_close_cancels_worker_without_destroying_it(
+    app, window, dictation, three_second_wav
+):
+    prepare_dictation(dictation, three_second_wav)
+    window.close()
+    assert dictation.closing and dictation.cancelled
+    assert (dictation.job / "stop").is_file()
+    wait_finished(app, dictation)
+    app.processEvents()
+    assert not window.busy
+    assert dictation.history.records()[0]["status"] == "cancelled"
+
+
+def test_dictation_worker_requires_result_identifier(dictation):
+    import uuid
+
+    from PySide6.QtCore import QProcess
+
+    dictation.ident = uuid.uuid4().hex
+    dictation._state("processing")
+    dictation._finished(0, QProcess.ExitStatus.NormalExit)
+    assert "no session identifier" in dictation.status.text()
+    assert dictation.history.records()[0]["status"] == "failed"
+
+
+def test_dictation_cancellation_while_preparing_does_not_capture(app, dictation, monkeypatch):
+    from npu_scribe.insertion import FocusTarget
+
+    captured = []
+    monkeypatch.setattr(dictation, "_begin_capture", lambda: captured.append(True))
+    dictation._state("preparing")
+    dictation._task(lambda: FocusTarget(1, 2, "Test", True), dictation._target_ready)
+    dictation.cancel()
+    wait_finished(app, dictation)
+    assert not captured
+
+
+def test_microphone_polling_reports_device_error(dictation):
+    from PySide6.QtMultimedia import QtAudio
+
+    class BrokenSource:
+        def error(self):
+            return QtAudio.Error.IOError
+
+        def stop(self):
+            pass
+
+        def deleteLater(self):
+            pass
+
+    dictation.mic.source = BrokenSource()
+    dictation._state("recording")
+    dictation._tick()
+    assert not dictation.busy
+    assert "stopped unexpectedly" in dictation.status.text()
+
+
+def test_native_shortcut_accepts_both_qt_windows_event_routes(app):
+    import ctypes
+    from ctypes import wintypes
+
+    from PySide6.QtCore import QByteArray
+
+    from npu_scribe.desktop_dictation import Shortcut
+
+    called = []
+    shortcut = Shortcut(None, lambda: called.append(True))
+    shortcut.enabled = True
+    msg = wintypes.MSG()
+    msg.message = 0x0312
+    msg.wParam = shortcut.IDENT
+    for route in (b"windows_generic_MSG", b"windows_dispatcher_MSG"):
+        assert shortcut.nativeEventFilter(QByteArray(route), ctypes.addressof(msg)) == (True, 0)
+        app.processEvents()
+    assert called == [True, True]
+    msg.wParam += 1
+    assert shortcut.nativeEventFilter(b"windows_generic_MSG", ctypes.addressof(msg)) == (False, 0)

@@ -24,6 +24,7 @@ from .ai_cleanup import (
 )
 from .checkpoint import CheckpointError
 from .chunking import DEFAULT_OVERLAP_SECONDS
+from .config import PROCESSING_DEFAULTS
 from .devices import Benchmark, cache_key, choose_device, load_cached, run_benchmark, save_cached
 from .engines import MockSpeechEngine, OpenVINOWhisperEngine
 from .export import ExportError, write_export
@@ -139,10 +140,15 @@ def add_run_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--cleanup",
         choices=("off", "light", "medium"),
-        default="off",
-        help="automatically clean the completed transcript at this level",
+        default=None,
+        help="cleanup level (default: light for lectures, medium for dictation)",
     )
-    parser.add_argument("--formatting", choices=("off", *FORMAT_STYLES), default="off")
+    parser.add_argument(
+        "--formatting",
+        choices=("off", *FORMAT_STYLES),
+        default=None,
+        help="layout (default: structured for lectures, prose for dictation; off with cleanup off)",
+    )
     parser.add_argument("--cleanup-model", default=DEFAULT_MODEL)
     parser.add_argument("--cleanup-device", choices=("AUTO", "CPU", "GPU", "NPU"), default="AUTO")
     parser.add_argument("--cleanup-mode", choices=("lecture", "dictation"), default="lecture")
@@ -164,6 +170,12 @@ def add_cleanup_arguments(parser: argparse.ArgumentParser) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command in ("transcribe", "resume"):
+        cleanup_default, formatting_default = PROCESSING_DEFAULTS[args.cleanup_mode]
+        if args.cleanup is None:
+            args.cleanup = cleanup_default
+        if args.formatting is None:
+            args.formatting = "off" if args.cleanup == "off" else formatting_default
     data_dir = (args.data_dir or default_data_dir()).expanduser()
     store = SessionStore(data_dir)
     try:

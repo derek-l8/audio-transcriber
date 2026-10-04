@@ -37,14 +37,16 @@ symlink privilege is unavailable.
 ## Source milestone and historical builds
 
 The [implementation matrix](REQUIREMENTS.md) separates the current file-based
-source v0.1 scope from the historical live-dictation plan. Existing installed-wheel
+source v0.1 scope and implemented Windows dictation from the historical plan. Existing installed-wheel
 checks cover path-independent CPU speech and CPU text cleanup on one Windows
 host.
 
-The [package/installer](host-validation/evidence/2026-10-02/package-validation/README.md)
-and [native frozen review](host-validation/evidence/2026-10-02/frozen-review/README.md)
-checks apply to earlier executable hashes. The current AI-cleanup GUI, worker
-and installer need a new build and execution checks before binary release.
+The [current installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+covers installed model acquisition, CPU speech, GPU cleanup, formatting, exports,
+native review and dictation controls, reinstall, and uninstall on one Windows
+host. Its latest rebuild verifies the lecture and dictation defaults and records
+exact executable hashes. Earlier package checks
+are retained under their original dates.
 
 ## Optional live and hardware checks
 
@@ -134,8 +136,9 @@ cancellation, history, export, and model-reuse checks. Formatting checks enforce
 complete passage coverage. Mixed/Structured can fall back to prose.
 
 The [October 3 PR run](https://github.com/derek-l8/npu-scribe/actions/runs/37163191173)
-passed packaging but failed Linux type checking and Windows test setup. The local
-fixes need a new CI run. See [development](DEVELOPMENT.md#ci-and-dependencies).
+passed packaging but failed Linux type checking and Windows test setup. The fixes passed [PR CI](https://github.com/derek-l8/npu-scribe/actions/runs/37164841983)
+and [main CI](https://github.com/derek-l8/npu-scribe/actions/runs/37165069295)
+after merge. New dictation changes still need CI after publication. See [development](DEVELOPMENT.md#ci-and-dependencies).
 
 
 ## Full class lecture validation
@@ -148,13 +151,66 @@ results contain only measurements and checks. Original media and source layers
 are preserved. The cleanup boundary fix has regression tests for invented
 endings, lost uncertainty wording, and added uncertainty labels.
 
+## Live dictation
+
+The [dictation report](host-validation/evidence/2026-10-03/live-dictation/report.json)
+records offline regression checks and real Windows shortcut/insertion checks in
+an owned Qt editor. It covers Unicode ordering, same-window field changes,
+password refusal, shortcut conflicts, activation/release, and unregistering.
+The offline suite covers recording conversion, quiet-input rejection, hold/toggle
+behavior, history-before-insertion, worker errors, and cancellation.
+
+The [provided-recording check](host-validation/evidence/2026-10-03/live-dictation/user-recording-report.json)
+uses a 266-second uploaded recording and 10-/30-second clips. Full-file CPU
+transcription completed in 10.64 seconds with tiny and 16.70 seconds with base.
+Dictation exercised Off, Light, and Medium; Light ran on CPU, GPU, and NPU twice.
+The repeated ten-second case took 14.47 seconds with GPU cleanup, 53.59 seconds
+with CPU cleanup, and 21.13 seconds with NPU cleanup. All six Light outputs matched.
+The first NPU job included 190.54 seconds of model setup. The source recording,
+clips, and transcripts remain in ignored local storage. There is no checked
+reference for word error rate on this recording.
+
+An approved ten-second microphone check produced almost-silent input (PCM peak
+2/32768), so spoken microphone validation remains incomplete. The input meter
+and quiet-recording rejection were added after that run. Other Windows apps and microphones still need checks. The
+[installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+covers the current frozen worker and GUI.
+
+To repeat the native adapter check with the desktop extra installed:
+
+```powershell
+$Validation = Join-Path $env:LOCALAPPDATA 'npu-scribe-validation\dictation'
+.\.venv\Scripts\python.exe host-validation/Validate-Dictation.py --output-dir "$Validation"
+```
+
+This briefly opens its own editor and types fixed test text. Keep that editor
+focused during the check. It does not record the microphone or write the clipboard.
+Supply `--text-file PATH` to test a local UTF-8 transcript in that owned editor.
+For a spoken check, use **Record a copy** in the
+[dictation window](docs/USER_GUIDE.md#live-dictation), verify the input meter moves,
+and compare its raw and cleaned text with what you said.
+
 ## Remaining validation
 
 - Real-device results come from one Windows computer. Other hardware and operating
-  systems need their own runs; CI results for the local fixes are pending.
-- A current installer still needs build and execution checks.
+  systems need their own runs; the new local dictation changes await CI after publication.
+- Visual installer wizard/startup shortcuts, a second computer, and upgrades
+  between different application payloads remain unchecked. Binary publication
+  also needs the [corresponding source files](THIRD_PARTY_NOTICES.md).
 - Synthetic tests cover program behavior. Full-lecture word error rate needs a
   checked audio reference; cleanup fidelity, summary selection, and layout quality
   still require review.
 - Typing and page-loading response were not measured. Invalid GPU counters left
   GPU-capacity usage unresolved.
+
+### Dictation efficiency comparison
+
+`host-validation/Measure-DictationEfficiency.py` compares speech, cleanup, or
+both in one reusable worker. Supply an inputs JSON containing `id` and `audio`
+fields for normalized WAV clips, local model folders, a compilation-cache folder,
+and a comma-separated `--order`. Use one input per process for fresh workers
+and repeated IDs for loaded workers. `--report` contains measurements;
+`--private-output` contains recognized text and must stay outside Git.
+The optional comparison dependencies are psutil 7.1.0 and faster-whisper 1.2.1;
+see the [October 4 results](host-validation/evidence/2026-10-04/dictation-efficiency/report.json)
+for exact runtime versions, model revisions, and limitations. The script downloads nothing.
