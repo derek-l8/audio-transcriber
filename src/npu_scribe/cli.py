@@ -149,7 +149,6 @@ def add_run_arguments(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="layout (default: structured for lectures, prose for dictation; off with cleanup off)",
     )
-    parser.add_argument("--formatting", choices=("off", *FORMAT_STYLES), default="off")
     parser.add_argument("--cleanup-model", default=DEFAULT_MODEL)
     parser.add_argument("--cleanup-device", choices=("AUTO", "CPU", "GPU", "NPU"), default="AUTO")
     parser.add_argument("--cleanup-mode", choices=("lecture", "dictation"), default="lecture")
