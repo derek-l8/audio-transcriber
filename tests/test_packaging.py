@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import builtins
 import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from npu_scribe import desktop
 from npu_scribe.desktop import worker_command
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,6 +46,10 @@ def test_packaging_launchers_import_as_scripts(tmp_path, three_second_wav):
             "--data-dir",
             str(tmp_path / "library"),
             "transcribe",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
             str(three_second_wav),
             "--model",
             "mock",
@@ -56,3 +64,22 @@ def test_packaging_launchers_import_as_scripts(tmp_path, three_second_wav):
     assert worker.returncode == 0, worker.stderr
     assert "status: ready" in worker.stdout
     assert "actual_device: CPU" in worker.stdout
+
+
+@pytest.mark.parametrize("frozen", [False, True])
+def test_desktop_startup_failure_keeps_diagnostics(monkeypatch, tmp_path, frozen):
+    real_import = builtins.__import__
+
+    def missing_desktop(name, *args, **kwargs):
+        if name.startswith("PySide6"):
+            raise ImportError("missing desktop dependency fixture")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(sys, "argv", ["npu-scribe-desktop", "--data-dir", str(tmp_path)])
+    monkeypatch.setattr(sys, "frozen", frozen, raising=False)
+    monkeypatch.setattr(builtins, "__import__", missing_desktop)
+    with pytest.raises(SystemExit, match="Details:"):
+        desktop.main()
+    assert "missing desktop dependency fixture" in (tmp_path / "startup-error.log").read_text(
+        encoding="utf-8"
+    )

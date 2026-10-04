@@ -1,0 +1,60 @@
+{
+  "date_local": "2026-10-03",
+  "platform": "Windows x64, one host",
+  "runtime": {
+    "python": "3.12.14",
+    "PySide6": "6.11.2",
+    "openvino": "2026.4.0",
+    "openvino_genai": "2026.4.0.0"
+  },
+  "offline_tests": {
+    "passed": 278,
+    "skipped": 1,
+    "live_deselected": 1
+  },
+  "native_editor": {
+    "unicode_insertion": "passed",
+    "same_window_focus_change": "passed",
+    "password_rejection": "passed",
+    "shortcut_conflict": "passed",
+    "native_shortcut_dispatch_and_release": "passed",
+    "shortcut_unregistered": "passed"
+  },
+  "known_speech": {
+    "source": "Local Windows SAPI synthesized speech, mono 16 kHz PCM",
+    "reference": "Um, please send Maya the lecture notes on Friday at three P M. The budget is twenty five dollars.",
+    "duration_seconds": 7.78,
+    "speech_model": "whisper-tiny.en-int4-ov",
+    "speech_device": "CPU",
+    "cleanup_model": "qwen2.5-7b-instruct-int4-ov",
+    "actual_cleanup_device": "GPU",
+    "raw": "Uhm, please send my other lecture notes on Friday at 3pm. The budget is $25.",
+    "light": "Please send my other lecture notes on Friday at 3pm. The budget is $25.",
+    "off_total_seconds": 2.64,
+    "light_total_seconds": 17.11,
+    "timing_scope": "Dialog initialization, 300 ms test start delay, normalization, worker startup, model verification/loading, inference, and history save; no recording or insertion",
+    "repetitions_per_configuration": 1
+  },
+  "microphone_attempt": {
+    "recording_seconds": 9.9780625,
+    "format": "Mono 16 kHz signed 16-bit PCM",
+    "peak_pcm": 2,
+    "rms_pcm": 0.48,
+    "result": "Almost silent. Spoken recognition remains unverified. Added meter and quiet-input rejection afterward."
+  },
+  "limits": [
+    "Native insertion checked in one owned Qt editor only.",
+    "Microphone captured data but meaningful spoken input was not recorded.",
+    "No current frozen dictation or installer validation."
+  ],
+  "checks": {
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "mypy_windows_py312": "passed",
+    "mypy_linux_py311": "passed",
+    "mypy_linux_py312": "passed",
+    "local_document_links": 72,
+    "wheel_and_source_content_check": "passed",
+    "installed_wheel_imports": "passed"
+  }
+}

@@ -57,6 +57,10 @@ def main() -> None:
         base
         + [
             "transcribe",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
             str(source),
             "--model",
             "mock",
@@ -69,7 +73,22 @@ def main() -> None:
     )
     session_id = paused.split("session: ", 1)[1].splitlines()[0]
     stop.unlink()
-    resumed = run(cli, base + ["resume", session_id, "--model", "mock", "--device", "CPU"])
+    resumed = run(
+        cli,
+        base
+        + [
+            "resume",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
+            session_id,
+            "--model",
+            "mock",
+            "--device",
+            "CPU",
+        ],
+    )
     if "status: ready" not in resumed:
         raise RuntimeError("Synthetic session did not finish after resume")
     session_dir = work / "library" / "lectures" / session_id

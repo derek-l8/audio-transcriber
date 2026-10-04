@@ -49,14 +49,32 @@ def test_auto_falls_back_after_selected_device_fails(
     )
     data = tmp_path / "library"
     args = ["--data-dir", str(data)]
-    run_args = ["transcribe", str(three_second_wav), "--device", "AUTO"]
+    run_args = [
+        "transcribe",
+        "--cleanup",
+        "off",
+        "--formatting",
+        "off",
+        str(three_second_wav),
+        "--device",
+        "AUTO",
+    ]
     if resume:
         stop = tmp_path / "pause"
         stop.touch()
         assert main(args + run_args + ["--stop-file", str(stop)]) == 130
         session_id = next((data / "lectures").iterdir()).name
         stop.unlink()
-        run_args = ["resume", session_id, "--device", "auto"]
+        run_args = [
+            "resume",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
+            session_id,
+            "--device",
+            "auto",
+        ]
     assert main(args + run_args) == 0
     assert attempted == ["GPU", "CPU"]
     store = SessionStore(data)
@@ -92,6 +110,10 @@ def test_manual_failure_does_not_fall_back(tmp_path, three_second_wav, monkeypat
                 "--data-dir",
                 str(tmp_path / "library"),
                 "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
                 str(three_second_wav),
                 "--device",
                 "GPU",
@@ -112,6 +134,10 @@ def test_stop_file_pauses_then_cli_resumes(tmp_path, three_second_wav, capsys):
             args
             + [
                 "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
                 str(three_second_wav),
                 "--model",
                 "mock",
@@ -127,12 +153,31 @@ def test_stop_file_pauses_then_cli_resumes(tmp_path, three_second_wav, capsys):
     session_id = output.split("session: ")[1].splitlines()[0]
     assert "status: interrupted" in output
     stop.unlink()
-    assert main(args + ["resume", session_id, "--model", "mock", "--device", "CPU"]) == 0
+    assert (
+        main(
+            args
+            + [
+                "resume",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
+                session_id,
+                "--model",
+                "mock",
+                "--device",
+                "CPU",
+            ]
+        )
+        == 0
+    )
     assert "status: ready" in capsys.readouterr().out
 
 
 def test_transcribe_default_has_no_overlap() -> None:
-    args = build_parser().parse_args(["transcribe", "lecture.wav"])
+    args = build_parser().parse_args(
+        ["transcribe", "--cleanup", "off", "--formatting", "off", "lecture.wav"]
+    )
     assert args.model == "whisper-tiny.en-int4-ov"
     assert args.device == "CPU"
     assert args.chunk_seconds == 30.0
@@ -162,6 +207,10 @@ def test_transcribe_creates_session_and_prints_id(data_dir: Path, capsys) -> Non
             "--data-dir",
             str(data_dir),
             "transcribe",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
             str(wav),
             "--model",
             "mock",
@@ -179,7 +228,18 @@ def test_export_all_formats_and_layers(
     data_dir: Path, tmp_path: Path, three_second_wav: Path
 ) -> None:
     code = main(
-        ["--data-dir", str(data_dir), "transcribe", str(three_second_wav), "--model", "mock"]
+        [
+            "--data-dir",
+            str(data_dir),
+            "transcribe",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
+            str(three_second_wav),
+            "--model",
+            "mock",
+        ]
     )
     assert code == 0
     session_id = next((data_dir / "lectures").iterdir()).name
@@ -219,7 +279,20 @@ def test_export_all_formats_and_layers(
 def test_export_refuses_overwrite_without_flag(
     data_dir: Path, three_second_wav: Path, capsys
 ) -> None:
-    main(["--data-dir", str(data_dir), "transcribe", str(three_second_wav), "--model", "mock"])
+    main(
+        [
+            "--data-dir",
+            str(data_dir),
+            "transcribe",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
+            str(three_second_wav),
+            "--model",
+            "mock",
+        ]
+    )
     session_id = next((data_dir / "lectures").iterdir()).name
     args = ["--data-dir", str(data_dir), "export", session_id, "--format", "text", "--layer", "raw"]
     assert main(args) == 0
@@ -247,7 +320,20 @@ def test_devices_reports_without_openvino_claim(data_dir: Path, capsys) -> None:
 
 
 def test_resume_missing_session_fails_cleanly(data_dir: Path, capsys) -> None:
-    code = main(["--data-dir", str(data_dir), "resume", "nonexistent0", "--model", "mock"])
+    code = main(
+        [
+            "--data-dir",
+            str(data_dir),
+            "resume",
+            "--cleanup",
+            "off",
+            "--formatting",
+            "off",
+            "nonexistent0",
+            "--model",
+            "mock",
+        ]
+    )
     assert code == 1
     assert "error:" in capsys.readouterr().err
 
@@ -292,7 +378,20 @@ def test_default_commands_are_network_free(
     assert main(["--data-dir", str(data_dir), "devices"]) == 0
     capsys.readouterr()
     assert (
-        main(["--data-dir", str(data_dir), "transcribe", str(three_second_wav), "--model", "mock"])
+        main(
+            [
+                "--data-dir",
+                str(data_dir),
+                "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
+                str(three_second_wav),
+                "--model",
+                "mock",
+            ]
+        )
         == 0
     )
     session_id = next((data_dir / "lectures").iterdir()).name
@@ -343,6 +442,20 @@ def test_real_downloader_only_behind_live_marker_and_env_gate() -> None:
 
 
 def test_default_transcription_requires_real_model_not_mock(data_dir, three_second_wav, capsys):
-    assert main(["--data-dir", str(data_dir), "transcribe", str(three_second_wav)]) == 1
+    assert (
+        main(
+            [
+                "--data-dir",
+                str(data_dir),
+                "transcribe",
+                "--cleanup",
+                "off",
+                "--formatting",
+                "off",
+                str(three_second_wav),
+            ]
+        )
+        == 1
+    )
     assert "whisper-tiny.en-int4-ov' is not installed" in capsys.readouterr().err
     assert not (data_dir / "lectures").exists()

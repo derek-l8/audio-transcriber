@@ -9,8 +9,8 @@ py -3.12 -m venv .venv
 ```
 
 The desktop extra supplies Qt. The inference extra supplies OpenVINO and GenAI;
-NumPy may be installed transitively by those runtimes. Microphone recording is
-not implemented, so sounddevice is not a desktop dependency.
+NumPy may be installed transitively by those runtimes. Microphone recording
+uses Qt Multimedia, which is included with the desktop extra.
 
 ## Local quality checks
 
@@ -46,11 +46,10 @@ The workflow has read-only repository permissions and uses pinned commits for
 [checkout](https://github.com/actions/checkout) and
 [setup-python](https://github.com/actions/setup-python). Dependabot is configured
 for weekly package/action updates, with OpenVINO and GenAI updates grouped.
-The [October 3 PR run](https://github.com/derek-l8/npu-scribe/actions/runs/37163191173)
-started all jobs and passed the package check. Linux type checking and Windows
-test setup failed; the local platform-guard and temporary-folder fixes need a
-new CI run after publication. Keep official actions allowed and workflow commit
-pins intact. Branch requirements must be set in GitHub.
+The [latest published main run](https://github.com/derek-l8/npu-scribe/actions/runs/37165069295)
+passed on October 3. Local checkpoint changes need a new CI run after publication.
+Keep official actions allowed and workflow commit pins intact. Branch requirements
+must be set in GitHub.
 
 Keep recordings, transcripts, models, logs, and generated build output outside
 publication candidates. Tests use synthetic media. New device behavior needs
@@ -62,7 +61,8 @@ Wheels/source distributions are separate from the experimental Windows bundle.
 See [packaging](packaging/README.md) for the GUI/worker recipe, one-host bundle
 checks, and outstanding Windows/redistribution checks. The optional `bundle`
 extra pins PyInstaller; build a Windows application on Windows.
-No validated installer is currently provided.
+The Windows installer passed local install, app, reinstall, and uninstall checks.
+A prebuilt GitHub release has not been published.
 
 ## Standalone distribution boundary
 

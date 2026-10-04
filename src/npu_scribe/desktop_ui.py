@@ -28,7 +28,9 @@ from PySide6.QtWidgets import (
 
 from .acquisition import MANIFEST
 from .ai_cleanup import DEFAULT_MODEL
+from .config import PROCESSING_DEFAULTS
 from .desktop import worker_command
+from .desktop_dictation import DictationWindow
 from .desktop_editing import RevisionHistoryDialog, SegmentEditDialog
 from .desktop_player import LecturePlayer
 from .editing import (
@@ -77,6 +79,7 @@ class LectureWindow(QMainWindow):
         self.stop_file: Path | None = None
         self.output = ""
         self._job_active = False
+        self.dictation_window: DictationWindow | None = None
         self.closing = False
         self.job_kind = "transcription"
         self.process = QProcess(self)
@@ -133,6 +136,9 @@ class LectureWindow(QMainWindow):
         self.import_button = QPushButton("Import lecture…")
         self.import_button.clicked.connect(self.choose_import)
         controls.addWidget(self.import_button)
+        self.dictation_button = QPushButton("Live dictation…")
+        self.dictation_button.clicked.connect(self.open_dictation)
+        controls.addWidget(self.dictation_button)
         self.resume_button = QPushButton("Resume selected")
         self.resume_button.clicked.connect(self.resume_selected)
         controls.addWidget(self.resume_button)
@@ -165,7 +171,9 @@ class LectureWindow(QMainWindow):
         self.cleanup_style.setToolTip(
             "Applied automatically after import/resume. Off keeps the unedited transcript."
         )
-        self.cleanup_style.setCurrentText(settings.get("cleanup_style", "light"))
+        self.cleanup_style.setCurrentText(
+            settings.get("cleanup_style", PROCESSING_DEFAULTS["lecture"][0])
+        )
         cleanup_controls.addWidget(self.cleanup_style)
         self.cleanup_device = QComboBox()
         self.cleanup_device.setAccessibleName("Cleanup device")
@@ -201,7 +209,12 @@ class LectureWindow(QMainWindow):
         ):
             self.format_style.addItem(label, value)
         self.format_style.setCurrentIndex(
-            max(0, self.format_style.findData(settings.get("format_style", "prose")))
+            max(
+                0,
+                self.format_style.findData(
+                    settings.get("format_style", PROCESSING_DEFAULTS["lecture"][1])
+                ),
+            )
         )
         self.format_style.setToolTip(
             "Prose needs no model pass. Mixed and structured request a layout after cleanup, "
@@ -305,7 +318,20 @@ class LectureWindow(QMainWindow):
 
     @property
     def busy(self) -> bool:
-        return self._job_active
+        return self._job_active or bool(self.dictation_window and self.dictation_window.busy)
+
+    def open_dictation(self) -> None:
+        if self.dictation_window is None:
+            self.dictation_window = DictationWindow(self)
+            self.dictation_window.changed.connect(self._dictation_changed)
+        self.dictation_window.show()
+        self.dictation_window.raise_()
+        self.dictation_window.activateWindow()
+
+    def _dictation_changed(self) -> None:
+        self._buttons()
+        if self.closing and not self.busy:
+            QTimer.singleShot(0, self.close)
 
     def _folder_labels(self) -> None:
         self.models_label.setText(f"Models: {self.model_root}")
@@ -477,6 +503,8 @@ class LectureWindow(QMainWindow):
             "--stop-file",
             str(self.stop_file),
         ]
+        if self.job_kind == "transcription":
+            command += ["--cleanup", "off", "--formatting", "off"]
         if self.ffmpeg and self.job_kind == "transcription":
             command += ["--ffmpeg", self.ffmpeg]
         program, command = worker_command(command)
@@ -701,7 +729,7 @@ class LectureWindow(QMainWindow):
         ):
             control.setEnabled(not self.busy)
         self.pause_button.setEnabled(
-            self.busy and self.stop_file is not None and not self.stop_file.exists()
+            self._job_active and self.stop_file is not None and not self.stop_file.exists()
         )
         session = self.sessions.get(self.selected_id() or "")
         self.resume_button.setEnabled(
@@ -922,7 +950,13 @@ class LectureWindow(QMainWindow):
         self.player.player.stop()
         if self.busy:
             self.closing = True
-            self.pause()
+            if self.dictation_window is not None:
+                self.dictation_window.close()
+            if self._job_active:
+                self.pause()
             event.ignore()
         else:
+            self.closing = False
+            if self.dictation_window is not None:
+                self.dictation_window.close()
             event.accept()

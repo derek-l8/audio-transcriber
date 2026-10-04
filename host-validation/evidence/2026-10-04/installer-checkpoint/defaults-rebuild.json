@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-10-04T23:05:15.035234+00:00",
+  "application_version": "0.1.0",
+  "source_base_commit": "967eb9b50cbcf5d039000286dcc10c1900807d9a",
+  "source_has_uncommitted_changes": true,
+  "installer": {
+    "file": "npu-scribe-0.1.0-windows-x64.exe",
+    "size_bytes": 102618518,
+    "sha256": "4efad61096ab584be76ea1492e50cbfa002457bab9d8c7caa1ea42cd1dcfb59f",
+    "signed": false,
+    "published": false
+  },
+  "defaults": {
+    "lectures": {
+      "cleanup": "light",
+      "formatting": "structured"
+    },
+    "dictation": {
+      "cleanup": "medium",
+      "formatting": "prose"
+    }
+  },
+  "checks": {
+    "compiler_version": "7.1.0",
+    "compile": "passed",
+    "payload_files_verified": 1304,
+    "fresh_install": "passed",
+    "startup_default": "unchecked",
+    "shortcuts_created": false,
+    "installed_worker_cpu_inference": "passed",
+    "reinstall": "passed",
+    "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
+    "installed_worker_model_download": "not requested",
+    "installed_lecture_defaults": "light / structured",
+    "installed_worker_cleanup_and_formatting": "passed",
+    "installed_worker_ai_and_formatted_exports": "passed",
+    "uninstall": "passed",
+    "installed_payload_removed": true,
+    "validation_registration_removed": true,
+    "inside_library_files_preserved": 41,
+    "separate_library_files_preserved": 42,
+    "unknown_nested_file_preserved": true,
+    "frozen_window": {
+      "scope": "Production frozen Windows GUI through owned UI Automation; silent synthetic audio and mock transcription; no visual review, real speech accuracy or device inference claim.",
+      "fixture_seconds": 61,
+      "fixture_chunks": 3,
+      "gui_sha256": "34f55a18bdb0b2fe6ced19ce6d24e88621bda3079306c4e51fa95c5b5f696e8b",
+      "worker_sha256": "6c0d3cdb171d2480dc89056261c25a12faa4958c5d18684aed80c12667aa1744",
+      "native": {
+        "runs": [
+          {
+            "exit_code": 0,
+            "lock_removed": true,
+            "history_revisions": 2,
+            "newest_revision_preview_matches": true,
+            "history_read_only": true,
+            "older_revision_preview_matches": true,
+            "edited_layer_matches": true
+          },
+          {
+            "exit_code": 0,
+            "lock_removed": true,
+            "history_revisions": 2,
+            "newest_revision_preview_matches": true,
+            "history_read_only": true,
+            "older_revision_preview_matches": true,
+            "edited_layer_matches": true
+          }
+        ],
+        "playback": {
+          "requested_ms": 5000,
+          "displayed_position_matches": true,
+          "advanced_ms": 5768,
+          "segment_seek_ms": 0
+        },
+        "edits_saved": 2,
+        "search_selection_matches": true,
+        "reopened_history_persisted": true,
+        "native_exports": 12,
+        "dictation_controls": true,
+        "fresh_lecture_defaults": "light / structured",
+        "fresh_dictation_defaults": "medium / prose",
+        "microphone_recording_started": false,
+        "cleanup_and_formatting_selectors": true,
+        "dropdown_selection": true,
+        "dropdowns": [
+          "Speech model",
+          "Transcription device",
+          "Transcript layer",
+          "Export format"
+        ]
+      },
+      "raw_balanced_unchanged": true,
+      "timestamps_unchanged": true,
+      "source_hash_preserved": true,
+      "edited_uncertainty_persisted": true,
+      "revisions": 2,
+      "previous_revision_preserved_on_disk": true,
+      "unverified": [
+        "close during active job",
+        "visual/manual usability",
+        "another Windows host"
+      ]
+    },
+    "scope": "One Windows x64 host; separate validation identity, silent install/reinstall/uninstall, no shortcuts; supplied recording CPU inference; owned native GUI workflows and fresh processing defaults. No visual installer wizard or real microphone capture."
+  },
+  "source_sha256": {
+    "src/npu_scribe/cli.py": "9ef4f7dd3b043e2daa9ffcf1ddadb3c1e63714ff61eced55b2046764a6da19e8",
+    "src/npu_scribe/config.py": "8a1e5b6bcc0c810ce6806e143a438beb9ef6e585b496b36f0724d38db83aeef6",
+    "src/npu_scribe/desktop_ui.py": "872d0d70e26d525c9f7912181fdb549815660283e0d23f75b1b32ad3d4cb12ea",
+    "src/npu_scribe/desktop_dictation.py": "658dbc30a4c994ddf2cec8b059b933762495ad5fdbeed777da30bc02308e7b43"
+  },
+  "scope": "One Windows x64 host; isolated installer identity and provided 10-second recording clip. No microphone capture or visual installer-wizard review."
+}

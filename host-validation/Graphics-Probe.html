@@ -1,0 +1,75 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#101820;color:white}canvas{width:1280px;height:720px}#cards{display:flex;position:absolute;top:0;flex-wrap:wrap;width:1000px}.card{width:90px;height:24px;border-radius:4px;background:#579;padding:3px;margin:2px}</style>
+<canvas id="canvas" width="1280" height="720"></canvas><div id="cards"></div>
+<script>
+const canvas=document.getElementById('canvas');
+const gl=canvas.getContext('webgl2',{antialias:false,preserveDrawingBuffer:false});
+if(!gl)throw Error('WebGL2 unavailable');
+const debug=gl.getExtension('WEBGL_debug_renderer_info');
+window.renderer=debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
+const p=gl.createProgram();
+gl.attachShader(p,shader(gl.VERTEX_SHADER,`#version 300 es
+in vec2 position;void main(){gl_Position=vec4(position,0.,1.);}`));
+gl.attachShader(p,shader(gl.FRAGMENT_SHADER,`#version 300 es
+precision highp float;
+uniform int iterations;uniform float tick;uniform sampler2D scene;out vec4 color;
+void main(){
+ vec2 uv=gl_FragCoord.xy/vec2(1280.,720.);
+ vec3 sum=vec3(0.);
+ for(int i=0;i<256;i++){
+  if(i>=iterations)break;
+  float x=float(i);
+  vec2 offset=vec2(sin(x*13.71),cos(x*7.53));
+  sum += texture(scene,fract(uv+offset+tick*.0000001)).rgb;
+ }
+ color=vec4(sum/float(iterations),1.);
+}`));
+gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));gl.useProgram(p);
+const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(p,'position');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const count=gl.getUniformLocation(p,'iterations'),tick=gl.getUniformLocation(p,'tick');
+const tex=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tex);
+const textureData=new Uint8Array(4096*4096*4);
+for(let i=0;i<textureData.length;i++)textureData[i]=(i*113 ^ (i>>>8) ^ (i>>>18))&255;
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,4096,4096,0,gl.RGBA,gl.UNSIGNED_BYTE,textureData);
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+gl.uniform1i(gl.getUniformLocation(p,'scene'),0);
+gl.viewport(0,0,1280,720);
+window.iterations=8;
+const pixel=new Uint8Array(4);window.draw=()=>{gl.uniform1i(count,window.iterations);gl.uniform1f(tick,performance.now());gl.drawArrays(gl.TRIANGLES,0,6);gl.readPixels(640,360,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);window.lastPixel=Array.from(pixel);};
+for(let i=0;i<80;i++){const e=document.createElement('div');e.className='card';e.textContent='Graphics '+i;cards.append(e);}
+window.calibrate=async()=>{
+ const rows=[];
+ for(const n of [1,2,4,8,16,32,64,128,256]){
+  window.iterations=n;
+  for(let i=0;i<3;i++)draw();
+  const ms=[];
+  for(let i=0;i<12;i++){const t=performance.now();draw();ms.push(performance.now()-t);await new Promise(r=>setTimeout(r,2));}
+  ms.sort((a,b)=>a-b);rows.push({iterations:n,median_ms:ms[Math.floor(ms.length/2)]});
+  if(rows.at(-1).median_ms>=15)break;
+ }
+ window.iterations=rows.reduce((a,b)=>Math.abs(a.median_ms-12)<Math.abs(b.median_ms-12)?a:b).iterations;
+ return {renderer:window.renderer,iterations:window.iterations,rows};
+};
+window.begin=()=>{
+ window.frames=[];window.timerDrifts=[];window.running=true;let last=performance.now(),expected=last+50;let i=0;
+ function frame(){
+  if(!window.running)return;
+  const start=performance.now(),interval=start-last;last=start;
+  cards.style.transform='translateX('+Math.sin(i++*.02)*10+'px)';
+  const t=performance.now();draw();const drawMs=performance.now()-t;
+  window.frames.push({time:Date.now()/1000,interval_ms:interval,draw_ms:drawMs});
+  requestAnimationFrame(frame);
+ }
+ function timer(){
+  if(!window.running)return;
+  const now=performance.now();window.timerDrifts.push({time:Date.now()/1000,delay_ms:Math.max(0,now-expected)});
+  expected=now+50;setTimeout(timer,50);
+ }
+ requestAnimationFrame(frame);setTimeout(timer,50);
+};
+window.end=()=>{window.running=false;return{frames:window.frames,timer_drifts:window.timerDrifts,renderer:window.renderer,iterations:window.iterations,pixel:window.lastPixel};};
+</script>
+
+
+

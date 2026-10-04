@@ -12,6 +12,7 @@ class FocusTarget:
     editable: bool
     password: bool = False
     elevated: bool = False
+    identity: str = ""
 
 
 @dataclass(frozen=True)
@@ -49,7 +50,11 @@ class SafeInserter:
         if intended.elevated:
             return InsertResult(False, text, "elevation boundary")
         current = self.focus.current()
-        if (current.handle, current.process_id) != (intended.handle, intended.process_id):
+        if (current.handle, current.process_id, current.identity) != (
+            intended.handle,
+            intended.process_id,
+            intended.identity,
+        ):
             return InsertResult(False, text, "focus changed")
         snapshot = self.clipboard.snapshot()
         try:

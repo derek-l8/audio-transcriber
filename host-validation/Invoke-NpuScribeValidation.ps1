@@ -368,7 +368,7 @@ if ($fixtureProbe.timedOut -or $fixtureProbe.exit -ne 0 -or $fixtureProbe.stdout
         if ($tinyReady) {
             $run = Invoke-CliStep -Id $stepId -ParsePrefixes @("session", "status",
                 "actual_device", "requested_device", "chunks_completed", "fallback_events") `
-                -CliArguments (@("--data-dir", $DataDirectory, "transcribe", $fixture,
+                -CliArguments (@("--data-dir", $DataDirectory, "transcribe", "--cleanup", "off", "--formatting", "off", $fixture,
                     "--model", "whisper-tiny.en-int4-ov", "--device", $device,
                     "--chunk-seconds", "30", "--overlap-seconds", "1") + $ffmpegArgs) `
                 -TimeoutSeconds 900
@@ -402,7 +402,7 @@ if ($LongFile) {
         $errFile = New-TemporaryOutputFile
         $proc = Start-Process -FilePath $PythonExe `
             -ArgumentList (@("-m","npu_scribe.cli","--data-dir",$DataDirectory,
-                "transcribe",$LongFile,"--model","whisper-base.en-int4-ov",
+                "transcribe", "--cleanup", "off", "--formatting", "off",$LongFile,"--model","whisper-base.en-int4-ov",
                 "--device","auto","--chunk-seconds","30","--overlap-seconds","1") + $ffmpegArgs) `
             -RedirectStandardOutput $outFile -RedirectStandardError $errFile `
             -WorkingDirectory $repoRoot -PassThru -NoNewWindow
@@ -451,7 +451,7 @@ if ($LongFile) {
                 $resume = Invoke-CliStep -Id "resume-test" -ParsePrefixes @(
                     "session", "status", "actual_device", "chunks_completed") `
                     -CliArguments (@("--data-dir", $DataDirectory,
-                        "resume", $newSession,
+                        "resume", "--cleanup", "off", "--formatting", "off", $newSession,
                         "--model", "whisper-base.en-int4-ov", "--device", "auto",
                         "--chunk-seconds", "30", "--overlap-seconds", "1") + $ffmpegArgs) `
                     -TimeoutSeconds 21600
@@ -493,7 +493,7 @@ print("unique", len(indexes))
         $enduranceStart = Get-Date
         $enduranceProc = Start-Process -FilePath $PythonExe `
             -ArgumentList (@("-m","npu_scribe.cli","--data-dir",$DataDirectory,
-                "transcribe",$LongFile,"--model","whisper-base.en-int4-ov",
+                "transcribe", "--cleanup", "off", "--formatting", "off",$LongFile,"--model","whisper-base.en-int4-ov",
                 "--device","auto","--chunk-seconds","30","--overlap-seconds","1") + $ffmpegArgs) `
             -RedirectStandardOutput $enduranceOut -RedirectStandardError $enduranceErr `
             -WorkingDirectory $repoRoot -PassThru -NoNewWindow

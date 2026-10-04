@@ -21,12 +21,35 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
         $transcript=FindControl $main 'Transcript' $edit
         if(-not (ValueOf $transcript).Current.IsReadOnly) { throw 'Transcript unexpectedly writable' }
         if($attempt -eq 0) {
+            if((ValueOf (FindControl $main 'Cleanup style' ([System.Windows.Automation.ControlType]::ComboBox))).Current.Value -ne 'light') { throw 'Fresh lecture cleanup default differs' }
+            if((ValueOf (FindControl $main 'Formatting style' ([System.Windows.Automation.ControlType]::ComboBox))).Current.Value -ne 'Mostly structured') { throw 'Fresh lecture formatting default differs' }
             foreach($model in @('whisper-tiny.en-int4-ov','whisper-base.en-int4-ov','Choose a speech model')) {
                 SelectCombo $p.Id $h $main 'Speech model' $model
             }
             foreach($device in @('GPU','NPU','auto','CPU')) {
                 SelectCombo $p.Id $h $main 'Transcription device' $device
             }
+            foreach($style in @('off','medium','light')) {
+                SelectCombo $p.Id $h $main 'Cleanup style' $style
+            }
+            foreach($layout in @('Mixed','Mostly structured','Mostly prose')) {
+                SelectCombo $p.Id $h $main 'Formatting style' $layout
+            }
+            InvokeControl (FindControl $main 'Live dictation…' $button)
+            $dictation=WaitWindow $p.Id 'NPU Scribe — Live dictation'
+            $dictationHandle=[OwnWindow]::Find($p.Id,'NPU Scribe — Live dictation')
+            FindControl $dictation 'Microphone' ([System.Windows.Automation.ControlType]::ComboBox) | Out-Null
+            FindControl $dictation 'Record a copy' $button | Out-Null
+            if((ValueOf (FindControl $dictation 'Cleanup' ([System.Windows.Automation.ControlType]::ComboBox))).Current.Value -ne 'medium') { throw 'Fresh dictation cleanup default differs' }
+            FindControl $dictation 'Mostly prose' ([System.Windows.Automation.ControlType]::Text) | Out-Null
+            $shortcut=ValueOf (FindControl $dictation 'Dictation shortcut' $edit)
+            $shortcut.SetValue('Ctrl+Shift+F10')
+            if($shortcut.Current.Value -ne 'Ctrl+Shift+F10') { throw 'Frozen dictation shortcut was not editable' }
+            foreach($mode in @('Hold to talk','Toggle')) {
+                SelectCombo $p.Id $dictationHandle $dictation 'Shortcut mode' $mode
+            }
+            [OwnWindow]::PostMessage($dictationHandle,0x10,[IntPtr]::Zero,[IntPtr]::Zero) | Out-Null
+            WaitUntil { [OwnWindow]::FindClass($p.Id,'QDialog','NPU Scribe — Live dictation') -eq [IntPtr]::Zero } 'Idle dictation window did not close'
             $slider=FindControl $main 'Audio position' ([System.Windows.Automation.ControlType]::Slider)
             $range=[System.Windows.Automation.RangeValuePattern]$slider.GetCurrentPattern([System.Windows.Automation.RangeValuePattern]::Pattern)
             $deadline=(Get-Date).AddSeconds(10)
@@ -110,6 +133,6 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
         $p.Dispose()
     }
 }
-[ordered]@{runs=$runs; playback=$playback; edits_saved=2; search_selection_matches=$true; reopened_history_persisted=$true; native_exports=12; dropdown_selection=$true; dropdowns=@('Speech model','Transcription device','Transcript layer','Export format')} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $Report -Encoding utf8
+[ordered]@{runs=$runs; playback=$playback; edits_saved=2; search_selection_matches=$true; reopened_history_persisted=$true; native_exports=12; dictation_controls=$true; fresh_lecture_defaults='light / structured'; fresh_dictation_defaults='medium / prose'; microphone_recording_started=$false; cleanup_and_formatting_selectors=$true; dropdown_selection=$true; dropdowns=@('Speech model','Transcription device','Transcript layer','Export format')} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $Report -Encoding utf8
 Write-Output 'Frozen native playback, seek, edits, search, history and close/reopen passed'
 

@@ -1,17 +1,25 @@
 # Experimental Windows recipe; see packaging/README.md before redistribution.
 from pathlib import Path
+import os
+import runpy
+import sys
 
 from PyInstaller.utils.hooks import collect_all, collect_dynamic_libs
 
 root = Path(SPECPATH).parent
+# Avoid resolving Qt dependencies from unrelated tools on the developer's PATH.
+windows = Path(os.environ["WINDIR"])
+os.environ["PATH"] = os.pathsep.join(
+    str(path) for path in (Path(sys.executable).parent, Path(sys.base_prefix), windows / "System32", windows)
+)
 ov_data, ov_bins, ov_hidden = collect_all("openvino")
 genai_data, genai_bins, genai_hidden = collect_all("openvino_genai")
 # GenAI loads this extension dynamically; import analysis does not collect its DLL.
 tokenizer_bins = collect_dynamic_libs("openvino_tokenizers")
-notice_data = [
-    (str(root / "LICENSE"), "licenses"),
-    (str(root / "THIRD_PARTY_NOTICES.md"), "licenses"),
-]
+assets = runpy.run_path(str(root / "packaging" / "bundle_assets.py"))
+notice_data = assets["collect_notices"](root, Path(workpath) / "notices")
+notice_data.append((str(root / "packaging" / "GettingStarted.html"), "help"))
+
 
 a = Analysis(
     [str(root / "packaging" / "desktop_entry.py")],

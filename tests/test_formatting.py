@@ -208,6 +208,8 @@ def test_transcribe_off_cleanup_can_format_without_text_model(
                 "--data-dir",
                 str(data),
                 "transcribe",
+                "--cleanup",
+                "off",
                 str(three_second_wav),
                 "--model",
                 "mock",

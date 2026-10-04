@@ -4,11 +4,11 @@ The current source v0.1 scope is a local English file-transcription engine,
 with an optional Windows desktop interface and experimental AI cleanup.
 Import, transcription, review, playback/search, checkpoint/resume, and export
 are implemented. This is a source milestone; a current validated installer
-release and the original live-dictation product are not complete.
+release is not complete. Live dictation now has source controls, capture, cleanup,
+insertion, and recovery; broader microphone/application checks remain open.
 
 [The PRD](docs/NPU-SCRIBE-PRD.md) is a historical planning document.
-Its microphone, tray, insertion, and setup requirements remain future
-work. The matrix retains those gaps without making them source v0.1 release gates.
+Its tray and setup-wizard requirements remain future work. The matrix retains those gaps without making them source v0.1 release gates.
 
 Status values are **verified-sandbox**, **verified-windows-one-host**,
 **implemented-unverified**, **partial**, **pending**, and **out-of-scope**.
@@ -32,17 +32,17 @@ Verification covers the recorded inputs and exercised paths. See
 | Independent formatting | Mostly prose without AI; Mixed/Structured source-passage layout plans, complete coverage/order validation, source-backed headings and restricted tables/steps, independent desktop controls, retained versions, CLI chaining/model reuse and document exports. General semantic grouping remains unverified | partial |
 | Raw/Balanced/AI cleanup | Conservative Balanced rules; separate pinned local Qwen2.5 7B with lecture/dictation and Off/Light/Medium controls, automatic selected cleanup after desktop import/resume, guarded source fallback, retained complete versions and GUI/CLI exports. Repeated CPU/GPU/NPU quality/speed and contention studies; arbitrary semantic fidelity remains unverified | partial |
 | Personal dictionary substitution | `dictionary.py`; only explicit rules replace terms | verified-sandbox; UI pending |
-| Lecture import, progress and recovery | Desktop child-process import, progress, pause/resume and library reopening; real short MP3 and full 47-minute MP4 checks. Forced termination of a processing session still needs explicit CLI recovery; microphone/live recording pending | partial |
+| Lecture import, progress and recovery | Desktop child-process import, progress, pause/resume and library reopening; real short MP3 and full 47-minute MP4 checks. Forced termination of a processing session still needs explicit CLI recovery; source dictation capture added; spoken microphone validation incomplete | partial |
 | Player/search/timestamps/uncertainty/outline/summary/storage/delete | Preserved-audio playback/seek, transcript search, timestamps, uncertainty, manual revisions and exports; source full-lecture and native frozen review checks. Separate formatted excerpt summaries; whole-lecture outline/delete pending | partial |
-| Tray, hold/toggle shortcuts, cues, states, preview/history | Live dictation adapters and tray pending; imported-file transcript review and manual revision history exist | partial |
-| Desktop insertion and clipboard restoration | `insertion.py` contract tests; native application integration absent | partial |
+| Tray, hold/toggle shortcuts, cues, states, preview/history | Configurable Windows toggle/hold shortcuts, Qt capture, input meter, stop/cancel, cleanup, raw/cleaned recovery history and copy. Tray and audible cues pending | partial |
+| Desktop insertion and clipboard restoration | Unicode insertion with recovery saved first, field identity/password checks and clipboard untouched. Native Qt editor, focus changes, password refusal and shortcut lifecycle checked on one Windows host; other apps pending | partial |
 | Offline operation/no telemetry | Default tests deny sockets during synthetic processing; ordinary transcription and cleanup use local assets. Downloads are explicit acquisition/evaluation actions; no telemetry implementation | verified-sandbox for tested network boundary |
 | Redacted diagnostics and support bundle | Path sanitization in public reports; full support bundle pending | partial |
-| Per-user installer/startup/uninstall/data choice | Earlier frozen builds passed isolated silent install, same-version reinstall, uninstall and file-preservation checks; startup off by default. Current AI-cleanup bundle not rebuilt/tested; wizard/startup shortcut/version upgrade pending | partial |
+| Per-user installer/startup/uninstall/data choice | Current frozen build passed isolated silent install, reinstall, a versioned reinstall with the same payload, uninstall, model download, CPU speech, GPU cleanup, prose formatting, exports, and file preservation; startup off by default. Wizard/startup shortcuts, different-payload migration, and a second host pending | partial |
 | One-command Windows validation and sanitized reports | `Invoke-NpuScribeValidation.ps1` plus focused local helpers; sanitized device, endurance, speech, desktop and cleanup metadata in `host-validation/evidence/` | verified-windows-one-host for exercised paths |
 | Two-hour bounded-memory test | Two synthetic CPU passes; denser pass sampled 408.6 MB peak and post-warmup first/last quarter medians 389.2/390.0 MB. Earlier one-hour setup sampled 1211.8 MB; no universal peak ceiling or two-hour real-speech result | verified-windows-one-host for synthetic CPU |
 | Portable source/package installation | Source archive and wheel checked for required modules and runtime/private artifacts; clean installed-wheel synthetic smoke, real CPU speech and real CPU cleanup from outside the checkout on one Windows host | verified-windows-one-host for exercised installation paths |
-| Required documentation/licenses/notices | MIT source, pinned model license metadata, user/development/testing/privacy guides. Complete native/transitive redistribution inventory remains open for a binary release | partial |
+| Required documentation/licenses/notices | MIT source, pinned model license metadata, user/development/testing/privacy guides. Current bundle includes runtime inventory and license notices; corresponding Qt/PySide/FFmpeg sources and build information remain open for binary publication | partial |
 | System audio, diarization, DOCX, surrounding text, selection rewrite | Intentionally absent from the current scope | out-of-scope |
 
 ## Evidence and remaining limits
@@ -62,12 +62,14 @@ Verification covers the recorded inputs and exercised paths. See
   distinguish execution, targeted fidelity checks, warmed request speed, RAM,
   and interference with synthetic graphics. A guard passing does not prove
   semantic preservation; literal commands, quotations, emphasis and math can fail.
+- [Current installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+  records the rebuilt app and isolated lifecycle checks.
 - [Historical package/installer checks](host-validation/evidence/2026-10-02/package-validation/README.md)
   and [native frozen review](host-validation/evidence/2026-10-02/frozen-review/README.md)
-  apply to recorded earlier builds. They do not validate the current
-  cleanup-enabled executable or installer.
+  apply to recorded earlier builds.
 
 Current validation is confined to one Windows host plus earlier sandbox checks.
 Independently audio-checked continuous lecture references, broad device/platform
 compatibility, two-hour real-speech memory behavior, real application contention,
-live microphone capture/insertion, and current installer validation remain open.
+successful spoken microphone recognition, broader insertion compatibility, and current
+installer wizard/startup checks remain open.

@@ -1,35 +1,43 @@
-# Third-party notices (development inventory)
+# Third-party notices
 
-This file is not yet a final redistribution notice. Direct dependencies currently declared:
+NPU Scribe source is MIT-licensed. The Windows bundle includes these runtime
+components from the build environment:
 
-- platformdirs 4.3.6 — MIT.
-- PySide6 6.8.2.1 — LGPL-3.0/GPL-3.0/commercial; dynamic-library LGPL obligations apply.
-- OpenVINO 2026.3.0 and OpenVINO GenAI 2026.3.0.0 — Apache-2.0.
-- build, Hatchling, pytest, pytest-cov, Hypothesis, Ruff, and mypy are build/test dependencies;
-  verify their locked transitive inventory before release.
+- Python 3.12.14 — PSF license and notices.
+- platformdirs 4.12.2 — MIT.
+- PySide6 / Qt for Python and Shiboken 6.11.2 — LGPL-3.0 or the alternative
+  licenses supplied by Qt. Qt libraries remain separate, replaceable DLLs.
+- OpenVINO 2026.4.0, GenAI and Tokenizers 2026.4.0.0 — Apache-2.0.
+- OpenVINO Telemetry 2025.2.0 — Apache-2.0; installed as an upstream dependency.
+  This application does not use its telemetry API.
+- NumPy 2.5.3 — BSD and included component notices.
+- Qt Multimedia's FFmpeg 7.1.5 playback libraries — LGPL-2.1 or later.
+  Their reported configuration uses shared libraries, zlib 1.3.1, and does not
+  enable GPL or nonfree components.
 
-NumPy may be installed transitively by OpenVINO; inventory the actual frozen build,
-including all native/transitive dependencies, before distributing it. sounddevice
-is not used by the current application and is no longer a declared dependency.
+The bundle's `_internal/licenses/` folder contains Python's license, package
+license files and notices, GPL/LGPL texts, and `runtime-inventory.json` with exact
+package versions and notice hashes. OpenVINO's native component notices and
+NumPy's bundled component licenses are copied from their installed packages.
+PyInstaller 6.22.3 and hooks 2026.8 build the app; the
+[bootloader license exception](https://pyinstaller.org/en/stable/license.html)
+permits distributing the generated application under its own license.
+Inno Setup 7.1.0 is a build tool, not an installed runtime dependency.
 
-PyInstaller 6.22.3 is declared in the optional `bundle` extra. The Windows bundle
-has one-host smoke evidence; the Inno Setup recipe has an isolated one-host
-install/reinstall/uninstall check. The compiler is a build tool, not bundled.
-The `ffmpeg.exe` command-line decoder is external. Qt Multimedia also uses FFmpeg
-libraries for playback, and the tested frozen bundle includes `avcodec-61.dll`.
-These libraries need their own inventory and notices before redistribution;
-see [Qt's FFmpeg attribution](https://doc.qt.io/qt-6.8/qtmultimedia-attribution-ffmpeg.html).
-That reference is for the Qt 6.8 documentation line, not proof of the exact
-FFmpeg patch version or build configuration inside the pinned PySide6 wheel.
-The recipe includes this development inventory and the project MIT license;
-it does not establish complete redistribution compliance.
-Model and dataset licenses never inherit the MIT license.
+See [Qt for Python licensing](https://doc.qt.io/qtforpython-6/licenses.html) and
+[FFmpeg's distribution guidance](https://ffmpeg.org/legal.html). Before publishing
+binary releases, make the corresponding Qt/PySide/FFmpeg sources and build
+information available with that release; collecting notices alone does not
+complete those source obligations. The local installer has not been published.
+The recorded FFmpeg configuration is retained in the installer validation report.
 
-## Optional cleanup model
+## Separately downloaded files
 
-The manifest pins `OpenVINO/Qwen2.5-7B-Instruct-int4-ov` at revision
-`51f38f02586876c08ca2a604224da20ea61685b8`, with per-file size/SHA-256 verification.
-These are INT4 OpenVINO artifacts derived from Qwen2.5-7B-Instruct, licensed
-under Apache-2.0. They are explicitly downloaded, not included in the source
-package or frozen bundle. See the [artifact model card](https://huggingface.co/OpenVINO/Qwen2.5-7B-Instruct-int4-ov)
+The `ffmpeg.exe` decoder is selected separately by the user and is not bundled.
+Its license depends on the chosen build. Model weights are also downloaded
+separately and do not inherit the application's MIT license.
+
+The cleanup manifest pins `OpenVINO/Qwen2.5-7B-Instruct-int4-ov` at revision
+`51f38f02586876c08ca2a604224da20ea61685b8`, derived from Qwen2.5-7B-Instruct
+under Apache-2.0. See the [artifact model card](https://huggingface.co/OpenVINO/Qwen2.5-7B-Instruct-int4-ov)
 and [original model license](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/main/LICENSE).

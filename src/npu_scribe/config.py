@@ -4,6 +4,11 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+PROCESSING_DEFAULTS = {
+    "lecture": ("light", "structured"),
+    "dictation": ("medium", "prose"),
+}
+
 
 @dataclass(frozen=True)
 class DataLocation:

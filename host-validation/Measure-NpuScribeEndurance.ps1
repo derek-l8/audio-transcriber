@@ -94,7 +94,7 @@ Get-ChildItem -Directory (Join-Path $DataDirectory "lectures") `
     -ErrorAction SilentlyContinue | ForEach-Object { $existing[$_.Name] = $true }
 $argsList = @(
     "-m", "npu_scribe.cli", "--data-dir", $DataDirectory,
-    "transcribe", $source, "--model", $Model, "--device", "CPU",
+    "transcribe", "--cleanup", "off", "--formatting", "off", $source, "--model", $Model, "--device", "CPU",
     "--chunk-seconds", "30", "--overlap-seconds", "1"
 )
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()

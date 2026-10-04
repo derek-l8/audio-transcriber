@@ -1,0 +1,237 @@
+{
+  "source": "User-provided speech recording; audio and transcript content excluded",
+  "source_duration_seconds": 266.004,
+  "original_format": "M4A/AAC, 48 kHz mono",
+  "test_format": "WAV, 16 kHz mono PCM16",
+  "source_preserved": true,
+  "clips": [
+    {
+      "source_start_seconds": 0.5,
+      "duration_seconds": 10.0
+    },
+    {
+      "source_start_seconds": 0.5,
+      "duration_seconds": 30.0
+    }
+  ],
+  "full_file_cpu": [
+    {
+      "model": "whisper-tiny.en-int4-ov",
+      "device": "CPU",
+      "source_seconds": 266.004,
+      "total_seconds": 10.64,
+      "words": 850,
+      "segments": 102
+    },
+    {
+      "model": "whisper-base.en-int4-ov",
+      "device": "CPU",
+      "source_seconds": 266.004,
+      "total_seconds": 16.703,
+      "words": 878,
+      "segments": 95
+    }
+  ],
+  "short_clip_speech": [
+    {
+      "requested_device": "CPU",
+      "total_seconds": 4.031,
+      "audio_seconds": 10.0,
+      "words": 31,
+      "status": "ready"
+    },
+    {
+      "requested_device": "GPU",
+      "total_seconds": 3.828,
+      "audio_seconds": 10.0,
+      "words": 31,
+      "status": "ready"
+    },
+    {
+      "requested_device": "NPU",
+      "total_seconds": 21.266,
+      "audio_seconds": 10.0,
+      "words": 31,
+      "status": "ready"
+    }
+  ],
+  "dictation_first_pass": [
+    {
+      "case": "short-off",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "off",
+      "requested_cleanup_device": "AUTO",
+      "actual_cleanup_device": null,
+      "audio_seconds": 10.0,
+      "processing_seconds": 2.219,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 31
+    },
+    {
+      "case": "short-light-gpu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "GPU",
+      "actual_cleanup_device": "GPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 19.281,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 10.023,
+      "cleanup_inference_seconds": 2.986,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "short-light-cpu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "CPU",
+      "actual_cleanup_device": "CPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 45.907,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 11.551,
+      "cleanup_inference_seconds": 27.168,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "short-light-npu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "NPU",
+      "actual_cleanup_device": "NPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 202.5,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 190.538,
+      "cleanup_inference_seconds": 5.159,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "short-medium",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "medium",
+      "requested_cleanup_device": "GPU",
+      "actual_cleanup_device": "GPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 13.594,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 28,
+      "cleanup_load_seconds": 3.906,
+      "cleanup_inference_seconds": 2.874,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "longer-light",
+      "speech_model": "whisper-base.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "GPU",
+      "actual_cleanup_device": "GPU",
+      "audio_seconds": 30.0,
+      "processing_seconds": 18.625,
+      "status": "ready",
+      "raw_words": 96,
+      "final_words": 90,
+      "cleanup_load_seconds": 3.144,
+      "cleanup_inference_seconds": 6.699,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    }
+  ],
+  "dictation_repeat_with_cache": [
+    {
+      "case": "repeat-light-gpu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "GPU",
+      "actual_cleanup_device": "GPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 14.469,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 3.69,
+      "cleanup_inference_seconds": 3.113,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "repeat-light-cpu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "CPU",
+      "actual_cleanup_device": "CPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 53.593,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 12.754,
+      "cleanup_inference_seconds": 33.125,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    },
+    {
+      "case": "repeat-light-npu",
+      "speech_model": "whisper-tiny.en-int4-ov",
+      "speech_device": "CPU",
+      "cleanup": "light",
+      "requested_cleanup_device": "NPU",
+      "actual_cleanup_device": "NPU",
+      "audio_seconds": 10.0,
+      "processing_seconds": 21.125,
+      "status": "ready",
+      "raw_words": 31,
+      "final_words": 29,
+      "cleanup_load_seconds": 8.12,
+      "cleanup_inference_seconds": 5.629,
+      "source_fallback_blocks": 0,
+      "warnings": 0
+    }
+  ],
+  "light_cleanup_outputs_identical_across_all_six_runs": true,
+  "speech_device_outputs_identical": false,
+  "native_insertion_using_cleaned_source_text": {
+    "unicode_insertion": "passed",
+    "same_window_focus_change": "passed",
+    "password_rejection": "passed",
+    "shortcut_conflict": "passed",
+    "native_shortcut_dispatch_and_release": "passed",
+    "shortcut_unregistered": "passed"
+  },
+  "dictation_two_minute_limit": "passed: full recording refused by capture normalization; clips accepted",
+  "offline_suite": {
+    "passed": 278,
+    "skipped": 1,
+    "live_deselected": 1
+  },
+  "timing_scope": {
+    "speech": "Single CLI process wall time, including startup/decoding/model setup and result storage; no cleanup",
+    "dictation": "Capture-buffer normalization through saved history, including CLI startup, CPU speech, model verification/setup, and selected cleanup; excludes recording/insertion"
+  },
+  "limits": [
+    "One Windows host; normal background applications remained open.",
+    "Single short speech run per device; two ordered Light cleanup passes. These are not universal device rankings.",
+    "No checked audio reference and no WER claimed.",
+    "Input is an uploaded recording. Laptop microphone capture remains unresolved."
+  ]
+}

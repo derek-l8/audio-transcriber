@@ -4,9 +4,10 @@ The project began as an attempt to use an NPU for local speech transcription
 and cleanup while leaving the computer usable. Tests led to different device
 choices: **CPU for speech; GPU with CPU fallback for cleanup**. NPU stays optional.
 
-Measured September 30–October 2, 2026 on one Windows x64 host: Core Ultra 5 335,
+Measured September 30–October 4, 2026 on one Windows x64 host: Core Ultra 5 335,
 Intel integrated graphics, Intel AI Boost NPU, 8 logical processors, 31.51 GiB
-usable RAM. OpenVINO 2026.3.0 / GenAI 2026.3.0.0. The linked reports contain
+usable RAM. Initial runs used OpenVINO 2026.3.0 / GenAI 2026.3.0.0;
+October 3–4 runs used 2026.4.0 / 2026.4.0.0. The linked reports contain
 methods, pinned models, and numerical results. Results apply to this computer
 and these workloads; power consumption was not measured.
 
@@ -112,7 +113,7 @@ as default and pause variants opt-in. Caption references remain provisional.
 [Overlap holdout](../host-validation/evidence/2026-10-01/overlap-holdout/README.md),
 [pause holdout](../host-validation/evidence/2026-10-02/pause-refinement/README.md).
 
-## Checkpoint scope
+## October 3: initial file checkpoint
 
 File transcription, selected automatic cleanup, unedited Raw, and separate
 formatted study notes are included. Light requests minimal wording changes;
@@ -125,16 +126,15 @@ lecture produced 101 words of notes from 192 recognition words, preserving sourc
 and cleanup hashes. Summary completeness and accuracy remain unmeasured.
 [Checkpoint checks and limits](../host-validation/evidence/2026-10-03/file-cleanup-checkpoint/report.json)
 include real CPU/GPU runs, source hashes, and the installed-wheel check.
-Microphone capture, hotkeys, insertion, and a current installer are deferred.
+At that checkpoint, microphone capture, hotkeys, insertion, and an installer
+were deferred. Later dictation and installer checks are linked below.
 [User guide](USER_GUIDE.md), [software checks](../TESTING.md).
 
 
 ## October 3: dependencies and separate formatting
 
-Published `main` at `e26205c` installed into a fresh Windows Python 3.12 environment
-with OpenVINO 2026.4.0, GenAI 2026.4.0.0, and PySide6 6.11.2. All 204 existing tests
-passed. GitHub CI could not start: repository settings rejected the official
-checkout/setup-python actions.
+The October 3 environment used OpenVINO 2026.4.0, GenAI 2026.4.0.0, and
+PySide6 6.11.2.
 
 Real CPU/GPU/NPU speech and cleanup paths were exercised on this host. The repeated
 72-second CPU speech → GPU cleanup → summary workflow produced identical text to
@@ -159,7 +159,7 @@ on two. Source and cleanup hashes stayed unchanged. Seven of eight additional
 short model requests produced valid layouts, including a comparison table and
 numbered procedure; one structured comparison returned invalid JSON and became
 prose. Layout consistency remains uncertain; headings and grouping need review.
-Mostly prose stays the default.
+Mostly prose was the default for this comparison.
 
 [Dependency, desktop, installed-package, and formatting checks](../host-validation/evidence/2026-10-03/validation-formatting/report.json)
 record the inputs, versions, checks, and limits without personal library paths.
@@ -186,7 +186,8 @@ Mostly prose added no model pass and its complete formatting step took less
 than 0.1 seconds. Other apps stayed open, but typing and page-loading response
 were not measured. GPU counters again exceeded 100% and were unusable.
 
-**Decisions:** keep CPU speech, AUTO cleanup, and Mostly prose. Base improved
+**Decisions from this run:** keep CPU speech and AUTO cleanup. Prose added no
+model pass. Base improved
 several inspected terms and reduced conspicuous repeated text at a cost of
 about 52 extra seconds; use it for lectures when the larger download is
 acceptable. Without a checked audio reference, the full-lecture error rate
@@ -202,7 +203,100 @@ in this lecture despite its added runtime.
 
 Original media and Raw/Balanced hashes were preserved; formatting retained all
 cleaned words in order. Raw, AI, and Formatted exports succeeded in text,
-Markdown, and JSON. The final software suite passed 233 tests; the rebuilt wheel
-passed installed-launcher checks outside the checkout and matched all 25 source
-modules. Course text and media remain in ignored local storage, excluded from Git.
+Markdown, and JSON. Course text and media remain in ignored local storage, excluded from Git.
 [Full lecture measurements and limits](../host-validation/evidence/2026-10-03/full-lecture/report.json).
+
+
+## Live dictation: latency and idle memory
+
+Dictation reuses CPU speech and GPU-to-CPU cleanup selection. Its worker exits
+when each recording finishes, releasing model memory while idle. On a ten-second
+clip of a provided speech recording, Off took **2.22 s**. Light cleanup ran twice
+per device; the repeat used existing compilation caches:
+
+| Cleanup device | First job | Repeat job |
+|---|---:|---:|
+| GPU | 19.28 s | 14.47 s |
+| CPU | 45.91 s | 53.59 s |
+| NPU | 202.50 s | 21.13 s |
+
+These times include conversion, CPU transcription, cleanup setup/generation,
+and saving text. NPU's first job spent **190.54 s** in model setup. All six Light
+outputs matched. GPU remains the cleanup default with CPU fallback; Off provides
+faster dictation when cleanup is unnecessary. The full 266-second file also
+completed on CPU: **10.64 s with tiny**, **16.70 s with base**.
+
+These runs used one computer with normal background applications open. WER for
+this recording is unmeasured. The
+[recording report](../host-validation/evidence/2026-10-03/live-dictation/user-recording-report.json)
+contains device timings and insertion checks; the
+[initial report](../host-validation/evidence/2026-10-03/live-dictation/report.json)
+retains the earlier generated sample and unresolved laptop microphone check.
+
+## Dictation: loaded models and alternative engines
+
+On October 4, three clips (10, 10, and 30 seconds) from the same provided
+recording compared fresh workers with workers that kept their models loaded.
+Each loaded worker processed the clips three times. Times below cover normalized
+audio through CPU tiny transcription and Light cleanup; app startup, recovery
+saving, and model checksum checks are excluded. Fresh workers reused compilation
+caches. RAM is the worker's working set after its last job.
+
+| Cleanup setup | Fresh worker, 10 s clip | Loaded worker, 10 s clip | Loaded worker, 30 s clip | RAM held | CPU during repeat jobs |
+|---|---:|---:|---:|---:|---:|
+| Qwen 7B, GPU | 6.79 s | 2.73 s | 6.88 s | 4.77 GiB | 12% |
+| Qwen 1.5B, GPU | 3.99 s | 1.15 s | 2.98 s | 1.55 GiB | 15% |
+| Qwen 1.5B, CPU | 12.06 s | 2.51 s | 4.66 s | 2.18 GiB | 24% |
+
+These are medians across the relevant clips/calls. Loaded idle CPU was 0–0.1%
+over two-second samples. Keeping 7B loaded held about 15% of this computer's
+usable RAM. The first job with a new GPU compilation cache took 32.19 s for 7B
+and 12.73 s for 1.5B.
+
+The smaller GPU model introduced unsupported interpretations and changed tone
+in inspected output. Its CPU run rejected all three versions of one passage
+and kept the raw text. The 7B GPU run also retained raw text on two rejected
+edits. Repeated GPU cleanup sometimes varied despite identical raw input.
+These checks compare edits with the raw text; the recording has no checked
+reference for measuring speech accuracy.
+
+For speech alone, loaded OpenVINO tiny INT4 took **0.33 s** on the ten-second
+clips and **0.89 s** on the thirty-second clip, holding **0.28 GiB**.
+Faster-whisper tiny INT8 with two CPU threads and beam size 1 took **0.49 s**
+and **1.09 s**, holding **0.15 GiB**. Beam size 5 took **0.56 s** and **1.44 s**.
+Typical worker CPU during repeat jobs was 25% for OpenVINO and 22% for
+faster-whisper. Their text differed, so these runs establish no accuracy ranking.
+Faster-whisper's file decoder failed with the installed PyAV version; the
+comparison used normalized PCM samples for both engines.
+
+The same fixed hardware graphics workload ran twice, with the device order
+reversed on the second pass. Its frame rate and the warmed ten-second jobs were:
+
+| Cleanup setup | Graphics before → during jobs | Frame-rate loss | Job time with graphics load |
+|---|---:|---:|---:|
+| Qwen 7B, GPU | 60.0 → 57.2 fps | 4.6% | 18.36 s |
+| Qwen 1.5B, GPU | 59.8 → 58.9 fps | 1.6% | 6.84 s |
+| Qwen 1.5B, CPU | 59.6 → 57.2 fps | 4.1% | 4.00 s |
+
+The graphics workload slowed cleanup substantially while losing a few frames
+per second itself. Loaded idle workers returned roughly 60 fps. This measures
+interference with one graphics workload; it does not give a GPU utilization
+percentage or establish responsiveness in other apps.
+
+**Decisions:** retain OpenVINO speech and 7B cleanup. Loaded models offer a
+substantial dictation latency reduction, with enough retained RAM to warrant
+an explicit option and idle unloading. This benchmark does not change the app's
+current per-recording worker behavior. The 1.5B model needs better fidelity
+before becoming a default.
+
+[Measurements, model revisions, and method](../host-validation/evidence/2026-10-04/dictation-efficiency/report.json).
+
+## Workflow defaults
+
+File imports now start with Light cleanup and Mostly structured formatting.
+Live dictation starts with Medium cleanup and Mostly prose. These defaults
+follow the requested lecture and dictation workflows. Performance tables above
+retain the settings used in each test. The device policy remains CPU speech
+and GPU cleanup with CPU fallback. Existing choices remain
+saved, and raw text stays available. The [installed-app checks](../host-validation/evidence/2026-10-04/installer-checkpoint/README.md#defaults-rebuild)
+verified both sets of defaults, lecture processing, exports, reinstall, and uninstall.

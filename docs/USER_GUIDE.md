@@ -1,9 +1,53 @@
 # Using NPU Scribe
 
 This guide covers Windows installation, transcription, cleanup, the optional
-desktop interface, and updates. Run the examples from the source folder containing
-your installed `.venv`. In a new PowerShell window, recreate the variables used
-by the example. Ordinary transcription and cleanup are offline after model download.
+desktop interface, live dictation, and updates. Source CLI examples use the folder
+containing your installed `.venv`. In a new PowerShell window, recreate the
+variables used by the example. Ordinary transcription and cleanup are offline after model download.
+
+## Using the Windows installer
+
+A local Windows x64 installer is available to build; a prebuilt GitHub release
+has not been published. Run your installer and keep the default folder.
+Python and Git are unnecessary. Launch-at-sign-in is optional and starts
+unchecked. The installer is unsigned, so Windows may show an unknown-publisher
+warning. The setup guide opens after installation and is also available under
+**NPU Scribe > Getting started** in the Start menu.
+
+1. Open PowerShell and download the first speech model:
+
+   ```powershell
+   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\NPU Scribe\npu-scribe-worker.exe'
+   & $Worker models download whisper-tiny.en-int4-ov
+   if ($LASTEXITCODE -ne 0) { throw 'Model download failed; stop here.' }
+   ```
+
+   Wait for `model ready`. If you chose another installation folder, change
+   `$Worker` to its worker executable. For lectures, download
+   `whisper-base.en-int4-ov` with the same command and select it in the app.
+
+2. For AI cleanup, download the separate text model (about 4.5 GB):
+
+   ```powershell
+   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\NPU Scribe\npu-scribe-worker.exe'
+   & $Worker models download qwen2.5-7b-instruct-int4-ov
+   if ($LASTEXITCODE -ne 0) { throw 'Cleanup model download failed; stop here.' }
+   ```
+
+   Choose **Off** for cleanup and formatting if you skip this download.
+
+3. For MP3, M4A, or MP4, extract a Windows executable build from the
+   [FFmpeg download page](https://www.ffmpeg.org/download.html). In NPU Scribe,
+   use **Choose FFmpeg** to select `bin\ffmpeg.exe`.
+
+Open NPU Scribe, select your speech model, and press **Import lecture**.
+Light cleanup and Mostly structured formatting are the starting file settings. Review the transcript
+and export the version you want. [Live dictation](#live-dictation) uses the same
+models. Processing works offline after the downloads.
+
+To update, close the app and run the newer installer into the same folder.
+Your library and models stay in `%LOCALAPPDATA%\npu-scribe`; uninstalling the app
+also keeps them. If you selected a custom library, keep using that folder.
 
 ## Install on Windows
 
@@ -72,7 +116,7 @@ local folder, and locate `bin\ffmpeg.exe`. The decoder is not bundled. For a WAV
 $Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
 $Model = 'whisper-tiny.en-int4-ov'
 $InputFile = 'C:\Lectures\lecture.wav'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --cleanup off
 if ($LASTEXITCODE -ne 0) { throw 'Transcription did not finish; check the message above.' }
 ```
 
@@ -100,7 +144,7 @@ $Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
 $Model = 'whisper-tiny.en-int4-ov'
 $FFmpeg = 'C:\Tools\ffmpeg\bin\ffmpeg.exe'
 $InputFile = 'C:\Lectures\lecture.mp4'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --ffmpeg "$FFmpeg"
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --ffmpeg "$FFmpeg" --cleanup off
 ```
 
 Nonconforming WAV files need conversion before import; passing `--ffmpeg`
@@ -131,7 +175,7 @@ media, supply its FFmpeg executable again. The saved chunk plan is reused:
 $Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
 $Session = 'SESSION_ID_FROM_OUTPUT'
 $Model = 'whisper-tiny.en-int4-ov' # Replace with the model originally used.
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" resume "$Session" --model "$Model" --device CPU
+.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" resume "$Session" --model "$Model" --device CPU --cleanup off
 ```
 
 If the desktop was forcibly terminated, confirm its worker has stopped before
@@ -177,6 +221,51 @@ revision. Unsaved drafts are lost if the process is forcibly closed. JSON
 exports include manual-edit attribution, revision ID, and source layer/hash.
 Text, Markdown, and SRT exports contain the selected layer's text.
 
+## Live dictation
+
+Launch the desktop, then open **Live dictation**. Download a speech model using
+the installation steps above. For Light or Medium cleanup, also download the
+[cleanup model](#local-ai-cleanup); Off needs only the speech model. FFmpeg is
+not needed for microphone recordings.
+
+1. Select your microphone and speech model. Speech starts on CPU; cleanup starts
+   on AUTO (GPU, then CPU). Medium cleanup and Mostly prose are the dictation
+   defaults; Off and Light remain available. Dictation settings are separate from file processing.
+2. Choose **Toggle** or **Hold to talk**, enter a shortcut such as
+   **Ctrl+Alt+Space**, and tick **Enable global shortcut**. If it is already in
+   use, choose another. Disable it before changing its key or mode.
+3. Focus an editable text field in another app. Press the shortcut, wait for
+   **Recording**, then speak. The input meter should move. In Toggle mode, press
+   again to stop; in Hold to talk, release the shortcut. Recording stops after
+   two minutes at most.
+4. Keep the same field focused while transcription and cleanup finish. The result
+   is saved before insertion. **Recovered text** holds recent results;
+   **Show unedited transcript** selects the original recognition output.
+   **Copy text** deliberately replaces the clipboard when you need to paste manually.
+
+**Record a copy** records from the window and saves text without automatic
+insertion. **Cancel** stops capture or requests that the worker stop; model
+compilation may need to finish first. Very quiet recordings are rejected. Check
+Windows microphone permissions, mute, and input volume if the meter stays flat.
+
+The shortcut works while the window is open, including when the main app is
+minimized. Closing the dictation window disables it; enable it again after a
+new app launch. There is no tray; the installer offers optional launch at sign-in.
+Dictation and file processing run one at a time.
+
+Text appears after you stop recording. Models load for each job and unload when
+it finishes; Light/Medium can take substantially longer than Off. Use Off for
+faster results. This version has no live partial transcript. Insertion uses
+Unicode keystrokes and leaves the clipboard unchanged. Password fields are
+rejected; elevated apps and custom editors may reject insertion. Review the
+result in the destination app and use the recovered copy if needed.
+
+Recordings, raw text, cleaned text, and settings are kept under
+`dictation` in the local library. They remain until you remove them; see
+[Privacy](../PRIVACY.md). Source workflow and native insertion checks are covered
+in [Testing](../TESTING.md#live-dictation). Broader microphone and app checks
+remain open.
+
 ## Local AI cleanup
 
 Cleanup uses an independent local text model. It is optional and requires the
@@ -196,7 +285,7 @@ network connection.
 
 In the desktop, choose **Off**, **Light**, or **Medium** before importing. Light is
 the initial setting. A completed import or resume automatically runs the selected
-cleanup; Off skips the model. If cleanup fails or its model is missing, the
+cleanup; Off skips cleanup. Set formatting to Off too if the text model is absent. If cleanup fails or its model is missing, the
 transcript stays ready and can be exported. Download the model and use **Clean
 selected** to retry or change the level. Cleanup has its own AUTO/CPU/GPU/NPU setting.
 Cleanup is saved in **AI**. When formatting is enabled, the desktop then opens
@@ -210,16 +299,16 @@ for AI because its paragraphs do not have word alignment.
   uncertainty. Words such as “period” are treated as content.
 - **Dictation** attempts to remove false starts, resolve explicit self-corrections,
   and interpret spoken punctuation, “new paragraph,” and list commands. These
-  edits can be imperfect. The requested “literal” escape has failed a targeted
-  test, so review any wording that resembles a formatting command.
+  edits can be imperfect; review wording that resembles a formatting command.
 - **Off** skips AI cleanup; **Raw** always remains available as unedited text.
 - **Light** requests minimal grammar edits. **Medium** also improves
   clarity and reduces redundant dictation phrasing; it does not generate a summary.
 
-For one CLI job that transcribes and then cleans, add `--cleanup light` or
-`--cleanup medium` to `transcribe` or `resume`. CLI transcription defaults to
-`--cleanup off`; the desktop defaults to Light. Cleanup defaults to AUTO (GPU,
-then CPU). Use `--cleanup-device CPU`, `GPU`, or `NPU` to require that device.
+CLI `transcribe` and `resume` default to Light cleanup and Mostly structured
+formatting. Use `--cleanup medium` to change the level, `--formatting prose`
+for paragraphs, or `--cleanup off` for unedited text. Dictation mode defaults
+to Medium cleanup and Mostly prose. Explicit options override these defaults.
+Cleanup defaults to AUTO (GPU, then CPU). Use `--cleanup-device CPU`, `GPU`, or `NPU` to require that device.
 Cleanup failure returns exit 1 while leaving a ready, exportable transcription.
 
 ```powershell
@@ -250,21 +339,13 @@ outputs require `--overwrite`, and the input file cannot be the output. Global
 `--data-dir` / `--model-root` options go before the subcommand. No transcription
 session or audio decoder is required for text cleanup.
 
-Raw, Balanced, Edited, and the recording remain unchanged. Each completed
-cleanup retains a snapshot in `ai-cleanup-history`; `ai-transcript.json` selects
-the latest result. JSON exports record the raw hash, speech provenance, pinned
-cleanup model, mode/style, and block warnings. History is currently available
-as files, not through the manual **Revision history** dialog.
+Each completed cleanup keeps a snapshot in `ai-cleanup-history`; the latest
+version appears in AI. JSON exports include settings and block warnings.
+Raw, Balanced, Edited, and the recording stay available.
 
-**Limits:** the model can still change meaning, names, or dates. Heuristic checks
-compare digit quantities, negation, large text-size changes, lost uncertainty
-wording, some changed unfinished endings, and newly added uncertainty labels. A failed block retains
-its source text and receives an uncertainty flag. Passing checks is not
-proof of fidelity. Corrections across input blocks (up to 1,200 characters) may
-not resolve. Review important text against Raw/audio. AI SRT uses coarse source
-block intervals, not newly aligned sentence/word timings; use Raw/Edited for
-precise source cues. This is batch cleanup, without microphone capture, hotkeys,
-or insertion into another application's text field.
+The model can change names, numbers, or meaning. Suspicious edits retain the
+source text with an uncertainty flag. Review important results against Raw/audio.
+AI subtitles use coarse source-block timing; use Raw or Edited for precise cues.
 
 AUTO tries a GPU exposed by OpenVINO; if GPU loading or generation fails, it
 retries the current block on CPU and stays there for the job. JSON records the
@@ -277,7 +358,7 @@ AI version and do not resume partial output: rerun cleanup to start again.
 
 Formatting is a separate layer after transcription and optional cleanup.
 Choose **Mostly prose**, **Mixed**, **Mostly structured**, or **Off** before
-importing. The desktop starts with Mostly prose. With cleanup enabled, formatting
+importing. The desktop starts with Mostly structured. With cleanup enabled, formatting
 reads the new AI version; with cleanup Off, it reads Raw.
 
 - **Mostly prose** groups passages into paragraphs without loading an AI model.
@@ -304,7 +385,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Formatting did not finish; check the message a
 
 Use `--source raw --style prose` without the text model. Add `--formatting prose`,
 `mixed`, or `structured` to `transcribe`, `resume`, or `cleanup` to run the stage
-automatically. CLI defaults to formatting Off. Formatting uses the cleanup model
+automatically. The standalone `cleanup` command leaves formatting Off unless
+you supply it. Formatting uses the cleanup model
 and device; a chained cleanup job reuses its loaded model. Prose adds no generation
 pass; Mixed and Mostly structured add one layout request per source block
 (up to eight passages). Invalid headings and layouts can cause prose fallback.
@@ -353,8 +435,8 @@ is not covered by the repeated device cleanup quality study.
 ## Choose devices and manage resource use
 
 Speech recognition and AI cleanup have separate device settings. Speech starts
-on CPU; cleanup starts on AUTO (GPU, then CPU). These are starting policies based
-on one host, not a benchmark or resource limit for your computer. Saved choices
+on CPU; cleanup starts on AUTO (GPU, then CPU). These policies were chosen from tests on one computer. Resource use varies with
+hardware and other applications. Saved choices
 are restored, including explicit devices. See the compact
 [tests and decisions](TESTED_DECISIONS.md) record for the comparisons.
 
