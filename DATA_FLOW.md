@@ -1,5 +1,7 @@
 # Data flow and recovery
 
+## Imported files
+
 ```
 imported file (WAV/MP3/M4A/MP4)
   └─ validate (type, regular file, size, resolved path)
@@ -63,8 +65,9 @@ a user override can still choose a checkout or cloud-synced folder. See
 ## Review and cleanup versions
 
 Manual corrections save a separate Edited revision and retain its history.
-Selected cleanup runs automatically after desktop import/resume, or after CLI
-transcription with `--cleanup light|medium`; Off skips it. AI cleanup reads Raw
+Selected cleanup runs automatically after desktop import/resume and CLI
+transcription/resume. Imported files default to Light cleanup and Mostly structured
+formatting; `--cleanup off` skips AI cleanup. AI cleanup reads Raw
 in bounded source blocks, uses a separate local
 text model/device, and publishes a complete AI version plus a retained snapshot.
 Numeric/negation/size warnings retain the source block; they do not prove meaning
@@ -82,3 +85,24 @@ Mixed/Structured request a layout plan from the same text model, reusing the loa
 pipeline after cleanup. Every source passage must appear once in original order;
 unsupported layouts become prose. Complete formatted versions have a separate
 history and source hash. They are documents rather than aligned subtitles.
+
+## Live dictation
+
+The desktop registers the selected Windows shortcut. Toggle starts and stops
+recording on separate presses; Hold stops when the configured keys are released.
+Qt captures microphone audio into `dictation/jobs/<job-id>/capture.pcm`, for up to
+two minutes, then converts it to mono 16 kHz `recording.wav`.
+
+A CLI worker runs the same transcription pipeline in dictation mode, using a
+separate library under `dictation/engine`. Defaults are CPU speech, Medium
+cleanup with GPU-to-CPU fallback, and Mostly prose formatting. The worker exits
+at the end of each recording to release its models.
+
+The desktop saves Raw and final text in recovery history before checking that
+the original target field is still focused and editable. Successful processing
+can insert the final text through Windows Unicode input. A changed focus,
+password field, or failed insertion leaves the saved copy available in the
+dictation window. The Record a copy button runs without automatic insertion.
+If processing fails after recognition, available Raw text is retained for recovery.
+File processing and dictation share a busy guard so this desktop runs one job
+at a time.
