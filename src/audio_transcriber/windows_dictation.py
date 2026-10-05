@@ -126,7 +126,7 @@ class WindowsInput:
             return InsertResult(False, text, "Target is not a supported editable field.")
         try:
             current = self.current()
-        except (OSError, ValueError, subprocess.SubprocessError):
+        except OSError, ValueError, subprocess.SubprocessError:
             return InsertResult(False, text, "Could not verify the target field.")
         if (
             (current.handle, current.process_id, current.identity)

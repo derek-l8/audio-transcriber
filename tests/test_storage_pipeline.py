@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.engines import MockSpeechEngine
-from npu_scribe.models import Segment, Session
-from npu_scribe.pipeline import run_lecture
-from npu_scribe.storage import SessionStore, safe_child
+from audio_transcriber.engines import MockSpeechEngine
+from audio_transcriber.models import Segment, Session
+from audio_transcriber.pipeline import run_lecture
+from audio_transcriber.storage import SessionStore, safe_child
 
 
 def test_atomic_layers_and_recovery(tmp_path: Path, silent_wav: Path) -> None:

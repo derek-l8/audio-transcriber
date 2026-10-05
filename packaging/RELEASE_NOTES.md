@@ -1,4 +1,4 @@
-# NPU Scribe 0.1.0 — Windows prerelease
+# Audio Transcriber 0.1.0 — Windows prerelease
 
 Transcribe English audio/video locally, clean up the text, and export transcripts
 or shorter study notes. The Windows app also supports dictation with a
@@ -6,7 +6,8 @@ configurable toggle or hold-to-talk shortcut.
 
 ## Install
 
-Download `npu-scribe-0.1.0-windows-x64.exe` and run it. Python and Git are not
+Download `audio-transcriber-0.1.0-windows-x64.exe` and run it. After setup,
+double-click the Audio Transcriber desktop shortcut. Python and Git are not
 required. Open **Getting started** from the Start menu to download the speech
 model and optional cleanup model. For compressed media, select a separate
 `ffmpeg.exe`. Processing works offline after setup.
@@ -24,4 +25,4 @@ and models in your local application-data folder.
 
 `SHA256SUMS.txt` contains the attachment hashes. Qt/PySide (LGPLv3), FFmpeg
 (LGPLv2.1 or later), and other notices are included in the app. Their sources and
-build instructions are in `npu-scribe-0.1.0-library-sources.zip`.
+build instructions are in `audio-transcriber-0.1.0-library-sources.zip`.

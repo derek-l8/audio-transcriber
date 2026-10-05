@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Windows validation for NPU Scribe Milestone 1 (batch transcription).
+    Windows validation for Audio Transcriber Milestone 1 (batch transcription).
 
 .DESCRIPTION
     Non-administrator workflow. The intended one-command novice experience:
 
         Set-ExecutionPolicy -Scope Process Bypass
-        .\Invoke-NpuScribeValidation.ps1 -SetupEnvironment -DownloadModels
+        .\Invoke-AudioTranscriberValidation.ps1 -SetupEnvironment -DownloadModels
 
     Parameters:
         -DataDirectory PATH        validation data root (default: per-user app data,
@@ -50,7 +50,7 @@ $metrics = [ordered]@{}
 
 # --------------------------------------------------------------- environment resolution
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$appRoot = Join-Path $env:LOCALAPPDATA "npu-scribe"
+$appRoot = Join-Path $env:LOCALAPPDATA "audio-transcriber"
 if (-not $DataDirectory) { $DataDirectory = Join-Path $appRoot "validation-data" }
 $venvPath = Join-Path $appRoot "validation-venv"
 New-Item -ItemType Directory -Force -Path $DataDirectory | Out-Null
@@ -142,7 +142,7 @@ function Invoke-CliStep {
         [string[]]$ParsePrefixes = @()
     )
     $tracked = Start-TrackedProcess -FilePath $PythonExe `
-        -ArgumentList (@("-m", "npu_scribe.cli") + $CliArguments) `
+        -ArgumentList (@("-m", "audio_transcriber.cli") + $CliArguments) `
         -TimeoutSeconds $TimeoutSeconds
     $combined = ($tracked.stdout + "`n" + $tracked.stderr)
     $values = [ordered]@{}
@@ -171,12 +171,12 @@ function Invoke-CliStep {
 $systemPython = Get-Command python -ErrorAction SilentlyContinue
 $venvPython = Join-Path $venvPath "Scripts\python.exe"
 if (-not $systemPython) {
-    Add-Check "python" "fail" "python not found on PATH; install Python 3.11 or 3.12 from python.org (per-user install is sufficient)"
+    Add-Check "python" "fail" "python not found on PATH; install Python 3.14 from python.org (per-user install is sufficient)"
     Write-Host "Python is required. Install it, reopen PowerShell, and rerun."
     New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
     $earlyReport = [ordered]@{ schema_version = 3; checks = $checks; metrics = $metrics }
     $earlyReport | ConvertTo-Json -Depth 8 |
-        Set-Content -Encoding UTF8 (Join-Path $OutputDirectory "npu-scribe-validation.json")
+        Set-Content -Encoding UTF8 (Join-Path $OutputDirectory "audio-transcriber-validation.json")
     return
 }
 if ($SetupEnvironment -or (Test-Path $venvPython)) {
@@ -199,10 +199,10 @@ if (-not (Test-Path $pythonExeCandidate)) {
 $PythonExe = $pythonExeCandidate
 
 $pyVersion = (& $PythonExe --version 2>&1 | Out-String).Trim()
-if ("$pyVersion" -match "3\.(11|12)") {
+if ("$pyVersion" -match "^Python 3\.14\.") {
     Add-Check "python-version" "pass" $pyVersion
 } else {
-    Add-Check "python-version" "fail" "$pyVersion; Python 3.11 or 3.12 is required"
+    Add-Check "python-version" "fail" "$pyVersion; Python 3.14 is required"
 }
 
 # ------------------------------------------------- 1. optional environment setup first
@@ -215,7 +215,7 @@ if ($SetupEnvironment) {
     $install = Start-TrackedProcess -FilePath $PythonExe -ArgumentList @(
         "-m", "pip", "install", "--quiet",
         "--editable", $repoRoot,
-        "openvino==2026.3.0", "openvino-genai==2026.3.0.0"
+        "openvino==2026.4.0", "openvino-genai==2026.4.0.0"
     ) -TimeoutSeconds 1800
     if ($install.timedOut) {
         Add-Check "setup-environment" "timeout" "dependency installation exceeded 1800 s"
@@ -233,7 +233,7 @@ if ($SetupEnvironment) {
 $importProbeScript = @'
 import json
 mods = {}
-for m in ("npu_scribe", "openvino", "openvino_genai"):
+for m in ("audio_transcriber", "openvino", "openvino_genai"):
     try:
         mods[m] = getattr(__import__(m), "__version__", "installed")
     except Exception:
@@ -245,23 +245,23 @@ $importProbe = Start-TrackedProcess -FilePath $PythonExe `
 $mods = $null
 try { $mods = $importProbe.stdout | ConvertFrom-Json } catch { }
 if ($null -eq $mods) {
-    $missing = @("npu_scribe", "openvino", "openvino_genai")
+    $missing = @("audio_transcriber", "openvino", "openvino_genai")
     Add-Check "imports" "fail" (
         "Could not verify imports. Recovery: rerun with -SetupEnvironment " +
-        "(creates a per-user environment at <LocalAppData>\npu-scribe\validation-venv " +
+        "(creates a per-user environment at <LocalAppData>\audio-transcriber\validation-venv " +
         "and installs '.[inference]'). No Administrator rights are needed."
     )
-    Write-Host "Recovery: .\Invoke-NpuScribeValidation.ps1 -SetupEnvironment -DownloadModels"
+    Write-Host "Recovery: .\Invoke-AudioTranscriberValidation.ps1 -SetupEnvironment -DownloadModels"
 } else {
     $missing = @($mods.PSObject.Properties | Where-Object { $null -eq $_.Value })
     if ($missing.Count -eq 0) {
         Add-Check "imports" "pass" (
-            "npu_scribe $($mods.npu_scribe); openvino $($mods.openvino); " +
+            "audio_transcriber $($mods.audio_transcriber); openvino $($mods.openvino); " +
             "openvino_genai $($mods.openvino_genai)"
         )
         $metrics["python"] = "$pyVersion"
         $metrics["package_versions"] = [ordered]@{
-            npu_scribe      = "$($mods.npu_scribe)"
+            audio_transcriber      = "$($mods.audio_transcriber)"
             openvino        = "$($mods.openvino)"
             openvino_genai  = "$($mods.openvino_genai)"
         }
@@ -274,7 +274,7 @@ if ($null -eq $mods) {
             "missing: " + (($missing | ForEach-Object Name) -join ", ") +
             ". Recovery: rerun with -SetupEnvironment."
         )
-        Write-Host "Recovery: .\Invoke-NpuScribeValidation.ps1 -SetupEnvironment -DownloadModels"
+        Write-Host "Recovery: .\Invoke-AudioTranscriberValidation.ps1 -SetupEnvironment -DownloadModels"
     }
 }
 $environmentReady = (Test-Path variable:mods) -and ($null -ne $mods) -and ($missing.Count -eq 0)
@@ -310,7 +310,7 @@ if ($DownloadModels) {
     }
     $revisionProbeScript = @'
 import json
-from npu_scribe.acquisition import MANIFEST
+from audio_transcriber.acquisition import MANIFEST
 print(json.dumps({k: v.revision for k, v in MANIFEST.items()}))
 '@
     $revisionProbe = Start-TrackedProcess -FilePath $PythonExe `
@@ -324,7 +324,7 @@ print(json.dumps({k: v.revision for k, v in MANIFEST.items()}))
 $verifyTinyScript = @'
 import sys
 from pathlib import Path
-from npu_scribe.acquisition import get_spec, verify_installed
+from audio_transcriber.acquisition import get_spec, verify_installed
 model = get_spec("whisper-tiny.en-int4-ov")
 raise SystemExit(0 if verify_installed(Path(sys.argv[1]) / "models", model) else 1)
 '@
@@ -351,7 +351,7 @@ with wave.open(path, "wb") as handle:
     handle.setsampwidth(2)
     handle.setframerate(16000)
     handle.writeframes(b"\x00\x00" * 160000)
-from npu_scribe.media import inspect_pcm_wav
+from audio_transcriber.media import inspect_pcm_wav
 rate, channels, frames = inspect_pcm_wav(Path(path))
 assert (rate, channels, frames) == (16000, 1, 160000), (rate, channels, frames)
 print("fixture-ok")
@@ -401,7 +401,7 @@ if ($LongFile) {
         $outFile = New-TemporaryOutputFile
         $errFile = New-TemporaryOutputFile
         $proc = Start-Process -FilePath $PythonExe `
-            -ArgumentList (@("-m","npu_scribe.cli","--data-dir",$DataDirectory,
+            -ArgumentList (@("-m","audio_transcriber.cli","--data-dir",$DataDirectory,
                 "transcribe", "--cleanup", "off", "--formatting", "off",$LongFile,"--model","whisper-base.en-int4-ov",
                 "--device","auto","--chunk-seconds","30","--overlap-seconds","1") + $ffmpegArgs) `
             -RedirectStandardOutput $outFile -RedirectStandardError $errFile `
@@ -492,7 +492,7 @@ print("unique", len(indexes))
         $enduranceErr = New-TemporaryOutputFile
         $enduranceStart = Get-Date
         $enduranceProc = Start-Process -FilePath $PythonExe `
-            -ArgumentList (@("-m","npu_scribe.cli","--data-dir",$DataDirectory,
+            -ArgumentList (@("-m","audio_transcriber.cli","--data-dir",$DataDirectory,
                 "transcribe", "--cleanup", "off", "--formatting", "off",$LongFile,"--model","whisper-base.en-int4-ov",
                 "--device","auto","--chunk-seconds","30","--overlap-seconds","1") + $ffmpegArgs) `
             -RedirectStandardOutput $enduranceOut -RedirectStandardError $enduranceErr `
@@ -605,10 +605,10 @@ $report = [ordered]@{
     metrics              = $metrics
     checks               = $checks
 }
-$jsonPath = Join-Path $OutputDirectory "npu-scribe-validation.json"
-$mdPath = Join-Path $OutputDirectory "npu-scribe-validation.md"
+$jsonPath = Join-Path $OutputDirectory "audio-transcriber-validation.json"
+$mdPath = Join-Path $OutputDirectory "audio-transcriber-validation.md"
 $report | ConvertTo-Json -Depth 8 | Set-Content -Encoding UTF8 $jsonPath
-@("# NPU Scribe Windows validation", "",
+@("# Audio Transcriber Windows validation", "",
     "Review for private content before returning.", "") +
 ($checks | ForEach-Object { "- **$($_.status)** ``$($_.id)`` - $($_.detail)" }) |
 Set-Content -Encoding UTF8 $mdPath

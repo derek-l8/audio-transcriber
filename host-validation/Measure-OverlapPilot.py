@@ -15,13 +15,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 
-from npu_scribe.acquisition import get_spec, verify_installed
-from npu_scribe.chunking import ChunkSpec, iter_source_windows, plan_chunks, read_chunk
-from npu_scribe.engines import OpenVINOWhisperEngine
-from npu_scribe.media import PcmWavDecoder
-from npu_scribe.metrics import _distance
-from npu_scribe.pipeline import BatchOptions, BatchRunner
-from npu_scribe.storage import SessionStore, atomic_json, sha256_file
+from audio_transcriber.acquisition import get_spec, verify_installed
+from audio_transcriber.chunking import ChunkSpec, iter_source_windows, plan_chunks, read_chunk
+from audio_transcriber.engines import OpenVINOWhisperEngine
+from audio_transcriber.media import PcmWavDecoder
+from audio_transcriber.metrics import _distance
+from audio_transcriber.pipeline import BatchOptions, BatchRunner
+from audio_transcriber.storage import SessionStore, atomic_json, sha256_file
 
 MODELS = ("whisper-tiny.en-int4-ov", "whisper-base.en-int4-ov")
 TOKEN = re.compile(r"[a-z0-9]+(?:'[a-z0-9]+)*")

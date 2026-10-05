@@ -19,10 +19,10 @@ def main() -> None:
     from PySide6.QtGui import QFont, QFontDatabase
     from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-    from npu_scribe.desktop_editing import RevisionHistoryDialog, SegmentEditDialog
-    from npu_scribe.desktop_ui import LectureWindow
-    from npu_scribe.editing import revision_history
-    from npu_scribe.storage import SessionStore, atomic_json, sha256_file
+    from audio_transcriber.desktop_editing import RevisionHistoryDialog, SegmentEditDialog
+    from audio_transcriber.desktop_ui import LectureWindow
+    from audio_transcriber.editing import revision_history
+    from audio_transcriber.storage import SessionStore, atomic_json, sha256_file
 
     source = SessionStore(args.source_library)
     candidates = [

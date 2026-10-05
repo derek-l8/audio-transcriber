@@ -10,12 +10,12 @@ from .cli import default_data_dir
 def worker_command(arguments: list[str]) -> tuple[str, list[str]]:
     """Use a console worker beside the frozen GUI, or this Python environment."""
     if getattr(sys, "frozen", False):
-        return str(Path(sys.executable).with_name("npu-scribe-worker.exe")), arguments
-    return sys.executable, ["-m", "npu_scribe.cli", *arguments]
+        return str(Path(sys.executable).with_name("audio-transcriber-worker.exe")), arguments
+    return sys.executable, ["-m", "audio_transcriber.cli", *arguments]
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(prog="npu-scribe-desktop")
+    parser = argparse.ArgumentParser(prog="audio-transcriber-desktop")
     parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--model-root", type=Path, default=None)
     parser.add_argument("--ffmpeg", default=None)
@@ -40,11 +40,11 @@ def main() -> int:
         raise SystemExit(f"{error_message}. Details: {log}") from error
 
     app = QApplication(sys.argv)
-    app.setApplicationName("NPU Scribe")
+    app.setApplicationName("Audio Transcriber")
     lock = QLockFile(str(data_dir / "desktop.lock"))
     if not lock.tryLock(0):
         message = QMessageBox()
-        message.setWindowTitle("NPU Scribe")
+        message.setWindowTitle("Audio Transcriber")
         message.setIcon(QMessageBox.Icon.Warning)
         message.setText("This lecture library is already open in another window.")
         message.exec()

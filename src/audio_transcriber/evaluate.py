@@ -150,7 +150,7 @@ def peak_memory_mb() -> float | None:
         # Linux reports KiB; macOS reports bytes.
         scale = 1024.0 if sys.platform != "darwin" else 1024.0 * 1024.0
         return round(usage.ru_maxrss / scale, 2)
-    except (OSError, ValueError):
+    except OSError, ValueError:
         return None
 
 

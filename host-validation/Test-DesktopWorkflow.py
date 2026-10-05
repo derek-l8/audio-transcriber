@@ -40,11 +40,11 @@ def main() -> None:
     from PySide6.QtGui import QFont, QFontDatabase
     from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-    from npu_scribe.desktop_ui import LectureWindow
-    from npu_scribe.storage import atomic_json
+    from audio_transcriber.desktop_ui import LectureWindow
+    from audio_transcriber.storage import atomic_json
 
     if args.worker_executable is not None:
-        from npu_scribe import desktop_ui
+        from audio_transcriber import desktop_ui
 
         worker = args.worker_executable.resolve()
         if not worker.is_file():

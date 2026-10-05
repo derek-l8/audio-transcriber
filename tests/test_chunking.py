@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.chunking import (
+from audio_transcriber.chunking import (
     ChunkSpec,
     iter_source_windows,
     merge_overlap,
@@ -17,7 +17,7 @@ from npu_scribe.chunking import (
     restore_windows,
     validate_segment_times,
 )
-from npu_scribe.media import PcmWavDecoder
+from audio_transcriber.media import PcmWavDecoder
 
 
 def test_pause_cut_covers_audio_and_avoids_speech(tmp_path: Path) -> None:

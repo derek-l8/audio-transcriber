@@ -31,7 +31,7 @@ def main() -> None:
     args = parser.parse_args()
     checkout = Path(__file__).resolve().parents[1]
     executable = args.executable.resolve(strict=True)
-    worker = executable.with_name("npu-scribe-worker.exe")
+    worker = executable.with_name("audio-transcriber-worker.exe")
     worker.resolve(strict=True)
     work = args.work_dir.resolve()
     if os.name != "nt":

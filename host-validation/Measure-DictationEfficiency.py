@@ -73,8 +73,8 @@ def main() -> None:
         sys.path.insert(0, str(args.deps.resolve()))
     import psutil
 
-    from npu_scribe.ai_cleanup import LocalCleanupModel, check_candidate, split_text
-    from npu_scribe.engines import OpenVINOWhisperEngine
+    from audio_transcriber.ai_cleanup import LocalCleanupModel, check_candidate, split_text
+    from audio_transcriber.engines import OpenVINOWhisperEngine
 
     cases = {c["id"]: c for c in json.loads(args.inputs.read_text(encoding="utf-8-sig"))}
     process = psutil.Process()

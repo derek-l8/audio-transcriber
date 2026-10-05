@@ -30,7 +30,7 @@ a = Analysis(
     hiddenimports=ov_hidden + genai_hidden,
 )
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="NPU Scribe", console=False)
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="Audio Transcriber", console=False)
 
 worker = Analysis(
     [str(root / "packaging" / "worker_entry.py")],
@@ -43,7 +43,7 @@ worker = Analysis(
 worker_pyz = PYZ(worker.pure)
 worker_exe = EXE(
     worker_pyz, worker.scripts, [], exclude_binaries=True,
-    name="npu-scribe-worker", console=True,
+    name="audio-transcriber-worker", console=True,
 )
 # Widgets uses raster rendering; the optional Mesa software-OpenGL DLL is unused.
 for analysis in (a, worker):
@@ -63,5 +63,5 @@ for analysis in (a, worker):
         raise RuntimeError(f"Review newly collected Qt libraries and their sources: {unexpected}")
 coll = COLLECT(
     exe, worker_exe, a.binaries, a.datas, worker.binaries, worker.datas,
-    name="NPU Scribe",
+    name="Audio Transcriber",
 )

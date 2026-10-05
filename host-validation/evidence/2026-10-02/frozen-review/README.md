@@ -50,7 +50,7 @@ only for the confirmed seek defect and accessibility labels.
 From a local checkout outside synced folders, with an existing frozen bundle:
 
 ```powershell
-.\.venv\Scripts\python.exe host-validation/Test-FrozenReview.py 'dist/NPU Scribe/NPU Scribe.exe' --work-dir .scratch/frozen-review-01 --report .scratch/frozen-review-01/results.json
+.\.venv\Scripts\python.exe host-validation/Test-FrozenReview.py 'dist/Audio Transcriber/Audio Transcriber.exe' --work-dir .scratch/frozen-review-01 --report .scratch/frozen-review-01/results.json
 ```
 
 Use a fresh work directory for each run. The helper requires Windows PowerShell
@@ -84,7 +84,7 @@ unchanged. The second normal close also exited with code 0 and removed the lock.
 From the local checkout, with an existing verified tiny model and public excerpt:
 
 ```powershell
-.\.venv\Scripts\python.exe host-validation/Test-FrozenJobClose.py 'dist/NPU Scribe/NPU Scribe.exe' --excerpt 'C:\Lectures\public-clip.mp3' --ffmpeg 'C:\Tools\ffmpeg\bin\ffmpeg.exe' --model-root 'C:\NPU Scribe Models' --work-dir .scratch/frozen-job-close-01
+.\.venv\Scripts\python.exe host-validation/Test-FrozenJobClose.py 'dist/Audio Transcriber/Audio Transcriber.exe' --excerpt 'C:\Lectures\public-clip.mp3' --ffmpeg 'C:\Tools\ffmpeg\bin\ffmpeg.exe' --model-root 'C:\Audio Transcriber Models' --work-dir .scratch/frozen-job-close-01
 ```
 
 Use a fresh work directory. Results and logs are written there. Two initial

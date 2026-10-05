@@ -269,7 +269,7 @@ class DictationWindow(QDialog):
         self.timer.setInterval(40)
         self.timer.timeout.connect(self._tick)
         self.started = 0.0
-        self.setWindowTitle("NPU Scribe — Live dictation")
+        self.setWindowTitle("Audio Transcriber — Live dictation")
         self.resize(650, 650)
         layout = QVBoxLayout(self)
         description = QLabel(

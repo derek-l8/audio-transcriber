@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.devices import (
+from audio_transcriber.devices import (
     Benchmark,
     cache_key,
     choose_device,

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from conftest import STUB_DIR, enable_python_stub_on_windows
 
-from npu_scribe.media import (
+from audio_transcriber.media import (
     FFmpegDecoder,
     MediaError,
     PcmWavDecoder,
@@ -105,7 +105,7 @@ def test_ffmpeg_decoder_failure_is_clean(tmp_path: Path, monkeypatch: pytest.Mon
     source.write_bytes(b"payload")
     with pytest.raises(MediaError, match="decoding failed"):
         FFmpegDecoder(failing).decode(source)
-    leftovers = [p for p in tmp_path.iterdir() if p.name.startswith("npu-scribe-decode-")]
+    leftovers = [p for p in tmp_path.iterdir() if p.name.startswith("audio-transcriber-decode-")]
     assert not leftovers
 
 
@@ -142,11 +142,12 @@ def test_no_shell_invocation_anywhere(tmp_path: Path) -> None:
 
 
 def test_decoder_discovers_local_ffmpeg_without_saved_paths(tmp_path, monkeypatch):
-    from npu_scribe.pipeline import select_decoder
+    from audio_transcriber.pipeline import select_decoder
 
     executable = str(tmp_path / "Tools with spaces" / "ffmpeg.exe")
     monkeypatch.setattr(
-        "npu_scribe.media.shutil.which", lambda name: executable if name == "ffmpeg" else None
+        "audio_transcriber.media.shutil.which",
+        lambda name: executable if name == "ffmpeg" else None,
     )
     assert select_decoder(".mp4", None).ffmpeg_path == executable
     # Explicit configuration takes precedence even if it no longer exists.
@@ -161,8 +162,8 @@ def test_decoder_discovers_local_ffmpeg_without_saved_paths(tmp_path, monkeypatc
 
 
 def test_decoder_missing_ffmpeg_explains_setup(monkeypatch):
-    from npu_scribe.pipeline import select_decoder
+    from audio_transcriber.pipeline import select_decoder
 
-    monkeypatch.setattr("npu_scribe.media.shutil.which", lambda name: None)
+    monkeypatch.setattr("audio_transcriber.media.shutil.which", lambda name: None)
     with pytest.raises(MediaError, match="install it on PATH"):
         select_decoder(".mp3", None)

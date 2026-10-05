@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from npu_scribe.cli import report_session
+from audio_transcriber.cli import report_session
 
 
 def make_session(

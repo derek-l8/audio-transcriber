@@ -25,7 +25,7 @@ Status labels: **verified-sandbox**, **verified-windows-one-host**,
 
 The two speech-model entries below are English-only OpenVINO IR + OpenVINO Tokenizers exports
 (Apache-2.0, no remote code, no pickle). Checksums are recorded per file in
-`src/npu_scribe/acquisition.py`; the download verifier enforces them.
+`src/audio_transcriber/acquisition.py`; the download verifier enforces them.
 
 | Model | Revision | Role | Download size | License |
 |---|---|---|---|---|
@@ -66,7 +66,7 @@ runtime binding check, not an accuracy or NPU performance comparison. See
 
 ## Evaluation harness (verified-windows-one-host)
 
-`npu-scribe evaluate EVALUATION_MANIFEST --model MODEL_ID --device auto`
+`audio-transcriber evaluate EVALUATION_MANIFEST --model MODEL_ID --device auto`
 
 The CLI evaluates through the same chunked batch path as transcription. It has
 been run on the Windows host with MIT, AMI, TED-LIUM, and NPTEL material.

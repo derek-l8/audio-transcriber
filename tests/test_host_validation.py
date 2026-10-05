@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-HARNESS = Path(__file__).parent.parent / "host-validation" / "Invoke-NpuScribeValidation.ps1"
+HARNESS = Path(__file__).parent.parent / "host-validation" / "Invoke-AudioTranscriberValidation.ps1"
 
 
 @pytest.fixture(scope="module")
@@ -40,8 +40,8 @@ def test_ffmpeg_path_threads_through_every_media_run(script: str) -> None:
 
 
 def test_no_undefined_environment_variable_for_data_dir(script: str) -> None:
-    # The old bug: --data-dir received $env:NPUSCRIBE_VALIDATION_DATA, never set.
-    assert "NPUSCRIBE_VALIDATION_DATA" not in script
+    # The old bug: --data-dir received $env:AUDIO_TRANSCRIBER_VALIDATION_DATA, never set.
+    assert "AUDIO_TRANSCRIBER_VALIDATION_DATA" not in script
     assert "$DataDirectory = Join-Path $appRoot" in script
 
 
@@ -63,11 +63,17 @@ def test_single_resolved_python_executable(script: str) -> None:
 
 
 def test_supported_python_version_check(script: str) -> None:
-    assert re.search(r'-match "3\\\.\(11\|12\)"', script), "version gate missing"
+    gate = re.search(r"if \(\"\$pyVersion\" -match \"([^\"]+)\"\)", script)
+    assert gate, "version gate missing"
+    pattern = re.compile(gate.group(1))
+    assert pattern.search("Python 3.14.0")
+    assert pattern.search("Python 3.14.6")
+    for version in ("Python 3.11.0", "Python 3.12.0", "Python 3.13.0", "Python 3.15.0"):
+        assert not pattern.search(version)
 
 
 def test_import_checks_before_validation(script: str) -> None:
-    for module in ("npu_scribe", "openvino", "openvino_genai"):
+    for module in ("audio_transcriber", "openvino", "openvino_genai"):
         assert f'"{module}"' in script
     assert "Recovery: rerun with -SetupEnvironment" in script or (
         "Recovery:" in script and "-SetupEnvironment" in script

@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from npu_scribe.ai_cleanup import (
+from audio_transcriber.ai_cleanup import (
     DEFAULT_MODEL,
     CleanupCancelled,
     CleanupError,
@@ -16,12 +16,12 @@ from npu_scribe.ai_cleanup import (
     source_blocks,
     split_text,
 )
-from npu_scribe.cleanup import deterministic_cleanup
-from npu_scribe.cli import main
-from npu_scribe.engines import MockSpeechEngine
-from npu_scribe.models import Segment
-from npu_scribe.pipeline import BatchOptions, BatchRunner
-from npu_scribe.storage import SessionStore, sha256_file
+from audio_transcriber.cleanup import deterministic_cleanup
+from audio_transcriber.cli import main
+from audio_transcriber.engines import MockSpeechEngine
+from audio_transcriber.models import Segment
+from audio_transcriber.pipeline import BatchOptions, BatchRunner
+from audio_transcriber.storage import SessionStore, sha256_file
 
 
 class Formatter:
@@ -161,7 +161,7 @@ def test_cancel_after_generation_does_not_publish(ready):
 
 def test_cli_session_cleanup_exports_all_formats(ready, monkeypatch):
     store, session = ready
-    monkeypatch.setattr("npu_scribe.cli.make_model", lambda *args: Formatter())
+    monkeypatch.setattr("audio_transcriber.cli.make_model", lambda *args: Formatter())
     base = ["--data-dir", str(store.data_dir)]
     assert main(base + ["cleanup", session.id]) == 0
     for fmt in ("text", "markdown", "json", "srt"):
@@ -172,7 +172,7 @@ def test_cli_session_cleanup_exports_all_formats(ready, monkeypatch):
 
 
 def test_cli_text_cleanup_preserves_input_and_refuses_overwrite(tmp_path, monkeypatch):
-    monkeypatch.setattr("npu_scribe.cli.make_model", lambda *args: Formatter())
+    monkeypatch.setattr("audio_transcriber.cli.make_model", lambda *args: Formatter())
     source = tmp_path / "input.txt"
     source.write_text("um keep 5 volts")
     output = tmp_path / "output.json"
@@ -198,7 +198,7 @@ def test_cli_text_cleanup_preserves_input_and_refuses_overwrite(tmp_path, monkey
 
 def test_cli_requires_cleanup_model_and_never_downloads(tmp_path, monkeypatch):
     monkeypatch.setattr(
-        "npu_scribe.acquisition.https_fetcher", lambda *args: pytest.fail("network")
+        "audio_transcriber.acquisition.https_fetcher", lambda *args: pytest.fail("network")
     )
     assert main(["--data-dir", str(tmp_path), "cleanup", "unknown-session"]) == 1
     assert (
@@ -221,8 +221,8 @@ def test_cli_requires_cleanup_model_and_never_downloads(tmp_path, monkeypatch):
 
 
 def test_formatted_exports_keep_paragraphs_and_lists():
-    from npu_scribe.export import plain_text, render
-    from npu_scribe.models import InferenceProvenance, Transcript
+    from audio_transcriber.export import plain_text, render
+    from audio_transcriber.models import InferenceProvenance, Transcript
 
     transcript = Transcript(
         (Segment(0, 10, "Hello.\n\n1. First.\n2. Second."), Segment(10, 20, "Another paragraph.")),
@@ -247,7 +247,7 @@ def test_formatted_exports_keep_paragraphs_and_lists():
 def test_transcribe_chains_selected_cleanup(
     mode, level, override, tmp_path, three_second_wav, monkeypatch
 ):
-    import npu_scribe.cli as cli
+    import audio_transcriber.cli as cli
 
     monkeypatch.setattr(cli, "make_model", lambda *args: Formatter())
     library = tmp_path / "library"
@@ -280,7 +280,7 @@ def test_transcribe_chains_selected_cleanup(
 def test_off_never_loads_cleanup_and_failure_keeps_transcript(
     tmp_path, three_second_wav, monkeypatch, capsys
 ):
-    import npu_scribe.cli as cli
+    import audio_transcriber.cli as cli
 
     def unavailable(*args):
         raise CleanupError("model missing")
@@ -310,8 +310,8 @@ def test_off_never_loads_cleanup_and_failure_keeps_transcript(
 
 
 def test_summary_is_separate_formatted_notes_and_not_subtitles(ready, monkeypatch):
-    import npu_scribe.cli as cli
-    from npu_scribe.export import ExportError, write_export
+    import audio_transcriber.cli as cli
+    from audio_transcriber.export import ExportError, write_export
 
     store, session = ready
     cleanup_session(store, session.id, Formatter())
@@ -352,7 +352,7 @@ def fake_runtime(monkeypatch, devices, load_failure=False, generate_failure=Fals
     import sys
     from types import SimpleNamespace
 
-    from npu_scribe.ai_cleanup import LocalCleanupModel
+    from audio_transcriber.ai_cleanup import LocalCleanupModel
 
     loads = []
 
@@ -429,7 +429,7 @@ def test_explicit_device_failure_and_cancellation_do_not_fall_back(monkeypatch):
 
 
 def test_resume_chains_cleanup_only_after_ready(tmp_path, three_second_wav, monkeypatch):
-    import npu_scribe.cli as cli
+    import audio_transcriber.cli as cli
 
     calls = []
 
@@ -500,7 +500,7 @@ def test_summary_cancellation_retains_previous_notes(ready):
 
 
 def test_summary_renders_only_selected_source_and_rejects_invalid_indices():
-    from npu_scribe.ai_cleanup import render_summary, summary_input
+    from audio_transcriber.ai_cleanup import render_summary, summary_input
 
     source = "um the pump moved five liters per minute. Power use is not known. Any questions?"
     passages, request = summary_input(source)

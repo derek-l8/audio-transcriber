@@ -6,8 +6,8 @@ Default tests block network sockets, including tests of ordinary CLI commands.
 
 ## Library and recordings
 
-The default library is `%LOCALAPPDATA%\npu-scribe` on Windows. Override it with
-`--data-dir` or `NPUSCRIBE_DATA_DIR`. Models can use a separate `--model-root`.
+The default library is `%LOCALAPPDATA%\audio-transcriber` on Windows. Override it with
+`--data-dir` or `AUDIO_TRANSCRIBER_DATA_DIR`. Models can use a separate `--model-root`.
 The app copies imported recordings into the library and retains transcripts,
 manual-edit revisions, AI cleanup history, settings, checkpoints, and exports there.
 Cleanup compilation caches are stored under `cache/cleanup` in the library.
@@ -15,7 +15,7 @@ Cleanup compilation caches are stored under `cache/cleanup` in the library.
 Choose a folder outside the repository. The app does not prevent an override
 from pointing into Git or a synced directory, and it does not yet warn about
 OneDrive redirection. Files in a synced library can be uploaded by the sync
-service independently of NPU Scribe. Local files use ordinary filesystem
+service independently of Audio Transcriber. Local files use ordinary filesystem
 permissions; the application does not encrypt them.
 
 ## Dictation

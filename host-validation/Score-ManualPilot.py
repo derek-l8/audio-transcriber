@@ -13,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-from npu_scribe.metrics import _distance
+from audio_transcriber.metrics import _distance
 
 MODELS = ("whisper-tiny.en-int4-ov", "whisper-base.en-int4-ov")
 ASCII_TOKEN = re.compile(r"[a-z0-9]+(?:'[a-z0-9]+)*")

@@ -104,7 +104,7 @@ def load_cached(path: PathLike, key: dict[str, str]) -> list[Benchmark] | None:
     """Return cached benchmarks only when every identity component still matches."""
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         return None
     entry = data.get(_key_id(key))
     if not isinstance(entry, dict):
@@ -123,7 +123,7 @@ def load_cached(path: PathLike, key: dict[str, str]) -> list[Benchmark] | None:
             )
             for item in entry["benchmarks"]
         ]
-    except (KeyError, TypeError):
+    except KeyError, TypeError:
         return None
 
 
@@ -131,7 +131,7 @@ def save_cached(path: PathLike, key: dict[str, str], results: Sequence[Benchmark
     path = Path(path)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         data = {}
     data[_key_id(key)] = {
         "key": key,

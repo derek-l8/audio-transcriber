@@ -10,7 +10,7 @@ The default suite uses synthetic media and no downloaded models or network.
 .\.venv\Scripts\python.exe -m mypy src
 ```
 
-For coverage, add `--cov=npu_scribe --cov-report=term`. Use a new `--basetemp`
+For coverage, add `--cov=audio_transcriber --cov-report=term`. Use a new `--basetemp`
 folder for a repeat when the previous run's files are in use.
 
 ## Coverage
@@ -41,7 +41,7 @@ source v0.1 scope and implemented Windows dictation from the historical plan. Ex
 checks cover path-independent CPU speech and CPU text cleanup on one Windows
 host.
 
-The [current installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+The [current installer checkpoint](host-validation/evidence/2026-10-04/audio-transcriber-checkpoint/README.md)
 covers installed model acquisition, CPU speech, GPU cleanup, formatting, exports,
 native review and dictation controls, reinstall, and uninstall on one Windows
 host. Its latest rebuild verifies the lecture and dictation defaults and records
@@ -53,9 +53,9 @@ are retained under their original dates.
 A live acquisition test downloads the pinned model and requires network access:
 
 ```powershell
-$env:NPU_SCRIBE_RUN_LIVE = '1'
+$env:AUDIO_TRANSCRIBER_RUN_LIVE = '1'
 .\.venv\Scripts\python.exe -m pytest -m live
-Remove-Item Env:NPU_SCRIBE_RUN_LIVE
+Remove-Item Env:AUDIO_TRANSCRIBER_RUN_LIVE
 ```
 
 Report live results separately from the default suite. The environment flag
@@ -78,9 +78,9 @@ and launcher smoke outside the checkout; the CI package job defines that sequenc
 For a separate Windows environment using the current package version:
 
 ```powershell
-py -3.12 -m venv .scratch/wheel-check
+py -3.14 -m venv .scratch/wheel-check
 if ($LASTEXITCODE -ne 0) { throw 'Environment creation failed.' }
-.\.scratch\wheel-check\Scripts\python.exe -m pip install dist/npu_scribe-0.1.0-py3-none-any.whl
+.\.scratch\wheel-check\Scripts\python.exe -m pip install dist/audio_transcriber-0.1.0-py3-none-any.whl
 if ($LASTEXITCODE -ne 0) { throw 'Wheel installation failed.' }
 .\.scratch\wheel-check\Scripts\python.exe scripts/smoke_installed.py .scratch/wheel-smoke
 ```
@@ -173,13 +173,13 @@ reference for word error rate on this recording.
 An approved ten-second microphone check produced almost-silent input (PCM peak
 2/32768), so spoken microphone validation remains incomplete. The input meter
 and quiet-recording rejection were added after that run. Other Windows apps and microphones still need checks. The
-[installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+[installer checkpoint](host-validation/evidence/2026-10-04/audio-transcriber-checkpoint/README.md)
 covers the current frozen worker and GUI.
 
 To repeat the native adapter check with the desktop extra installed:
 
 ```powershell
-$Validation = Join-Path $env:LOCALAPPDATA 'npu-scribe-validation\dictation'
+$Validation = Join-Path $env:LOCALAPPDATA 'audio-transcriber-validation\dictation'
 .\.venv\Scripts\python.exe host-validation/Validate-Dictation.py --output-dir "$Validation"
 ```
 

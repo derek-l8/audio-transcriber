@@ -32,11 +32,11 @@ def main() -> None:
     configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     version = configuration["project"]["version"]
     destination = ROOT / "dist/release"
-    source = destination / f"npu_scribe-{version}.tar.gz"
-    wheel = destination / f"npu_scribe-{version}-py3-none-any.whl"
-    libraries = destination / f"npu-scribe-{version}-library-sources.zip"
-    installer = ROOT / f"dist/installer/npu-scribe-{version}-windows-x64.exe"
-    bundle = ROOT / "dist/NPU Scribe"
+    source = destination / f"audio_transcriber-{version}.tar.gz"
+    wheel = destination / f"audio_transcriber-{version}-py3-none-any.whl"
+    libraries = destination / f"audio-transcriber-{version}-library-sources.zip"
+    installer = ROOT / f"dist/installer/audio-transcriber-{version}-windows-x64.exe"
+    bundle = ROOT / "dist/Audio Transcriber"
     bundle_files = sorted(p for p in bundle.rglob("*") if p.is_file())
     if not bundle_files or not installer.is_file():
         raise RuntimeError("Build the bundle and installer first")
@@ -76,8 +76,8 @@ def main() -> None:
     if missing:
         raise RuntimeError(f"Source archive omits current files; rebuild it: {sorted(missing)}")
     with zipfile.ZipFile(wheel) as archive:
-        for file in (ROOT / "src/npu_scribe").glob("*.py"):
-            if archive.read("npu_scribe/" + file.name) != file.read_bytes():
+        for file in (ROOT / "src/audio_transcriber").glob("*.py"):
+            if archive.read("audio_transcriber/" + file.name) != file.read_bytes():
                 raise RuntimeError(f"Wheel predates an edit: {file.name}")
     target = destination / installer.name
     shutil.copy2(installer, target)

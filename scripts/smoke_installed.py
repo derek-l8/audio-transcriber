@@ -15,16 +15,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("work_dir", type=Path, help="a new disposable directory outside src")
     args = parser.parse_args()
-    import npu_scribe
+    import audio_transcriber
 
-    origin = Path(npu_scribe.__file__).resolve()
+    origin = Path(audio_transcriber.__file__).resolve()
     if not origin.is_relative_to(Path(sys.prefix).resolve()):
         raise RuntimeError("Application was not imported from this environment's installation")
     work = args.work_dir.resolve()
     work.mkdir(parents=True, exist_ok=False)
     suffix = ".exe" if os.name == "nt" else ""
-    cli = Path(sys.executable).parent / f"npu-scribe{suffix}"
-    desktop = Path(sys.executable).parent / f"npu-scribe-desktop{suffix}"
+    cli = Path(sys.executable).parent / f"audio-transcriber{suffix}"
+    desktop = Path(sys.executable).parent / f"audio-transcriber-desktop{suffix}"
 
     def run(program: Path, arguments: list[str], expected: int = 0) -> str:
         result = subprocess.run(  # noqa: S603 - installed launcher with synthetic test arguments

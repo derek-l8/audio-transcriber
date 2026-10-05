@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from npu_scribe.cli import main
-from npu_scribe.editing import (
+from audio_transcriber.cli import main
+from audio_transcriber.editing import (
     EditError,
     current_revision,
     edit_lock,
@@ -13,9 +13,9 @@ from npu_scribe.editing import (
     revision_history,
     save_segment_edit,
 )
-from npu_scribe.export import write_export
-from npu_scribe.models import InferenceProvenance, Segment, Session, Transcript
-from npu_scribe.storage import SessionStore, sha256_file
+from audio_transcriber.export import write_export
+from audio_transcriber.models import InferenceProvenance, Segment, Session, Transcript
+from audio_transcriber.storage import SessionStore, sha256_file
 
 
 @pytest.fixture

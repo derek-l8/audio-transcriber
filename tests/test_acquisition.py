@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.acquisition import (
+from audio_transcriber.acquisition import (
     MANIFEST,
     AcquisitionError,
     ModelFile,
@@ -191,9 +191,9 @@ def test_no_runtime_network_for_transcription(
     tmp_path: Path, three_second_wav: Path, monkeypatch
 ) -> None:
     """After acquisition, ordinary transcription must never open a socket."""
-    from npu_scribe.engines import MockSpeechEngine
-    from npu_scribe.pipeline import BatchOptions, BatchRunner
-    from npu_scribe.storage import SessionStore
+    from audio_transcriber.engines import MockSpeechEngine
+    from audio_transcriber.pipeline import BatchOptions, BatchRunner
+    from audio_transcriber.storage import SessionStore
 
     class Denied(socket.socket):
         def __init__(self, *a, **k):
@@ -210,7 +210,7 @@ def test_no_runtime_network_for_transcription(
 def test_large_model_range_download_checks_server_range_and_contents(tmp_path, monkeypatch):
     import io
 
-    import npu_scribe.acquisition as acquisition
+    import audio_transcriber.acquisition as acquisition
 
     payload = b"verified model bytes"
 

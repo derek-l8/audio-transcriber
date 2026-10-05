@@ -117,5 +117,5 @@ Only explicit acquisition/evaluation commands initiate network downloads.
 ```
 
 Default location comes from `platformdirs`; override with `--data-dir` or
-`NPUSCRIBE_DATA_DIR`. The application does not prevent an override into the
+`AUDIO_TRANSCRIBER_DATA_DIR`. The application does not prevent an override into the
 repository or a cloud-synced folder. See [Privacy](PRIVACY.md).

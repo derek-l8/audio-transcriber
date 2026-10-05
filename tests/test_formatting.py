@@ -4,14 +4,14 @@ import json
 
 import pytest
 
-from npu_scribe.ai_cleanup import DEFAULT_MODEL, CleanupCancelled, CleanupError
-from npu_scribe.cli import main
-from npu_scribe.engines import MockSpeechEngine
-from npu_scribe.export import ExportError, write_export
-from npu_scribe.formatting import format_session, render_layout
-from npu_scribe.models import InferenceProvenance, Segment
-from npu_scribe.pipeline import BatchOptions, BatchRunner
-from npu_scribe.storage import SessionStore, atomic_json, sha256_file
+from audio_transcriber.ai_cleanup import DEFAULT_MODEL, CleanupCancelled, CleanupError
+from audio_transcriber.cli import main
+from audio_transcriber.engines import MockSpeechEngine
+from audio_transcriber.export import ExportError, write_export
+from audio_transcriber.formatting import format_session, render_layout
+from audio_transcriber.models import InferenceProvenance, Segment
+from audio_transcriber.pipeline import BatchOptions, BatchRunner
+from audio_transcriber.storage import SessionStore, atomic_json, sha256_file
 
 
 @pytest.fixture
@@ -188,7 +188,7 @@ def test_cli_raw_format_without_model_and_cleanup_model_reuse(ready, monkeypatch
         made.append(1)
         return Shared()
 
-    monkeypatch.setattr("npu_scribe.cli.make_model", factory)
+    monkeypatch.setattr("audio_transcriber.cli.make_model", factory)
     assert main(common + ["cleanup", session.id, "--formatting", "structured"]) == 0
     assert made == [1] and calls == ["lecture", "format"]
     assert store.load_transcript(session.id, "formatted").transformation["source_layer"] == "ai"
@@ -200,7 +200,7 @@ def test_transcribe_off_cleanup_can_format_without_text_model(
     def forbidden(*args):
         raise AssertionError("prose must not load a text model")
 
-    monkeypatch.setattr("npu_scribe.cli.make_model", forbidden)
+    monkeypatch.setattr("audio_transcriber.cli.make_model", forbidden)
     data = tmp_path / "library"
     assert (
         main(

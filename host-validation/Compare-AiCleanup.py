@@ -16,15 +16,15 @@ import sys
 import time
 from pathlib import Path
 
-from npu_scribe.acquisition import get_spec, verify_installed
-from npu_scribe.ai_cleanup import (
+from audio_transcriber.acquisition import get_spec, verify_installed
+from audio_transcriber.ai_cleanup import (
     DEFAULT_MODEL,
     PROMPT_VERSION,
     LocalCleanupModel,
     check_candidate,
     split_text,
 )
-from npu_scribe.storage import atomic_json
+from audio_transcriber.storage import atomic_json
 
 
 def failures(case: dict, text: str, category: str) -> list[str]:

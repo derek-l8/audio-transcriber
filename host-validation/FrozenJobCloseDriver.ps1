@@ -13,7 +13,7 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
  $p=Start-Process -FilePath $Exe -ArgumentList @('--data-dir',('"'+$Data+'"')) -WorkingDirectory $Data -PassThru -WindowStyle Hidden
  $h=[IntPtr]::Zero
  try {
-  $main=WaitWindow $p.Id 'NPU Scribe — Lecture library'
+  $main=WaitWindow $p.Id 'Audio Transcriber — Lecture library'
   $h=[OwnWindow]::Find($p.Id)
   if($attempt -eq 0) {
    $opening=[OwnWindow]::InvokeAsync((FindControl $main 'Import lecture…' $button))

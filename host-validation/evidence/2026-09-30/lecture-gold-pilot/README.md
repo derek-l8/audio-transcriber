@@ -69,7 +69,7 @@ details. The MIT captions remain unaudited; this repeat is a timing check.
 ## Reproduce
 
 Prepare the locally downloaded pinned Pure Set archive with
-`host-validation/Prepare-NptelPilot.py`, run `npu_scribe evaluate` separately
+`host-validation/Prepare-NptelPilot.py`, run `audio-transcriber evaluate` separately
 for each model using the generated manifest, then run
 `host-validation/Score-ManualPilot.py` on the manifest and application data
 directory. The source archive and text-bearing manifest are intentionally

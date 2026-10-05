@@ -7,20 +7,20 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.checkpoint import Checkpoint, CheckpointError, save_checkpoint
-from npu_scribe.chunking import ChunkSpec, plan_chunks
-from npu_scribe.devices import Benchmark
-from npu_scribe.engines import MockSpeechEngine
-from npu_scribe.media import PcmWavDecoder
-from npu_scribe.models import Segment
-from npu_scribe.pipeline import (
+from audio_transcriber.checkpoint import Checkpoint, CheckpointError, save_checkpoint
+from audio_transcriber.chunking import ChunkSpec, plan_chunks
+from audio_transcriber.devices import Benchmark
+from audio_transcriber.engines import MockSpeechEngine
+from audio_transcriber.media import PcmWavDecoder
+from audio_transcriber.models import Segment
+from audio_transcriber.pipeline import (
     BatchOptions,
     BatchRunner,
     PipelineError,
     run_lecture,
     start_transcription,
 )
-from npu_scribe.storage import SessionStore
+from audio_transcriber.storage import SessionStore
 
 CHUNK_OPTIONS = dict(chunk_seconds=1.0, overlap_seconds=0.25)
 
@@ -166,7 +166,7 @@ def test_pause_resume_uses_saved_plan(
     def forbidden(*args, **kwargs):
         raise AssertionError("resume must not select new pause boundaries")
 
-    monkeypatch.setattr("npu_scribe.pipeline.iter_source_windows", forbidden)
+    monkeypatch.setattr("audio_transcriber.pipeline.iter_source_windows", forbidden)
     resumed = make_runner(store, failing_after(10**9), **options).resume(session_id)
     assert resumed.status == "ready"
     assert (
@@ -345,7 +345,7 @@ def test_interruption_before_first_checkpoint_recovers(
     tmp_path: Path, three_second_wav: Path
 ) -> None:
     store = SessionStore(tmp_path / "data")
-    import npu_scribe.pipeline as pipeline_module
+    import audio_transcriber.pipeline as pipeline_module
 
     def refusing_save(path, checkpoint):  # noqa: ANN001, ANN202
         raise KeyboardInterrupt("interrupted before first checkpoint")
@@ -367,7 +367,7 @@ def test_interruption_during_checkpoint_write_keeps_last_durable_state(
     tmp_path: Path, three_second_wav: Path
 ) -> None:
     store = SessionStore(tmp_path / "data")
-    import npu_scribe.pipeline as pipeline_module
+    import audio_transcriber.pipeline as pipeline_module
 
     real_save = pipeline_module.save_checkpoint
     state = {"writes": 0}

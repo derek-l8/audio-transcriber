@@ -1,6 +1,6 @@
 # Two-hour synthetic CPU endurance — 2026-09-30
 
-The local [endurance harness](../../../Measure-NpuScribeEndurance.ps1) ran the
+The local [endurance harness](../../../Measure-AudioTranscriberEndurance.ps1) ran the
 pinned base.en INT4 model on a 7,200-second, mono 16 kHz, 16-bit silent WAV on
 one Intel Core Ultra 5 335 Windows host. The file was validated as PCM and
 kept outside Git. The application used explicit CPU binding, 30-second chunks,

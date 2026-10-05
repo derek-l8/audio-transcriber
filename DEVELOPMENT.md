@@ -1,10 +1,10 @@
 # Development
 
-Use Python 3.11 or 3.12. The main reader setup is in the [README](README.md).
+Use Python 3.14. The main reader setup is in the [README](README.md).
 For development, run from the repository root in a virtual environment:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e '.[dev,desktop,inference]'
 ```
 
@@ -33,8 +33,8 @@ Windows launcher. See [testing](TESTING.md) for Qt and live-test boundaries.
 
 ## CI and dependencies
 
-The local workflow definition runs quality checks on Linux Python 3.11/3.12 and
-Windows Python 3.12. Qt workflow tests run on Windows with an offscreen platform.
+The local workflow definition runs quality checks on Linux Python 3.14 and
+Windows Python 3.14. Qt workflow tests run on Windows with an offscreen platform.
 Linux checks core tests and types; it does not establish desktop compatibility.
 The package job builds a wheel from the source distribution, checks contents,
 and installs the wheel into a fresh environment under ignored `.scratch` storage.
@@ -46,7 +46,7 @@ The workflow has read-only repository permissions and uses pinned commits for
 [checkout](https://github.com/actions/checkout) and
 [setup-python](https://github.com/actions/setup-python). Dependabot is configured
 for weekly package/action updates, with OpenVINO and GenAI updates grouped.
-The [latest published main run](https://github.com/derek-l8/npu-scribe/actions/runs/37165069295)
+The [recorded main run](https://github.com/derek-l8/npu-scribe/actions/runs/37165069295)
 passed on October 3. Local checkpoint changes need a new CI run after publication.
 Keep official actions allowed and workflow commit pins intact. Branch requirements
 must be set in GitHub.

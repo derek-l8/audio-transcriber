@@ -2,7 +2,7 @@
 
 The Windows app uses unmodified PyPI wheels for PySide6/Shiboken 6.11.2 and
 Qt 6.11.2. `third-party-sources.json` lists the upstream archives and SHA-256
-hashes. The release's `npu-scribe-0.1.0-library-sources.zip` contains those
+hashes. The release's `audio-transcriber-0.1.0-library-sources.zip` contains those
 archives, this guide, and notices. Qt DLLs and plugins remain separate files;
 compatible rebuilt libraries can replace them in `_internal/PySide6/`.
 Replace Shiboken in `_internal/shiboken6/`. Close the app before replacing files.
@@ -26,7 +26,7 @@ Then build the supplied add-on modules with
 `C:\Qt\custom\bin\qt-configure-module.bat SOURCE_FOLDER`, followed by the
 same CMake build/install commands. Build Qt Multimedia against the FFmpeg
 libraries described below. Build PySide/Shiboken from the supplied pyside-setup
-archive with Python 3.12, the rebuilt Qt's qtpaths, and its documented LLVM/Clang
+archive with Python 3.14, the rebuilt Qt's qtpaths, and its documented LLVM/Clang
 prerequisites:
 
 ```powershell
@@ -64,5 +64,5 @@ versioned provisioning recipe, which both identify 7.1.5.
 
 Qt/PySide are used under LGPLv3 and FFmpeg under LGPLv2.1 or later. Their source
 archives contain their licenses and third-party notices. You may modify the
-libraries and reverse-engineer the app to debug those modifications. NPU Scribe's
+libraries and reverse-engineer the app to debug those modifications. Audio Transcriber's
 own source and packaging recipe are available in the same release and repository.

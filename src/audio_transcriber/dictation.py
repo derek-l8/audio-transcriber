@@ -134,6 +134,6 @@ class DictationHistory:
                 value = json.loads(path.read_text(encoding="utf-8"))
                 if isinstance(value, dict) and isinstance(value.get("text"), str):
                     result.append(value)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 continue
         return sorted(result, key=lambda r: str(r.get("created_at", "")), reverse=True)

@@ -7,15 +7,15 @@ from types import SimpleNamespace
 
 import pytest
 
-from npu_scribe.cleanup import deterministic_cleanup, process_text, spoken_formatting
-from npu_scribe.config import propose_windows_data_location
-from npu_scribe.devices import Benchmark, choose_device
-from npu_scribe.dictionary import DictionaryEntry, PersonalDictionary
-from npu_scribe.engines import MockSpeechEngine, OpenVINOWhisperEngine, inspect_audio
-from npu_scribe.export import markdown, plain_text, srt, structured_json
-from npu_scribe.insertion import FocusTarget, SafeInserter
-from npu_scribe.metrics import cer, wer
-from npu_scribe.models import InferenceProvenance, Segment, Transcript
+from audio_transcriber.cleanup import deterministic_cleanup, process_text, spoken_formatting
+from audio_transcriber.config import propose_windows_data_location
+from audio_transcriber.devices import Benchmark, choose_device
+from audio_transcriber.dictionary import DictionaryEntry, PersonalDictionary
+from audio_transcriber.engines import MockSpeechEngine, OpenVINOWhisperEngine, inspect_audio
+from audio_transcriber.export import markdown, plain_text, srt, structured_json
+from audio_transcriber.insertion import FocusTarget, SafeInserter
+from audio_transcriber.metrics import cer, wer
+from audio_transcriber.models import InferenceProvenance, Segment, Transcript
 
 
 def test_cleanup_and_literal_commands() -> None:

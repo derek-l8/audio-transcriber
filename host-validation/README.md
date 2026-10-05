@@ -5,7 +5,7 @@ one-command novice experience:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\Invoke-NpuScribeValidation.ps1 -SetupEnvironment -DownloadModels
+.\Invoke-AudioTranscriberValidation.ps1 -SetupEnvironment -DownloadModels
 ```
 
 Optional additions:
@@ -21,14 +21,14 @@ Optional additions:
 What this does, in order:
 
 1. Resolves the repository root from the script location and creates a
-   validation data directory under `%LOCALAPPDATA%\npu-scribe\validation-data`
+   validation data directory under `%LOCALAPPDATA%\audio-transcriber\validation-data`
    (never inside the repository). `-DataDirectory` overrides it.
 2. With `-SetupEnvironment` (the only network-dependent setup step): creates a
    dedicated per-user virtual environment at
-   `%LOCALAPPDATA%\npu-scribe\validation-venv` — outside Git — and installs this
+   `%LOCALAPPDATA%\audio-transcriber\validation-venv` — outside Git — and installs this
    project plus the pinned inference dependencies (`openvino==2026.3.0`,
    `openvino-genai==2026.3.0.0`).
-3. Checks the Python version (3.11/3.12) and that `npu_scribe`, `openvino`, and
+3. Checks the Python version (3.14) and that `audio_transcriber`, `openvino`, and
    `openvino_genai` import; without them it fails with exact recovery
    instructions instead of a cascade of misleading errors.
 4. Enumerates real OpenVINO devices and tests **only those**. A missing GPU/NPU
@@ -76,7 +76,7 @@ For a separate continuous two-hour CPU run with a process-tree memory series,
 use PowerShell 7:
 
 ```powershell
-pwsh -File .\Measure-NpuScribeEndurance.ps1 -LongFile PATH
+pwsh -File .\Measure-AudioTranscriberEndurance.ps1 -LongFile PATH
 ```
 
 The [one-host result](evidence/2026-09-30/two-hour-endurance/README.md) includes

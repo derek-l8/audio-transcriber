@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from npu_scribe.export import (
+from audio_transcriber.export import (
     ExportError,
     markdown,
     plain_text,
@@ -13,7 +13,7 @@ from npu_scribe.export import (
     structured_json,
     validate_srt,
 )
-from npu_scribe.models import InferenceProvenance, Segment, Transcript
+from audio_transcriber.models import InferenceProvenance, Segment, Transcript
 
 
 def sample() -> Transcript:
