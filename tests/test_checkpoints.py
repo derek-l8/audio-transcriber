@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.checkpoint import (
+from audio_transcriber.checkpoint import (
     CHECKPOINT_SCHEMA_VERSION,
     Checkpoint,
     CheckpointError,

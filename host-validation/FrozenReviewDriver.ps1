@@ -14,7 +14,7 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
     $p=Start-Process -FilePath $Exe -ArgumentList @('--data-dir',('"'+$Data+'"')) -WorkingDirectory $Data -PassThru -WindowStyle Hidden
     $h=[IntPtr]::Zero
     try {
-        $main=WaitWindow $p.Id 'NPU Scribe — Lecture library'
+        $main=WaitWindow $p.Id 'Audio Transcriber — Lecture library'
         $h=[OwnWindow]::Find($p.Id)
         [OwnWindow]::ShowWindow($h,5) | Out-Null
         if(-not (Test-Path -LiteralPath (Join-Path $Data 'desktop.lock'))) { throw 'Library lock absent' }
@@ -36,8 +36,8 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
                 SelectCombo $p.Id $h $main 'Formatting style' $layout
             }
             InvokeControl (FindControl $main 'Live dictation…' $button)
-            $dictation=WaitWindow $p.Id 'NPU Scribe — Live dictation'
-            $dictationHandle=[OwnWindow]::Find($p.Id,'NPU Scribe — Live dictation')
+            $dictation=WaitWindow $p.Id 'Audio Transcriber — Live dictation'
+            $dictationHandle=[OwnWindow]::Find($p.Id,'Audio Transcriber — Live dictation')
             FindControl $dictation 'Microphone' ([System.Windows.Automation.ControlType]::ComboBox) | Out-Null
             FindControl $dictation 'Record a copy' $button | Out-Null
             if((ValueOf (FindControl $dictation 'Cleanup' ([System.Windows.Automation.ControlType]::ComboBox))).Current.Value -ne 'medium') { throw 'Fresh dictation cleanup default differs' }
@@ -49,7 +49,7 @@ for($attempt=0; $attempt -lt 2; $attempt++) {
                 SelectCombo $p.Id $dictationHandle $dictation 'Shortcut mode' $mode
             }
             [OwnWindow]::PostMessage($dictationHandle,0x10,[IntPtr]::Zero,[IntPtr]::Zero) | Out-Null
-            WaitUntil { [OwnWindow]::FindClass($p.Id,'QDialog','NPU Scribe — Live dictation') -eq [IntPtr]::Zero } 'Idle dictation window did not close'
+            WaitUntil { [OwnWindow]::FindClass($p.Id,'QDialog','Audio Transcriber — Live dictation') -eq [IntPtr]::Zero } 'Idle dictation window did not close'
             $slider=FindControl $main 'Audio position' ([System.Windows.Automation.ControlType]::Slider)
             $range=[System.Windows.Automation.RangeValuePattern]$slider.GetCurrentPattern([System.Windows.Automation.RangeValuePattern]::Pattern)
             $deadline=(Get-Date).AddSeconds(10)

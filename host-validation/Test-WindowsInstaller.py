@@ -17,7 +17,7 @@ import winreg
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_NAME = "NPU Scribe Validation"
+APP_NAME = "Audio Transcriber Validation"
 APP_ID = "{5AA8A0D2-4E78-47BD-9230-0387D4F56B44}"
 REG_KEY = rf"Software\Microsoft\Windows\CurrentVersion\Uninstall\{APP_ID}_is1"
 
@@ -102,6 +102,9 @@ def main() -> None:
     model_root = args.model_root.resolve(strict=True)
     ffmpeg = args.ffmpeg.resolve(strict=True)
     base.mkdir(parents=True)
+    desktop_dir = base / "desktop"
+    desktop_dir.mkdir()
+    desktop_shortcut = desktop_dir / f"{APP_NAME}.lnk"
     output = base / "output"
     output.mkdir()
     run(
@@ -110,14 +113,15 @@ def main() -> None:
             f"--define=BundleDir={bundle}",
             f"--define=AppName={APP_NAME}",
             f"--define=AppId={{{APP_ID}",
+            f"--define=DesktopDir={desktop_dir}",
             f"--output-dir={output}",
-            "--output-filename=npu-scribe-validation",
-            str(ROOT / "packaging/npu-scribe.iss"),
+            "--output-filename=audio-transcriber-validation",
+            str(ROOT / "packaging/audio-transcriber.iss"),
         ],
         base / "compile.log",
         cwd=ROOT,
     )
-    installer = output / "npu-scribe-validation.exe"
+    installer = output / "audio-transcriber-validation.exe"
     app_dir = base / "installed"
     outside_library = base / "separate-library"
     outside_library.mkdir()
@@ -132,7 +136,7 @@ def main() -> None:
         "/NORESTARTAPPLICATIONS",
         f"/DIR={app_dir}",
     ]
-    # Omit /TASKS: verify the fresh install's opt-in default through saved settings.
+    # Omit /TASKS: check desktop-on and startup-off defaults in isolated storage.
     run(
         [
             str(installer),
@@ -147,8 +151,41 @@ def main() -> None:
         raise RuntimeError("Isolated registration or disabled shortcut check failed")
     # SAVEINF uses plain text here; inspect its ASCII key without assuming UTF-16.
     settings = (base / "settings.inf").read_bytes().splitlines()
-    if b"Tasks=" not in settings:
-        raise RuntimeError("Startup task was not off by default")
+    if b"Tasks=desktopicon" not in settings:
+        raise RuntimeError("Expected desktop shortcut on and startup off by default")
+    if not desktop_shortcut.is_file():
+        raise RuntimeError("Default desktop shortcut was not created")
+    shortcut_env = os.environ.copy()
+    shortcut_env["AUDIO_TRANSCRIBER_SHORTCUT"] = str(desktop_shortcut)
+    shortcut_env["AUDIO_TRANSCRIBER_EXECUTABLE"] = str(app_dir / "Audio Transcriber.exe")
+    run(
+        [
+            str(Path(os.environ["WINDIR"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"),
+            "-NoProfile",
+            "-Command",
+            "$link = (New-Object -ComObject WScript.Shell).CreateShortcut("
+            "$env:AUDIO_TRANSCRIBER_SHORTCUT); "
+            "if ($link.TargetPath -ne $env:AUDIO_TRANSCRIBER_EXECUTABLE) "
+            "{ throw 'Desktop shortcut target differs' }",
+        ],
+        base / "desktop-shortcut.log",
+        cwd=base,
+        env=shortcut_env,
+    )
+    run(
+        [
+            str(Path(os.environ["WINDIR"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"),
+            "-NoProfile",
+            "-File",
+            str(ROOT / "host-validation/Test-DesktopShortcut.ps1"),
+            "-Shortcut",
+            str(desktop_shortcut),
+            "-Library",
+            str(base / "shortcut-library"),
+        ],
+        base / "desktop-shortcut-launch.log",
+        cwd=base,
+    )
     payload = snapshot(bundle)
     if any(
         not (app_dir / name).is_file() or sha256(app_dir / name) != digest
@@ -164,7 +201,7 @@ def main() -> None:
         acquired_model = base / "downloaded-models"
         run(
             [
-                str(app_dir / "npu-scribe-worker.exe"),
+                str(app_dir / "audio-transcriber-worker.exe"),
                 "--data-dir",
                 str(base / "acquisition-data"),
                 "--model-root",
@@ -177,12 +214,12 @@ def main() -> None:
             cwd=base,
             env=env,
         )
-        from npu_scribe.acquisition import get_spec, verify_installed
+        from audio_transcriber.acquisition import get_spec, verify_installed
 
         if not verify_installed(acquired_model, get_spec("whisper-tiny.en-int4-ov")):
             raise RuntimeError("Installed-worker model download verification failed")
     inside_library = app_dir / "personal-library"
-    worker = app_dir / "npu-scribe-worker.exe"
+    worker = app_dir / "audio-transcriber-worker.exe"
     run(
         [
             str(worker),
@@ -259,7 +296,7 @@ def main() -> None:
         [
             str(sys.executable),
             str(ROOT / "host-validation/Test-FrozenReview.py"),
-            str(app_dir / "NPU Scribe.exe"),
+            str(app_dir / "Audio Transcriber.exe"),
             "--work-dir",
             str(base / "gui-review"),
             "--report",
@@ -275,7 +312,11 @@ def main() -> None:
     )
     if snapshot(inside_library) != original_inside or snapshot(outside_library) != original_outside:
         raise RuntimeError("Reinstall changed a validation library")
-    if sha256(nested_note) != note_hash or any(path.exists() for path in shortcuts):
+    if (
+        sha256(nested_note) != note_hash
+        or any(path.exists() for path in shortcuts)
+        or not desktop_shortcut.is_file()
+    ):
         raise RuntimeError("Reinstall changed a user file or created a shortcut")
     run(
         [
@@ -283,17 +324,18 @@ def main() -> None:
             f"--define=BundleDir={bundle}",
             f"--define=AppName={APP_NAME}",
             f"--define=AppId={{{APP_ID}",
+            f"--define=DesktopDir={desktop_dir}",
             "--define=AppVersion=0.1.1",
             f"--output-dir={output}",
-            "--output-filename=npu-scribe-validation-upgrade",
-            str(ROOT / "packaging/npu-scribe.iss"),
+            "--output-filename=audio-transcriber-validation-upgrade",
+            str(ROOT / "packaging/audio-transcriber.iss"),
         ],
         base / "compile-upgrade.log",
         cwd=ROOT,
     )
     run(
         [
-            str(output / "npu-scribe-validation-upgrade.exe"),
+            str(output / "audio-transcriber-validation-upgrade.exe"),
             *common,
             f"/LOG={base / 'upgrade-detail.log'}",
         ],
@@ -305,7 +347,11 @@ def main() -> None:
             raise RuntimeError("Upgrade registration did not advance")
     if snapshot(inside_library) != original_inside or snapshot(outside_library) != original_outside:
         raise RuntimeError("Versioned reinstall changed a validation library")
-    if sha256(nested_note) != note_hash or any(path.exists() for path in shortcuts):
+    if (
+        sha256(nested_note) != note_hash
+        or any(path.exists() for path in shortcuts)
+        or not desktop_shortcut.is_file()
+    ):
         raise RuntimeError("Versioned reinstall changed a user file or created a shortcut")
     # Uninstall only this new, verified workspace target and identity.
     if not app_dir.resolve().is_relative_to((ROOT / ".scratch").resolve()):
@@ -321,7 +367,7 @@ def main() -> None:
         base / "uninstall.log",
         cwd=base,
     )
-    if registered() or any(path.exists() for path in shortcuts):
+    if registered() or any(path.exists() for path in [*shortcuts, desktop_shortcut]):
         raise RuntimeError("Validation registration/shortcuts remain after uninstall")
     if any((app_dir / name).exists() for name in payload):
         raise RuntimeError("Installed payload remains after uninstall")
@@ -336,7 +382,10 @@ def main() -> None:
         "payload_files_verified": len(payload),
         "fresh_install": "passed",
         "startup_default": "unchecked",
-        "shortcuts_created": False,
+        "desktop_shortcut_created_and_target_verified": True,
+        "desktop_shortcut_opened_without_cli_arguments": True,
+        "desktop_shortcut_removed_on_uninstall": True,
+        "shortcuts_outside_validation_storage_created": False,
         "installed_worker_cpu_inference": "passed",
         "reinstall": "passed",
         "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
@@ -358,7 +407,8 @@ def main() -> None:
         "unknown_nested_file_preserved": True,
         "frozen_window": json.loads((base / "gui-results.json").read_text(encoding="utf-8")),
         "scope": "One Windows x64 host; separate validation identity, silent install/reinstall/"
-        "uninstall, no shortcuts; supplied recording CPU inference; owned native GUI workflows "
+        "uninstall, desktop shortcut in isolated storage; supplied recording CPU inference; "
+        "owned native GUI workflows "
         "and fresh processing defaults. "
         "No visual installer wizard or real microphone capture.",
     }

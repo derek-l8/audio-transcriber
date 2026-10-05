@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from npu_scribe import storage
+from audio_transcriber import storage
 
 
 def test_transient_windows_denial_retries_without_losing_existing_file(tmp_path, monkeypatch):

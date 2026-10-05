@@ -77,7 +77,7 @@ public static class OwnWindow {
         return Task.Run(() => ((InvokePattern)element.GetCurrentPattern(InvokePattern.Pattern)).Invoke());
     }
     public static IntPtr Find(int processId) {
-        return Find(processId, "NPU Scribe — Lecture library");
+        return Find(processId, "Audio Transcriber — Lecture library");
     }
     public static IntPtr Find(int processId, string title) {
         IntPtr result = IntPtr.Zero;

@@ -11,12 +11,12 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PySide6")
 from PySide6.QtWidgets import QApplication, QFileDialog  # noqa: E402
 
-from npu_scribe.desktop_editing import RevisionHistoryDialog, SegmentEditDialog  # noqa: E402
-from npu_scribe.desktop_player import LecturePlayer, clock  # noqa: E402
-from npu_scribe.desktop_ui import LectureWindow  # noqa: E402
-from npu_scribe.editing import revision_history  # noqa: E402
-from npu_scribe.models import Segment  # noqa: E402
-from npu_scribe.storage import sha256_file  # noqa: E402
+from audio_transcriber.desktop_editing import RevisionHistoryDialog, SegmentEditDialog  # noqa: E402
+from audio_transcriber.desktop_player import LecturePlayer, clock  # noqa: E402
+from audio_transcriber.desktop_ui import LectureWindow  # noqa: E402
+from audio_transcriber.editing import revision_history  # noqa: E402
+from audio_transcriber.models import Segment  # noqa: E402
+from audio_transcriber.storage import sha256_file  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -251,7 +251,7 @@ def test_desktop_ai_cleanup_worker_review_export_and_reopen(
 ):
     import sys
 
-    from npu_scribe.ai_cleanup import DEFAULT_MODEL
+    from audio_transcriber.ai_cleanup import DEFAULT_MODEL
 
     assert window.model.findData(DEFAULT_MODEL) == -1
     assert window.cleanup_model.findData(DEFAULT_MODEL) >= 0
@@ -263,8 +263,8 @@ def test_desktop_ai_cleanup_worker_review_export_and_reopen(
     worker.write_text("""
 import sys
 from pathlib import Path
-from npu_scribe.ai_cleanup import cleanup_session
-from npu_scribe.storage import SessionStore
+from audio_transcriber.ai_cleanup import cleanup_session
+from audio_transcriber.storage import SessionStore
 args=sys.argv[1:]
 store=SessionStore(Path(args[args.index('--data-dir')+1]))
 session=args[args.index('cleanup')+1]
@@ -274,7 +274,8 @@ class Fixture:
 cleanup_session(store,session,Fixture(),mode='dictation',style='medium')
 """)
     monkeypatch.setattr(
-        "npu_scribe.desktop_ui.worker_command", lambda args: (sys.executable, [str(worker), *args])
+        "audio_transcriber.desktop_ui.worker_command",
+        lambda args: (sys.executable, [str(worker), *args]),
     )
     window.cleanup_mode.setCurrentIndex(window.cleanup_mode.findData("dictation"))
     window.cleanup_style.setCurrentText("medium")
@@ -348,8 +349,8 @@ def test_desktop_summary_keeps_ai_and_disallows_subtitles(
     worker.write_text("""
 import sys
 from pathlib import Path
-from npu_scribe.ai_cleanup import cleanup_session
-from npu_scribe.storage import SessionStore
+from audio_transcriber.ai_cleanup import cleanup_session
+from audio_transcriber.storage import SessionStore
 args=sys.argv[1:]
 store=SessionStore(Path(args[args.index('--data-dir')+1]))
 session=args[args.index('summarize')+1]
@@ -359,7 +360,8 @@ class Notes:
 cleanup_session(store,session,Notes(),mode='summary')
 """)
     monkeypatch.setattr(
-        "npu_scribe.desktop_ui.worker_command", lambda args: (sys.executable, [str(worker), *args])
+        "audio_transcriber.desktop_ui.worker_command",
+        lambda args: (sys.executable, [str(worker), *args]),
     )
     window.start_summary()
     wait_finished(app, window)
@@ -383,7 +385,7 @@ def test_automatic_cleanup_success_after_import(
     worker = tmp_path / "auto-worker.py"
     worker.write_text("""
 import sys
-import npu_scribe.cli as cli
+import audio_transcriber.cli as cli
 class Fixture:
     device='CPU'
     def generate(self, text, mode, style):
@@ -392,7 +394,8 @@ cli.make_model=lambda *args: Fixture()
 raise SystemExit(cli.main(sys.argv[1:]))
 """)
     monkeypatch.setattr(
-        "npu_scribe.desktop_ui.worker_command", lambda args: (sys.executable, [str(worker), *args])
+        "audio_transcriber.desktop_ui.worker_command",
+        lambda args: (sys.executable, [str(worker), *args]),
     )
     window.cleanup_style.setCurrentText("medium")
     window.start_import(three_second_wav)
@@ -465,7 +468,7 @@ def test_desktop_cleanup_then_format_and_rerun_keep_sources(
     worker = tmp_path / "cleanup-layout-worker.py"
     worker.write_text("""
 import json, sys
-import npu_scribe.cli as cli
+import audio_transcriber.cli as cli
 class Fixture:
     device='CPU'
     def generate(self, text, mode, style):
@@ -476,7 +479,8 @@ cli.make_model=lambda *args: Fixture()
 raise SystemExit(cli.main(sys.argv[1:]))
 """)
     monkeypatch.setattr(
-        "npu_scribe.desktop_ui.worker_command", lambda args: (sys.executable, [str(worker), *args])
+        "audio_transcriber.desktop_ui.worker_command",
+        lambda args: (sys.executable, [str(worker), *args]),
     )
     window.cleanup_style.setCurrentText("light")
     window.format_style.setCurrentIndex(window.format_style.findData("mixed"))
@@ -529,7 +533,7 @@ def prepare_dictation(dictation, wav):
 def test_dictation_pipeline_saves_history_before_insertion(
     app, window, dictation, three_second_wav
 ):
-    from npu_scribe.insertion import FocusTarget, InsertResult
+    from audio_transcriber.insertion import FocusTarget, InsertResult
 
     class Native:
         def insert(self, text, target, allowed):
@@ -553,7 +557,7 @@ def test_dictation_pipeline_saves_history_before_insertion(
 
 
 def test_dictation_focus_change_recovers_without_insertion(app, dictation, three_second_wav):
-    from npu_scribe.insertion import FocusTarget, InsertResult
+    from audio_transcriber.insertion import FocusTarget, InsertResult
 
     class Native:
         def insert(self, text, target, allowed):
@@ -669,7 +673,7 @@ def test_dictation_normalization_then_worker(app, dictation, three_second_wav):
 
 
 def test_dictation_settings_restore_without_enabling_shortcut(window, dictation):
-    from npu_scribe.desktop_dictation import DictationWindow
+    from audio_transcriber.desktop_dictation import DictationWindow
 
     dictation.hotkey_text.setText("Ctrl+Shift+F9")
     dictation.mode.setCurrentText("Hold to talk")
@@ -710,7 +714,7 @@ def test_dictation_worker_requires_result_identifier(dictation):
 
 
 def test_dictation_cancellation_while_preparing_does_not_capture(app, dictation, monkeypatch):
-    from npu_scribe.insertion import FocusTarget
+    from audio_transcriber.insertion import FocusTarget
 
     captured = []
     monkeypatch.setattr(dictation, "_begin_capture", lambda: captured.append(True))
@@ -747,7 +751,7 @@ def test_native_shortcut_accepts_both_qt_windows_event_routes(app):
 
     from PySide6.QtCore import QByteArray
 
-    from npu_scribe.desktop_dictation import Shortcut
+    from audio_transcriber.desktop_dictation import Shortcut
 
     called = []
     shortcut = Shortcut(None, lambda: called.append(True))

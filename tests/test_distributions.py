@@ -33,16 +33,16 @@ spec.loader.exec_module(checker)
 )
 def test_rejects_runtime_data_and_unsafe_members(name):
     with pytest.raises(ValueError):
-        checker.check_names({"npu_scribe/cli.py", name}, {"npu_scribe/cli.py"})
+        checker.check_names({"audio_transcriber/cli.py", name}, {"audio_transcriber/cli.py"})
 
 
 def test_required_module_cannot_be_missing():
     with pytest.raises(ValueError, match="missing"):
-        checker.check_names({"README.md"}, {"npu_scribe/cli.py"})
+        checker.check_names({"README.md"}, {"audio_transcriber/cli.py"})
 
 
 def test_sanitized_evidence_and_source_are_allowed():
     checker.check_names(
-        {"src/npu_scribe/cli.py", "host-validation/evidence/2026-10-02/results.json"},
-        {"src/npu_scribe/cli.py"},
+        {"src/audio_transcriber/cli.py", "host-validation/evidence/2026-10-02/results.json"},
+        {"src/audio_transcriber/cli.py"},
     )

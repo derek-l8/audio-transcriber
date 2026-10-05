@@ -90,7 +90,7 @@ class LectureWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.refresh)
-        self.setWindowTitle("NPU Scribe — Lecture library")
+        self.setWindowTitle("Audio Transcriber — Lecture library")
         self.resize(1100, 760)
         central = QWidget()
         layout = QVBoxLayout(central)
@@ -676,7 +676,7 @@ class LectureWindow(QMainWindow):
                     ):
                         raise ValueError("invalid session metadata")
                     sessions[session.id] = session
-                except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                except OSError, ValueError, TypeError, KeyError, AttributeError:
                     errors += 1
         self.sessions = sessions
         target = selected
@@ -706,7 +706,7 @@ class LectureWindow(QMainWindow):
                     self.progress.setRange(0, max(1, total))
                     self.progress.setValue(done)
                     self.progress.setFormat(f"{done} / {total} chunks")
-                except (OSError, ValueError, KeyError, TypeError):
+                except OSError, ValueError, KeyError, TypeError:
                     pass  # Atomic replacements can briefly be unavailable on Windows.
         if errors and not self.busy:
             self.status.setText(
@@ -789,7 +789,7 @@ class LectureWindow(QMainWindow):
         diag = session.diagnostics
         try:
             self.player.load(self.store.source_copy(session.id))
-        except (OSError, ValueError, KeyError):
+        except OSError, ValueError, KeyError:
             self.player.load(None)
         self.segment_starts = []
         self.details.setText(

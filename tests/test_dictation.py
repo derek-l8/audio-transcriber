@@ -11,9 +11,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from npu_scribe.dictation import DictationHistory, Hotkey, normalize_capture, parse_hotkey
-from npu_scribe.insertion import FocusTarget
-from npu_scribe.windows_dictation import Input, WindowsInput
+from audio_transcriber.dictation import DictationHistory, Hotkey, normalize_capture, parse_hotkey
+from audio_transcriber.insertion import FocusTarget
+from audio_transcriber.windows_dictation import Input, WindowsInput
 
 
 @pytest.mark.parametrize(

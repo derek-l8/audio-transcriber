@@ -11,7 +11,7 @@ import argparse
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any
 
 from .acquisition import MANIFEST, AcquisitionError, download_model, get_spec, verify_installed
 from .ai_cleanup import (
@@ -38,19 +38,23 @@ from .storage import SessionStore
 def default_data_dir() -> Path:
     import os
 
-    override = os.environ.get("NPUSCRIBE_DATA_DIR")
+    override = os.environ.get("AUDIO_TRANSCRIBER_DATA_DIR") or os.environ.get("NPUSCRIBE_DATA_DIR")
     if override:
         return Path(override)
     try:
         import platformdirs
 
-        return Path(platformdirs.user_data_path("npu-scribe", appauthor=False))
+        current = Path(platformdirs.user_data_path("audio-transcriber", appauthor=False))
+        legacy = Path(platformdirs.user_data_path("npu-scribe", appauthor=False))
     except Exception:  # noqa: BLE001 - fall back beside the platform default
-        return Path.home() / ".local" / "share" / "npu-scribe"
+        current = Path.home() / ".local" / "share" / "audio-transcriber"
+        legacy = current.with_name("npu-scribe")
+    # Reuse an existing library rather than copying recordings and large models.
+    return legacy if legacy.is_dir() and not current.exists() else current
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="npu-scribe")
+    parser = argparse.ArgumentParser(prog="audio-transcriber")
     parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--model-root", type=Path, default=None)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -262,7 +266,7 @@ def run_devices(args: argparse.Namespace, store: SessionStore, data_dir: Path) -
     return 0
 
 
-EngineFactory: TypeAlias = Callable[[str], Any]
+type EngineFactory = Callable[[str], Any]
 
 
 def make_engine_provider(
@@ -275,7 +279,8 @@ def make_engine_provider(
         install = verify_installed(model_root or data_dir / "models", spec)
         if install is None:
             raise AcquisitionError(
-                f"model '{model_id}' is not installed; run 'npu-scribe models download {model_id}'"
+                f"model '{model_id}' is not installed; "
+                f"run 'audio-transcriber models download {model_id}'"
             )
 
         def provider(device: str) -> Any:
@@ -289,7 +294,7 @@ def make_engine_provider(
 
         return provider
     raise AcquisitionError(
-        f"model '{model_id}' is not manifest-approved; run 'npu-scribe models list'"
+        f"model '{model_id}' is not manifest-approved; run 'audio-transcriber models list'"
     )
 
 

@@ -1,9 +1,9 @@
 # Third-party notices
 
-NPU Scribe source is MIT-licensed. The Windows bundle includes these runtime
+Audio Transcriber source is MIT-licensed. The Windows bundle includes these runtime
 components from the build environment:
 
-- Python 3.12.14 — PSF license and notices.
+- Python 3.14.6 — PSF license and notices.
 - platformdirs 4.12.2 — MIT.
 - PySide6 / Qt for Python and Shiboken 6.11.2 — LGPL-3.0 or the alternative
   licenses supplied by Qt. Qt libraries remain separate, replaceable DLLs.
@@ -24,13 +24,13 @@ PyInstaller 6.22.3 and hooks 2026.8 build the app; the
 permits distributing the generated application under its own license.
 Inno Setup 7.1.0 is a build tool, not an installed runtime dependency.
 
-Binary releases are accompanied by `npu-scribe-0.1.0-library-sources.zip`, with
+Binary releases are accompanied by `audio-transcriber-0.1.0-library-sources.zip`, with
 pinned Qt/PySide, FFmpeg and zlib sources, upstream build recipes, and
 [rebuild instructions](packaging/LIBRARY_BUILD.md). The installer includes those
 instructions, the source manifest, and upstream attribution/license files in
 `_internal/licenses/`. You may replace the shared libraries with compatible
 modified builds and reverse-engineer the app to debug those modifications.
-NPU Scribe makes no local changes to the upstream libraries.
+Audio Transcriber makes no local changes to the upstream libraries.
 
 The bundle excludes the unused Qt Virtual Keyboard and PDF plugins and the
 software OpenGL renderer. It uses the Widgets interface and native media plugins.

@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe import cli
-from npu_scribe.engines import MockSpeechEngine
-from npu_scribe.evaluate import (
+from audio_transcriber import cli
+from audio_transcriber.engines import MockSpeechEngine
+from audio_transcriber.evaluate import (
     CaseResult,
     EvaluationError,
     EvaluationReport,

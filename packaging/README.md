@@ -2,30 +2,31 @@
 
 The installer targets Windows x64 and installs for the current user without
 administrator access. It includes the desktop app, CLI worker, setup guide,
-and runtime notices. Model weights and the `ffmpeg.exe` decoder are separate
+and runtime notices. A desktop shortcut is selected by default; startup at
+sign-in remains optional. Model weights and the `ffmpeg.exe` decoder are separate
 downloads. See the [installed-app setup guide](../docs/USER_GUIDE.md#using-the-windows-installer).
 
-The [current local check](../host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+The [current local check](../host-validation/evidence/2026-10-04/audio-transcriber-checkpoint/README.md)
 passed installed transcription/cleanup, model download, GUI workflows,
 reinstall, and uninstall on one Windows host. No binary release is published.
 
 ## Build
 
 Use a local checkout outside cloud-synced folders. From its root, create a
-64-bit Python 3.12 environment and install the build dependencies:
+64-bit Python 3.14 environment and install the build dependencies:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 if ($LASTEXITCODE -ne 0) { throw 'Environment creation failed.' }
 .\.venv\Scripts\python.exe -m pip install '.[desktop,inference,bundle]'
 if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
 .\.venv\Scripts\python.exe packaging/collect_sources.py
 if ($LASTEXITCODE -ne 0) { throw 'Library source preparation failed.' }
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm packaging/npu-scribe.spec
+.\.venv\Scripts\python.exe -m PyInstaller --noconfirm packaging/audio-transcriber.spec
 if ($LASTEXITCODE -ne 0) { throw 'Bundle build failed.' }
 ```
 
-This produces `dist/NPU Scribe/`. Keep both executables and `_internal` together.
+This produces `dist/Audio Transcriber/`. Keep both executables and `_internal` together.
 The spec collects native OpenVINO libraries, installed package notices, and a
 version inventory. The source collector verifies pinned upstream archives and
 prepares their attribution files before bundling. It downloads about 102 MB once
@@ -35,11 +36,11 @@ Install the official [Inno Setup compiler](https://jrsoftware.org/isdl.php).
 Replace the compiler path below with yours:
 
 ```powershell
-& 'C:\Tools\Inno Setup\ISCC.exe' packaging/npu-scribe.iss
+& 'C:\Tools\Inno Setup\ISCC.exe' packaging/audio-transcriber.iss
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 ```
 
-The output is `dist/installer/npu-scribe-0.1.0-windows-x64.exe`.
+The output is `dist/installer/audio-transcriber-0.1.0-windows-x64.exe`.
 For another bundle location, pass `--define=BundleDir=FULL_PATH` before the script.
 `--define=AppVersion=VERSION` overrides the installer version; it should match
 `pyproject.toml` for a release. Builds are unsigned.
@@ -50,12 +51,12 @@ For another bundle location, pass `--define=BundleDir=FULL_PATH` before the scri
 It checks silent install, same-version reinstall, a versioned reinstall with the
 same payload, installed CPU transcription, GUI workflows, and uninstall.
 Library hashes must survive both reinstalls and uninstall. Startup stays off,
-and the test creates no shortcuts.
+and the desktop shortcut is tested inside ignored validation storage.
 
 With an existing approved speech/cleanup model folder and a short recording:
 
 ```powershell
-.\.venv\Scripts\python.exe host-validation/Test-WindowsInstaller.py --compiler 'C:\Tools\Inno Setup\ISCC.exe' --bundle 'dist/NPU Scribe' --validation-dir .scratch/installer-check-01 --media 'C:\Lectures\clip.m4a' --model-root 'C:\Models\npu-scribe' --ffmpeg 'C:\Tools\ffmpeg\bin\ffmpeg.exe' --check-cleanup --download-model
+.\.venv\Scripts\python.exe host-validation/Test-WindowsInstaller.py --compiler 'C:\Tools\Inno Setup\ISCC.exe' --bundle 'dist/Audio Transcriber' --validation-dir .scratch/installer-check-01 --media 'C:\Lectures\clip.m4a' --model-root 'C:\Models\audio-transcriber' --ffmpeg 'C:\Tools\ffmpeg\bin\ffmpeg.exe' --check-cleanup --download-model
 ```
 
 `--check-cleanup` checks automatic Light cleanup, Mostly structured formatting, and exports.

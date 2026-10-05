@@ -1,4 +1,4 @@
-# NPU Scribe
+# Audio Transcriber
 
 Transcribe English audio and video files locally, clean up the text, and export
 transcripts or study notes. The Windows app includes playback, corrections,
@@ -9,23 +9,23 @@ This is an early Windows x64 version; AI cleanup and dictation are experimental.
 
 ## Setup
 
-Use 64-bit Python 3.12 and PowerShell. Follow the
+Use 64-bit Python 3.14 and PowerShell. Follow the
 [installation guide](docs/USER_GUIDE.md#install-on-windows) for downloading the
-project, creating an environment, and installing a speech model. The source
-package also supports Python 3.11.
-
+project, creating an environment, and installing a speech model.
 AI cleanup and Mixed or Mostly structured formatting use a
 [separate text model](docs/USER_GUIDE.md#local-ai-cleanup), about 4.5 GB to download
 and several GiB of RAM to run. If you skip it, choose **Off** for both cleanup
 and formatting. MP3, M4A, and MP4 require a separate
 [FFmpeg executable](docs/USER_GUIDE.md#cli-transcription-and-export).
 
-After setup, install and open the desktop app from the project folder:
+The Windows installer creates an **Audio Transcriber** desktop shortcut.
+After model setup, double-click it to open the app. For a source installation,
+install and open the desktop app from the project folder:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install '.[desktop,inference]'
 if ($LASTEXITCODE -ne 0) { throw 'Desktop installation failed.' }
-.\.venv\Scripts\python.exe -m npu_scribe.desktop
+.\.venv\Scripts\python.exe -m audio_transcriber.desktop
 ```
 
 ## Transcribe a file

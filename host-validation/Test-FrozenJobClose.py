@@ -154,7 +154,7 @@ def main() -> None:
         "model": "whisper-tiny.en-int4-ov",
         "actual_device": "CPU",
         "gui_sha256": digest(executable),
-        "worker_sha256": digest(executable.with_name("npu-scribe-worker.exe")),
+        "worker_sha256": digest(executable.with_name("audio-transcriber-worker.exe")),
         "native": read_json(native_report),
         "source_hashes_preserved": True,
         "ordered_unique_chunks": True,

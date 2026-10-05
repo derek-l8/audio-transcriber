@@ -10,7 +10,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)] [string]$LongFile,
-    [string]$DataDirectory = (Join-Path $env:LOCALAPPDATA "npu-scribe\validation-data"),
+    [string]$DataDirectory = (Join-Path $env:LOCALAPPDATA "audio-transcriber\validation-data"),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot "reports"),
     [string]$PythonExe,
     [string]$Model = "whisper-base.en-int4-ov",
@@ -93,7 +93,7 @@ $existing = @{}
 Get-ChildItem -Directory (Join-Path $DataDirectory "lectures") `
     -ErrorAction SilentlyContinue | ForEach-Object { $existing[$_.Name] = $true }
 $argsList = @(
-    "-m", "npu_scribe.cli", "--data-dir", $DataDirectory,
+    "-m", "audio_transcriber.cli", "--data-dir", $DataDirectory,
     "transcribe", "--cleanup", "off", "--formatting", "off", $source, "--model", $Model, "--device", "CPU",
     "--chunk-seconds", "30", "--overlap-seconds", "1"
 )

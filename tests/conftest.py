@@ -14,7 +14,7 @@ def enable_python_stub_on_windows(monkeypatch: pytest.MonkeyPatch) -> None:
     """Launch test decoder scripts through Python where shebangs are not executable."""
     if os.name != "nt":
         return
-    from npu_scribe import media
+    from audio_transcriber import media
 
     build_args = media.build_ffmpeg_args
 
@@ -28,11 +28,11 @@ def enable_python_stub_on_windows(monkeypatch: pytest.MonkeyPatch) -> None:
 def deny_network_by_default():
     """The default suite must never touch the network.
 
-    Live runs opt out explicitly via NPU_SCRIBE_RUN_LIVE=1. Blocking happens at
+    Live runs opt out explicitly via AUDIO_TRANSCRIBER_RUN_LIVE=1. Blocking happens at
     the raw socket layer so any unexpected DNS/HTTP/dataset access fails loudly
     instead of silently succeeding.
     """
-    if os.environ.get("NPU_SCRIBE_RUN_LIVE") == "1":
+    if os.environ.get("AUDIO_TRANSCRIBER_RUN_LIVE") == "1":
         yield
         return
     import socket as socket_module

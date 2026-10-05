@@ -1,0 +1,79 @@
+{
+  "checked_at": "2026-10-05T04:55:24.569523+00:00",
+  "source_base_commit": "70d6e17e9af9234f6ce2bf92699f2b2409ebace4",
+  "changes": "local staged changes; no commit or push",
+  "application_source_sha256": "b1904733b4c880a6ffa6c3d75c5b64da68ffe5e3001dbc9c637b5aa255532140",
+  "python": "3.14.6",
+  "runtime_versions": {
+    "openvino": "2026.4.0",
+    "openvino-genai": "2026.4.0.0",
+    "PySide6": "6.11.2",
+    "pyinstaller": "6.22.3"
+  },
+  "installer": {
+    "file": "audio-transcriber-0.1.0-windows-x64.exe",
+    "bytes": 93204110,
+    "sha256": "b4af2e4982293d00d825b3b0b74ce96e707aba7d7f4377030273dbbf317ef23f",
+    "published": false
+  },
+  "quality": {
+    "offline_tests_passed": 284,
+    "skipped": 1,
+    "live_deselected": 1,
+    "ruff_format": "passed",
+    "ruff_lint": "passed",
+    "mypy_windows_and_linux_targets": "passed",
+    "document_links_and_anchors": 87,
+    "powershell_syntax_helpers": 6
+  },
+  "packages": {
+    "source_and_wheel_contents": "passed",
+    "fresh_python314_wheel_install": "passed",
+    "both_launchers_pause_resume_and_eight_exports": "passed"
+  },
+  "desktop_shortcut": {
+    "selected_by_default": true,
+    "target_verified": true,
+    "opened_gui_without_cli_arguments": true,
+    "test_location": "isolated local validation storage",
+    "removed_by_uninstall": true
+  },
+  "installed_workflows": {
+    "payload_files_verified": 1301,
+    "fresh_install": "passed",
+    "startup_default": "unchecked",
+    "installed_worker_cpu_inference": "passed",
+    "installed_worker_model_download": "passed",
+    "installed_worker_cleanup_and_formatting": "passed",
+    "installed_worker_ai_and_formatted_exports": "passed",
+    "installed_lecture_defaults": "light / structured",
+    "reinstall": "passed",
+    "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
+    "uninstall": "passed",
+    "installed_payload_removed": true,
+    "validation_registration_removed": true,
+    "inside_library_files_preserved": 41,
+    "separate_library_files_preserved": 42,
+    "unknown_nested_file_preserved": true
+  },
+  "gui": {
+    "playback_seek_edit_history_search_reopen": "passed",
+    "exports": 12,
+    "lecture_defaults": "light / structured",
+    "dictation_defaults": "medium / prose"
+  },
+  "fixture": {
+    "supplied_recording_clip_seconds": 10,
+    "transcription_device": "CPU",
+    "cleanup_and_formatting_device": "GPU"
+  },
+  "compatibility": {
+    "existing_library_and_legacy_environment_override": "regression tests passed"
+  },
+  "bundle_documentation_refresh": {
+    "file": "_internal/licenses/LIBRARY_BUILD.md",
+    "change": "Python 3.14 library rebuild instructions",
+    "tested_gui_and_worker_hashes_unchanged": true
+  },
+  "scope": "One Windows x64 host. Installed speech/cleanup used the supplied recording clip; native GUI workflows used synthetic audio and mock recognition. No new microphone recording or comparative performance benchmark."
+}

@@ -21,9 +21,9 @@ from typing import Any
 from PySide6.QtCore import QEventLoop, QTimer
 from PySide6.QtWidgets import QApplication, QLineEdit, QVBoxLayout, QWidget
 
-from npu_scribe.desktop_dictation import Shortcut
-from npu_scribe.dictation import Hotkey
-from npu_scribe.windows_dictation import Input, InputUnion, KeyboardInput, WindowsInput
+from audio_transcriber.desktop_dictation import Shortcut
+from audio_transcriber.dictation import Hotkey
+from audio_transcriber.windows_dictation import Input, InputUnion, KeyboardInput, WindowsInput
 
 
 def require(condition: bool, message: str) -> None:
@@ -34,7 +34,7 @@ def require(condition: bool, message: str) -> None:
 def editor(root: Path) -> None:
     app = QApplication([])
     window = QWidget()
-    window.setWindowTitle("NPU Scribe — owned dictation test field")
+    window.setWindowTitle("Audio Transcriber — owned dictation test field")
     window.resize(450, 160)
     layout = QVBoxLayout(window)
     fields = {name: QLineEdit() for name in ("first", "second", "password")}
@@ -93,7 +93,7 @@ def validate(app: QApplication, root: Path, text: str) -> dict[str, str]:
                 state = json.loads((root / "state.json").read_text(encoding="utf-8"))
                 if test(state):
                     return dict(state)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 pass
             time.sleep(0.02)
         raise RuntimeError("Owned editor did not reach the required state; keep its field focused.")

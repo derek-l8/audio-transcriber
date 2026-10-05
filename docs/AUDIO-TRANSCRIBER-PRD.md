@@ -1,10 +1,10 @@
-# NPU Scribe — Product Requirements Document
+# Audio Transcriber — Product Requirements Document
 
 **Version:** 1.1  
 **Date:** 2026-08-20  
 **Status:** Build-ready specification  
 **Product type:** Personal-first, local Windows desktop application  
-**Repository name:** `npu-scribe`  
+**Package name:** `audio-transcriber`
 **Document status:** Historical planning requirements; current implemented scope is in the README
 **License:** MIT for original application code; model and dataset licenses remain separate
 
@@ -14,7 +14,7 @@
 
 ## 1. Executive summary
 
-NPU Scribe is an English-only Windows desktop application for two related workflows:
+Audio Transcriber is an English-only Windows desktop application for two related workflows:
 
 1. **Live dictation:** capture speech, remove fillers and false starts, optionally rewrite it, and insert the final text into ordinary editable desktop fields.
 2. **Lecture transcription:** record a microphone or import an audio/video file, create a timestamped transcript, retain the source audio and transcript versions, and provide local review, search, playback, cleanup, outline, summary, and export tools.
@@ -117,7 +117,7 @@ Targets are measured on the owner's target machine unless otherwise specified. R
 
 ## 6. User-visible product structure
 
-NPU Scribe is one installed product with shared settings, models, dictionaries, history, and inference services.
+Audio Transcriber is one installed product with shared settings, models, dictionaries, history, and inference services.
 
 ```mermaid
 flowchart LR
@@ -144,7 +144,7 @@ The first-run experience must:
 
 1. Explain that models run locally and may use approximately 10 GB.
 2. Let the user choose the application-data location.
-3. Default to a dedicated `NPU Scribe` folder on the Desktop when that Desktop is local.
+3. Default to a dedicated `Audio Transcriber` folder on the Desktop when that Desktop is local.
 4. Detect likely OneDrive Desktop redirection. If detected, warn that recordings and transcripts could sync and offer a clearly labeled non-synced local location. Never silently place private recordings in a synced folder.
 5. Download required models with visible progress, resumability, checksums where available, and attributable license information.
 6. Detect CPU, GPU, and NPU availability through the actual inference runtime.
@@ -355,7 +355,7 @@ The application must create a user-reviewed, redacted support bundle. It must ex
 Use ordinary documented files in a dedicated application-data directory separate from the source repository. An illustrative structure is:
 
 ```text
-NPU Scribe/
+Audio Transcriber/
 ├── config/
 ├── dictionary/
 ├── history/
@@ -566,7 +566,7 @@ Required repository documents:
 
 Documentation must reference real code and verified commands. It must not contain generic claims copied from the PRD after the implementation differs.
 
-Portfolio language may accurately state that the owner developed NPU Scribe using the chosen language, OpenVINO, and local models once the owner can explain and modify the implementation. It must not claim that the owner trained Whisper, invented the underlying models, or personally hand-authored every line. Benchmark and compatibility claims must name their tested environment.
+Portfolio language may accurately state that the owner developed Audio Transcriber using the chosen language, OpenVINO, and local models once the owner can explain and modify the implementation. It must not claim that the owner trained Whisper, invented the underlying models, or personally hand-authored every line. Benchmark and compatibility claims must name their tested environment.
 
 ## 15. Milestones and gates
 
@@ -719,4 +719,4 @@ Model weights, runtime components, media tools, and datasets must be reviewed in
 
 ## 19. Definition of done
 
-NPU Scribe is done for v1 when the acceptance checklist is resolved, the owner-run Windows validation evidence is incorporated, the installer and documentation are complete, the offline and data-integrity requirements hold, and the outbox contains a PR-ready public package. The autonomous agent may finish every sandbox-capable item independently, but it must label the project **host validation pending** until the owner has run and returned the required Windows checks. Git commits, pushes, pull requests, and releases remain manual trusted-host actions.
+Audio Transcriber is done for v1 when the acceptance checklist is resolved, the owner-run Windows validation evidence is incorporated, the installer and documentation are complete, the offline and data-integrity requirements hold, and the outbox contains a PR-ready public package. The autonomous agent may finish every sandbox-capable item independently, but it must label the project **host validation pending** until the owner has run and returned the required Windows checks. Git commits, pushes, pull requests, and releases remain manual trusted-host actions.

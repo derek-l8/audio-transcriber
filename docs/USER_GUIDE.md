@@ -1,4 +1,4 @@
-# Using NPU Scribe
+# Using Audio Transcriber
 
 This guide covers Windows installation, transcription, cleanup, the optional
 desktop interface, live dictation, and updates. Source CLI examples use the folder
@@ -9,15 +9,15 @@ variables used by the example. Ordinary transcription and cleanup are offline af
 
 A local Windows x64 installer is available to build; a prebuilt GitHub release
 has not been published. Run your installer and keep the default folder.
-Python and Git are unnecessary. Launch-at-sign-in is optional and starts
-unchecked. The installer is unsigned, so Windows may show an unknown-publisher
+Python and Git are unnecessary. The installer creates a desktop shortcut by
+default; launch-at-sign-in is optional and starts unchecked. The installer is unsigned, so Windows may show an unknown-publisher
 warning. The setup guide opens after installation and is also available under
-**NPU Scribe > Getting started** in the Start menu.
+**Audio Transcriber > Getting started** in the Start menu.
 
 1. Open PowerShell and download the first speech model:
 
    ```powershell
-   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\NPU Scribe\npu-scribe-worker.exe'
+   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\Audio Transcriber\audio-transcriber-worker.exe'
    & $Worker models download whisper-tiny.en-int4-ov
    if ($LASTEXITCODE -ne 0) { throw 'Model download failed; stop here.' }
    ```
@@ -29,7 +29,7 @@ warning. The setup guide opens after installation and is also available under
 2. For AI cleanup, download the separate text model (about 4.5 GB):
 
    ```powershell
-   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\NPU Scribe\npu-scribe-worker.exe'
+   $Worker = Join-Path $env:LOCALAPPDATA 'Programs\Audio Transcriber\audio-transcriber-worker.exe'
    & $Worker models download qwen2.5-7b-instruct-int4-ov
    if ($LASTEXITCODE -ne 0) { throw 'Cleanup model download failed; stop here.' }
    ```
@@ -37,23 +37,23 @@ warning. The setup guide opens after installation and is also available under
    Choose **Off** for cleanup and formatting if you skip this download.
 
 3. For MP3, M4A, or MP4, extract a Windows executable build from the
-   [FFmpeg download page](https://www.ffmpeg.org/download.html). In NPU Scribe,
+   [FFmpeg download page](https://www.ffmpeg.org/download.html). In Audio Transcriber,
    use **Choose FFmpeg** to select `bin\ffmpeg.exe`.
 
-Open NPU Scribe, select your speech model, and press **Import lecture**.
+Double-click the **Audio Transcriber** desktop shortcut, select your speech model, and press **Import lecture**.
 Light cleanup and Mostly structured formatting are the starting file settings. Review the transcript
 and export the version you want. [Live dictation](#live-dictation) uses the same
 models. Processing works offline after the downloads.
 
 To update, close the app and run the newer installer into the same folder.
-Your library and models stay in `%LOCALAPPDATA%\npu-scribe`; uninstalling the app
-also keeps them. If you selected a custom library, keep using that folder.
+Your library and models stay in `%LOCALAPPDATA%\audio-transcriber`; uninstalling the app
+also keeps them. An existing library from before the rename is reused automatically.
+If you selected a custom library, keep using that folder.
 
 ## Install on Windows
 
-Use [64-bit Python 3.12](https://www.python.org/downloads/windows/) and PowerShell.
-Check that the requested Python is available with `py -3.12 --version`. Python 3.11 is also supported by the source
-package. Windows x64 is the locally tested target; other devices and operating
+Use [64-bit Python 3.14](https://www.python.org/downloads/windows/) and PowerShell.
+Check that the requested Python is available with `py -3.14 --version`. Windows x64 is the locally tested target; other devices and operating
 systems are not fully validated.
 
 1. Get the source using **Code > Download ZIP** on GitHub, or clone it with Git.
@@ -66,15 +66,15 @@ systems are not fully validated.
    $Projects = Join-Path $env:USERPROFILE 'Projects'
    New-Item -ItemType Directory -Force -Path $Projects -ErrorAction Stop | Out-Null
    Set-Location $Projects -ErrorAction Stop
-   git clone https://github.com/derek-l8/npu-scribe.git
+   git clone https://github.com/derek-l8/npu-scribe.git audio-transcriber
    if ($LASTEXITCODE -ne 0) { throw 'Clone failed; stop here.' }
-   Set-Location npu-scribe -ErrorAction Stop
+   Set-Location audio-transcriber -ErrorAction Stop
    ```
 
 2. Install the engine in its own Python environment:
 
    ```powershell
-   py -3.12 -m venv .venv
+   py -3.14 -m venv .venv
    if ($LASTEXITCODE -ne 0) { throw 'Environment creation failed; stop here.' }
    .\.venv\Scripts\python.exe -m pip install '.[inference]'
    if ($LASTEXITCODE -ne 0) { throw 'Installation failed; stop here.' }
@@ -83,8 +83,8 @@ systems are not fully validated.
 3. Download a speech model. This step needs internet access:
 
    ```powershell
-   $Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
-   .\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" models download whisper-tiny.en-int4-ov
+   $Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
+   .\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" models download whisper-tiny.en-int4-ov
    if ($LASTEXITCODE -ne 0) { throw 'Model download failed; stop here.' }
    ```
 
@@ -105,7 +105,7 @@ Keep using the same library when downloading models and processing files.
 
 The examples use the environment under the source folder. If you run from
 another directory, use the full path to its Python executable followed by
-`-m npu_scribe.cli`. Activating the environment is optional.
+`-m audio_transcriber.cli`. Activating the environment is optional.
 
 For MP3, M4A, or MP4, get a Windows executable build through the
 [FFmpeg download page](https://www.ffmpeg.org/download.html), extract it to a
@@ -113,10 +113,10 @@ local folder, and locate `bin\ffmpeg.exe`. The decoder is not bundled. For a WAV
 16 kHz, 16-bit PCM recording:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Model = 'whisper-tiny.en-int4-ov'
 $InputFile = 'C:\Lectures\lecture.wav'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --cleanup off
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --cleanup off
 if ($LASTEXITCODE -ne 0) { throw 'Transcription did not finish; check the message above.' }
 ```
 
@@ -126,9 +126,9 @@ requires saved corrections and `ai` requires completed cleanup. Saved `formatted
 and `summary` versions support text, Markdown, and JSON, without SRT subtitles:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Session = 'SESSION_ID_FROM_OUTPUT'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --format srt --layer balanced
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" export "$Session" --format srt --layer balanced
 if ($LASTEXITCODE -ne 0) { throw 'Export failed; check the message above.' }
 ```
 
@@ -140,11 +140,11 @@ For MP3/M4A/MP4, FFmpeg is discovered on PATH. To select another executable,
 set its path and add `--ffmpeg` to the run:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Model = 'whisper-tiny.en-int4-ov'
 $FFmpeg = 'C:\Tools\ffmpeg\bin\ffmpeg.exe'
 $InputFile = 'C:\Lectures\lecture.mp4'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --ffmpeg "$FFmpeg" --cleanup off
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" transcribe "$InputFile" --model "$Model" --device CPU --ffmpeg "$FFmpeg" --cleanup off
 ```
 
 Nonconforming WAV files need conversion before import; passing `--ffmpeg`
@@ -172,10 +172,10 @@ Resume a paused/failed session with the **same model** and library. For compress
 media, supply its FFmpeg executable again. The saved chunk plan is reused:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Session = 'SESSION_ID_FROM_OUTPUT'
 $Model = 'whisper-tiny.en-int4-ov' # Replace with the model originally used.
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" resume "$Session" --model "$Model" --device CPU --cleanup off
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" resume "$Session" --model "$Model" --device CPU --cleanup off
 ```
 
 If the desktop was forcibly terminated, confirm its worker has stopped before
@@ -186,7 +186,7 @@ start a new import to transcribe again.
 ## Desktop workflow
 
 Install and launch the optional interface with the
-[README desktop commands](../README.md#optional-desktop-app).
+[README desktop commands](../README.md#setup).
 
 Choose an installed model and import WAV, MP3, M4A, or MP4. CPU is initially
 selected. Auto benchmarks available devices and can try other successful
@@ -273,8 +273,8 @@ Cleanup uses an independent local text model. It is optional and requires the
 explicitly into the same library/model root used by the app:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" models download qwen2.5-7b-instruct-int4-ov
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" models download qwen2.5-7b-instruct-int4-ov
 if ($LASTEXITCODE -ne 0) { throw 'Cleanup model download failed; stop here.' }
 ```
 
@@ -312,26 +312,26 @@ Cleanup defaults to AUTO (GPU, then CPU). Use `--cleanup-device CPU`, `GPU`, or 
 Cleanup failure returns exit 1 while leaving a ready, exportable transcription.
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" transcribe 'lecture.wav' --device CPU --cleanup light
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" transcribe 'lecture.wav' --device CPU --cleanup light
 ```
 
 To clean an existing session and export it:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Session = 'SESSION_ID_FROM_OUTPUT'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" cleanup "$Session" --device AUTO --mode lecture --style light
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" cleanup "$Session" --device AUTO --mode lecture --style light
 if ($LASTEXITCODE -ne 0) { throw 'Cleanup did not finish; check the message above.' }
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --layer ai --format markdown
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" export "$Session" --layer ai --format markdown
 ```
 
 For an existing UTF-8 text file, run from the source folder and replace the
 input path. This uses the same downloaded model and library:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" cleanup-text 'draft.txt' --output 'cleaned.txt' --mode dictation --style light --device CPU
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" cleanup-text 'draft.txt' --output 'cleaned.txt' --mode dictation --style light --device CPU
 ```
 
 Use `--format json` for settings, source hash, and per-block warnings. Existing
@@ -376,11 +376,11 @@ Use cleanup for wording and Summary for reduced detail.
 CLI example after cleanup:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Session = 'SESSION_ID_FROM_OUTPUT'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" format "$Session" --source ai --style mixed
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" format "$Session" --source ai --style mixed
 if ($LASTEXITCODE -ne 0) { throw 'Formatting did not finish; check the message above.' }
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --layer formatted --format markdown
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" export "$Session" --layer formatted --format markdown
 ```
 
 Use `--source raw --style prose` without the text model. Add `--formatting prose`,
@@ -415,11 +415,11 @@ full transcript intact. Summary works even when cleanup is Off.
 CLI equivalent:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
 $Session = 'SESSION_ID_FROM_OUTPUT'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" summarize "$Session"
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" summarize "$Session"
 if ($LASTEXITCODE -ne 0) { throw 'Summary did not finish; check the message above.' }
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" export "$Session" --layer summary --format markdown
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" export "$Session" --layer summary --format markdown
 ```
 
 Export Summary as text, Markdown, or JSON; summaries cannot become SRT subtitles.
@@ -468,11 +468,11 @@ Both launchers accept `--model-root`. That folder contains model-ID subfolders,
 not a single model's files. Use the same location for download and launch:
 
 ```powershell
-$Data = Join-Path $env:LOCALAPPDATA 'npu-scribe'
-$Models = 'D:\NPU Scribe Models'
-.\.venv\Scripts\python.exe -m npu_scribe.cli --data-dir "$Data" --model-root "$Models" models download whisper-tiny.en-int4-ov
+$Data = Join-Path $env:LOCALAPPDATA 'audio-transcriber'
+$Models = 'D:\Audio Transcriber Models'
+.\.venv\Scripts\python.exe -m audio_transcriber.cli --data-dir "$Data" --model-root "$Models" models download whisper-tiny.en-int4-ov
 if ($LASTEXITCODE -ne 0) { throw 'Model download failed; stop here.' }
-.\.venv\Scripts\python.exe -m npu_scribe.desktop --data-dir "$Data" --model-root "$Models"
+.\.venv\Scripts\python.exe -m audio_transcriber.desktop --data-dir "$Data" --model-root "$Models"
 ```
 
 The desktop saves its model-folder and FFmpeg settings in the library when a
@@ -503,7 +503,7 @@ do not copy its virtual environment into the new folder.
 In either case, install from the updated source folder:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 if ($LASTEXITCODE -ne 0) { throw 'Environment setup failed; stop here.' }
 .\.venv\Scripts\python.exe -m pip install --upgrade '.[inference]'
 if ($LASTEXITCODE -ne 0) { throw 'Reinstallation failed; stop here.' }
@@ -518,7 +518,7 @@ the same `--data-dir` and any custom `--model-root`.
 
 | Message or symptom | Check |
 |---|---|
-| `py -3.12` unavailable | Install 64-bit Python 3.12 or make that version available to the Python launcher. |
+| `py -3.14` unavailable | Install 64-bit Python 3.14 or make that version available to the Python launcher. |
 | Python module missing | Run from the source folder with its `.venv\Scripts\python.exe`, or use the full executable path. Install the extras shown in the README. |
 | Model not installed | Download the approved model explicitly into the same library/model root used for the job. A speech model and a cleanup model are separate downloads. |
 | Resume model mismatch | Supply the original `--model`; the CLI default is `whisper-tiny.en-int4-ov`. |

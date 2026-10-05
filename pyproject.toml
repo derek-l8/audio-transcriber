@@ -3,11 +3,11 @@ requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
-name = "npu-scribe"
+name = "audio-transcriber"
 version = "0.1.0"
 description = "Local audio transcription and AI text cleanup with OpenVINO"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = {file = "LICENSE"}
 dependencies = ["platformdirs==4.12.2"]
 
@@ -18,11 +18,11 @@ bundle = ["pyinstaller==6.22.3"]
 dev = ["pytest==9.1.1", "pytest-cov==7.1.0", "hypothesis==6.168.3", "ruff==0.16.9", "mypy==2.3.1", "build==1.6.1", "hatchling==1.32.4"]
 
 [project.scripts]
-npu-scribe = "npu_scribe.cli:main"
-npu-scribe-desktop = "npu_scribe.desktop:main"
+audio-transcriber = "audio_transcriber.cli:main"
+audio-transcriber-desktop = "audio_transcriber.desktop:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/npu_scribe"]
+packages = ["src/audio_transcriber"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -34,7 +34,7 @@ include = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "S"]
@@ -43,9 +43,9 @@ select = ["E", "F", "I", "B", "UP", "S"]
 "tests/*" = ["S101"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.14"
 strict = true
-packages = ["npu_scribe"]
+packages = ["audio_transcriber"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -53,6 +53,6 @@ addopts = "-q --strict-markers"
 markers = [
     "endurance: long bounded-memory checks",
     "windows: owner-run Windows checks",
-    "live: opt-in tests that use the real network; require NPU_SCRIBE_RUN_LIVE=1",
+    "live: opt-in tests that use the real network; require AUDIO_TRANSCRIBER_RUN_LIVE=1",
 ]
 

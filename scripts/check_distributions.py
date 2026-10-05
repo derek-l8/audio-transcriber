@@ -56,7 +56,7 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     modules = {
         str(p.relative_to(root / "src")).replace("\\", "/")
-        for p in (root / "src" / "npu_scribe").glob("*.py")
+        for p in (root / "src" / "audio_transcriber").glob("*.py")
     }
     with zipfile.ZipFile(wheels[0]) as archive:
         names = set(archive.namelist())
@@ -82,8 +82,8 @@ def main() -> None:
                 "docs/USER_GUIDE.md",
                 "packaging/desktop_entry.py",
                 "packaging/worker_entry.py",
-                "packaging/npu-scribe.spec",
-                "packaging/npu-scribe.iss",
+                "packaging/audio-transcriber.spec",
+                "packaging/audio-transcriber.iss",
                 "packaging/bundle_assets.py",
                 "packaging/collect_sources.py",
                 "packaging/prepare_release.py",

@@ -19,10 +19,10 @@ class DataLocation:
 
 def propose_windows_data_location(home: Path, env: dict[str, str] | None = None) -> DataLocation:
     values = env or os.environ
-    desktop = home / "Desktop" / "NPU Scribe"
+    desktop = home / "Desktop" / "Audio Transcriber"
     onedrive = values.get("OneDrive") or values.get("OneDriveConsumer")
     likely = _within(desktop, Path(onedrive)) if onedrive else False
-    return DataLocation(desktop, likely, home / "AppData" / "Local" / "NPU Scribe Data")
+    return DataLocation(desktop, likely, home / "AppData" / "Local" / "Audio Transcriber Data")
 
 
 def _within(path: Path, parent: Path) -> bool:

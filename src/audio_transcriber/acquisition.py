@@ -1,7 +1,7 @@
 """Explicit model acquisition: manifest-approved downloads with staged verification.
 
 Ordinary transcription NEVER touches this module or the network. Downloads happen
-only through `npu-scribe models download MODEL_ID` or the evaluation harness.
+only through `audio-transcriber models download MODEL_ID` or the evaluation harness.
 
 Security policy enforced here:
 - Only manifest-approved model identifiers and HTTPS hosts are allowed.
@@ -348,7 +348,7 @@ def get_spec(model_id: str) -> ModelSpec:
         return MANIFEST[model_id]
     except KeyError:
         raise AcquisitionError(
-            f"model '{model_id}' is not manifest-approved; run 'npu-scribe models list'"
+            f"model '{model_id}' is not manifest-approved; run 'audio-transcriber models list'"
         ) from None
 
 

@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe import desktop
-from npu_scribe.desktop import worker_command
+from audio_transcriber import desktop
+from audio_transcriber.desktop import worker_command
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -18,14 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_worker_uses_current_python_environment():
     program, arguments = worker_command(["models", "list"])
     assert program == sys.executable
-    assert arguments == ["-m", "npu_scribe.cli", "models", "list"]
+    assert arguments == ["-m", "audio_transcriber.cli", "models", "list"]
 
 
 def test_frozen_worker_is_a_sibling_console_executable(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "frozen", True, raising=False)
-    monkeypatch.setattr(sys, "executable", str(tmp_path / "NPU Scribe.exe"))
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "Audio Transcriber.exe"))
     program, arguments = worker_command(["models", "list"])
-    assert program == str(tmp_path / "npu-scribe-worker.exe")
+    assert program == str(tmp_path / "audio-transcriber-worker.exe")
     assert arguments == ["models", "list"]
 
 
@@ -75,7 +75,7 @@ def test_desktop_startup_failure_keeps_diagnostics(monkeypatch, tmp_path, frozen
             raise ImportError("missing desktop dependency fixture")
         return real_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(sys, "argv", ["npu-scribe-desktop", "--data-dir", str(tmp_path)])
+    monkeypatch.setattr(sys, "argv", ["audio-transcriber-desktop", "--data-dir", str(tmp_path)])
     monkeypatch.setattr(sys, "frozen", frozen, raising=False)
     monkeypatch.setattr(builtins, "__import__", missing_desktop)
     with pytest.raises(SystemExit, match="Details:"):

@@ -76,7 +76,7 @@ def main() -> None:
                 if pid.value == pid_expected:
                     title = ctypes.create_unicode_buffer(256)
                     user32.GetWindowTextW(hwnd, title, len(title))
-                    if title.value == "NPU Scribe — Lecture library":
+                    if title.value == "Audio Transcriber — Lecture library":
                         user32.ShowWindow(hwnd, subprocess.SW_HIDE)
                         owned_windows.append(hwnd)
                 return True

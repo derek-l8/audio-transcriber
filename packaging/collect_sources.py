@@ -85,7 +85,7 @@ def main() -> None:
     version = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"][
         "version"
     ]
-    bundle = destination / f"npu-scribe-{version}-library-sources.zip"
+    bundle = destination / f"audio-transcriber-{version}-library-sources.zip"
     with zipfile.ZipFile(bundle, "w", compression=zipfile.ZIP_STORED) as output:
         for archive in archives:
             output.write(archive, "upstream/" + archive.name)

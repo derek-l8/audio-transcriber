@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from npu_scribe.cli import build_parser, main
+from audio_transcriber.cli import build_parser, main
 
 
 def test_manual_device_does_not_benchmark_other_devices(tmp_path, monkeypatch):
-    from npu_scribe import cli
+    from audio_transcriber import cli
 
     def unexpected(*args):
         raise AssertionError("manual device must not benchmark other devices")
@@ -24,10 +24,10 @@ def test_manual_device_does_not_benchmark_other_devices(tmp_path, monkeypatch):
 def test_auto_falls_back_after_selected_device_fails(
     tmp_path, three_second_wav, monkeypatch, resume
 ):
-    from npu_scribe import cli
-    from npu_scribe.devices import Benchmark
-    from npu_scribe.engines import MockSpeechEngine
-    from npu_scribe.storage import SessionStore
+    from audio_transcriber import cli
+    from audio_transcriber.devices import Benchmark
+    from audio_transcriber.engines import MockSpeechEngine
+    from audio_transcriber.storage import SessionStore
 
     attempted = []
 
@@ -91,7 +91,7 @@ def test_auto_falls_back_after_selected_device_fails(
 
 
 def test_manual_failure_does_not_fall_back(tmp_path, three_second_wav, monkeypatch):
-    from npu_scribe import cli
+    from audio_transcriber import cli
 
     attempted = []
 
@@ -340,8 +340,8 @@ def test_resume_missing_session_fails_cleanly(data_dir: Path, capsys) -> None:
 
 @pytest.mark.live
 @pytest.mark.skipif(
-    os.environ.get("NPU_SCRIBE_RUN_LIVE") != "1",
-    reason="live network test; run with NPU_SCRIBE_RUN_LIVE=1 and -m live",
+    os.environ.get("AUDIO_TRANSCRIBER_RUN_LIVE") != "1",
+    reason="live network test; run with AUDIO_TRANSCRIBER_RUN_LIVE=1 and -m live",
 )
 def test_models_download_real_pinned_model_live(data_dir: Path) -> None:
     """Opt-in: full download of the pinned tiny.en proof model over real HTTPS."""
@@ -366,7 +366,7 @@ def test_default_commands_are_network_free(
     data_dir: Path, three_second_wav: Path, monkeypatch, capsys
 ) -> None:
     """Regression: ordinary commands never open sockets or touch the downloader."""
-    import npu_scribe.acquisition as acquisition
+    import audio_transcriber.acquisition as acquisition
 
     def denied_fetcher(*args, **kwargs):  # noqa: ANN002, ANN003
         raise AssertionError("live downloader invoked during a default command")
@@ -438,7 +438,7 @@ def test_real_downloader_only_behind_live_marker_and_env_gate() -> None:
     forbidden_probe = "_hf_" + "reachable"  # assembled to avoid self-reference
     assert forbidden_probe not in cli_tests, "collection-time reachability probes are forbidden"
     assert "@pytest.mark.live" in cli_tests
-    assert 'os.environ.get("NPU_SCRIBE_RUN_LIVE")' in cli_tests
+    assert 'os.environ.get("AUDIO_TRANSCRIBER_RUN_LIVE")' in cli_tests
 
 
 def test_default_transcription_requires_real_model_not_mock(data_dir, three_second_wav, capsys):
@@ -459,3 +459,31 @@ def test_default_transcription_requires_real_model_not_mock(data_dir, three_seco
     )
     assert "whisper-tiny.en-int4-ov' is not installed" in capsys.readouterr().err
     assert not (data_dir / "lectures").exists()
+
+
+def test_default_library_reuses_existing_data_after_rename(tmp_path, monkeypatch):
+    from audio_transcriber.cli import default_data_dir
+
+    for name in ("AUDIO_TRANSCRIBER_DATA_DIR", "NPUSCRIBE_DATA_DIR"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr("platformdirs.user_data_path", lambda name, **kwargs: tmp_path / name)
+    current = tmp_path / "audio-transcriber"
+    legacy = tmp_path / "npu-scribe"
+    assert default_data_dir() == current
+    legacy.mkdir()
+    saved = legacy / "settings.json"
+    saved.write_text('{"cleanup": "medium"}', encoding="utf-8")
+    assert default_data_dir() == legacy
+    assert saved.read_text(encoding="utf-8") == '{"cleanup": "medium"}'
+    current.mkdir()
+    assert default_data_dir() == current
+
+
+def test_library_override_accepts_old_setting_and_prefers_new_name(tmp_path, monkeypatch):
+    from audio_transcriber.cli import default_data_dir
+
+    monkeypatch.delenv("AUDIO_TRANSCRIBER_DATA_DIR", raising=False)
+    monkeypatch.setenv("NPUSCRIBE_DATA_DIR", str(tmp_path / "previous"))
+    assert default_data_dir() == tmp_path / "previous"
+    monkeypatch.setenv("AUDIO_TRANSCRIBER_DATA_DIR", str(tmp_path / "chosen"))
+    assert default_data_dir() == tmp_path / "chosen"

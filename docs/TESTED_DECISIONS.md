@@ -1,5 +1,7 @@
 # Tests and decisions
 
+These measurements predate the Audio Transcriber rename and Python 3.14 update.
+
 The project began as an attempt to use an NPU for local speech transcription
 and cleanup while leaving the computer usable. Tests led to different device
 choices: **CPU for speech; GPU with CPU fallback for cleanup**. NPU stays optional.

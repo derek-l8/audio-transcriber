@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from npu_scribe.cli import make_engine_provider, resolve_device
+from audio_transcriber.cli import make_engine_provider, resolve_device
 
 MODELS = ("whisper-tiny.en-int4-ov", "whisper-base.en-int4-ov")
 

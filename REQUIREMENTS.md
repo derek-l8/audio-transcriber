@@ -7,7 +7,7 @@ are implemented. This is a source milestone; a current validated installer
 release is not complete. Live dictation now has source controls, capture, cleanup,
 insertion, and recovery; broader microphone/application checks remain open.
 
-[The PRD](docs/NPU-SCRIBE-PRD.md) is a historical planning document.
+[The PRD](docs/AUDIO-TRANSCRIBER-PRD.md) is a historical planning document.
 Its tray and setup-wizard requirements remain future work. The matrix retains those gaps without making them source v0.1 release gates.
 
 Status values are **verified-sandbox**, **verified-windows-one-host**,
@@ -39,7 +39,7 @@ Verification covers the recorded inputs and exercised paths. See
 | Offline operation/no telemetry | Default tests deny sockets during synthetic processing; ordinary transcription and cleanup use local assets. Downloads are explicit acquisition/evaluation actions; no telemetry implementation | verified-sandbox for tested network boundary |
 | Redacted diagnostics and support bundle | Path sanitization in public reports; full support bundle pending | partial |
 | Per-user installer/startup/uninstall/data choice | Current frozen build passed isolated silent install, reinstall, a versioned reinstall with the same payload, uninstall, model download, CPU speech, GPU cleanup, prose formatting, exports, and file preservation; startup off by default. Wizard/startup shortcuts, different-payload migration, and a second host pending | partial |
-| One-command Windows validation and sanitized reports | `Invoke-NpuScribeValidation.ps1` plus focused local helpers; sanitized device, endurance, speech, desktop and cleanup metadata in `host-validation/evidence/` | verified-windows-one-host for exercised paths |
+| One-command Windows validation and sanitized reports | `Invoke-AudioTranscriberValidation.ps1` plus focused local helpers; sanitized device, endurance, speech, desktop and cleanup metadata in `host-validation/evidence/` | verified-windows-one-host for exercised paths |
 | Two-hour bounded-memory test | Two synthetic CPU passes; denser pass sampled 408.6 MB peak and post-warmup first/last quarter medians 389.2/390.0 MB. Earlier one-hour setup sampled 1211.8 MB; no universal peak ceiling or two-hour real-speech result | verified-windows-one-host for synthetic CPU |
 | Portable source/package installation | Source archive and wheel checked for required modules and runtime/private artifacts; clean installed-wheel synthetic smoke, real CPU speech and real CPU cleanup from outside the checkout on one Windows host | verified-windows-one-host for exercised installation paths |
 | Required documentation/licenses/notices | MIT source, pinned model license metadata, user/development/testing/privacy guides. Current bundle includes runtime inventory and license notices; corresponding Qt/PySide/FFmpeg sources and build information remain open for binary publication | partial |
@@ -62,7 +62,7 @@ Verification covers the recorded inputs and exercised paths. See
   distinguish execution, targeted fidelity checks, warmed request speed, RAM,
   and interference with synthetic graphics. A guard passing does not prove
   semantic preservation; literal commands, quotations, emphasis and math can fail.
-- [Current installer checkpoint](host-validation/evidence/2026-10-04/installer-checkpoint/README.md)
+- [Current installer checkpoint](host-validation/evidence/2026-10-04/audio-transcriber-checkpoint/README.md)
   records the rebuilt app and isolated lifecycle checks.
 - [Historical package/installer checks](host-validation/evidence/2026-10-02/package-validation/README.md)
   and [native frozen review](host-validation/evidence/2026-10-02/frozen-review/README.md)

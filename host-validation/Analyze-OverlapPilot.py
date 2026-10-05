@@ -16,8 +16,8 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from npu_scribe.metrics import _distance
-from npu_scribe.storage import atomic_json
+from audio_transcriber.metrics import _distance
+from audio_transcriber.storage import atomic_json
 
 TOKEN = re.compile(r"[a-z0-9]+(?:'[a-z0-9]+)*")
 

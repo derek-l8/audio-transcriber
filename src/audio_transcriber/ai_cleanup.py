@@ -251,7 +251,7 @@ def make_model(
     if installed is None:
         raise CleanupError(
             f"cleanup model '{model_id}' is not installed; run "
-            f"'npu-scribe models download {model_id}' with the same data/model folder"
+            f"'audio-transcriber models download {model_id}' with the same data/model folder"
         )
     return LocalCleanupModel(
         installed, device, cache_root / model_id / device.upper(), cancel_requested
@@ -445,7 +445,7 @@ def clean_segments(
             response = model.generate(request, mode, style)
             try:
                 candidate = render_summary(response, passages, group.text)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 candidate = ""
                 reasons = ["invalid-summary-selection"]
         else:

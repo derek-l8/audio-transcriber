@@ -149,7 +149,7 @@ class FFmpegDecoder:
         resolved = validate_source(source, self.max_input_bytes)
         if not shutil.which(self.ffmpeg_path) and not Path(self.ffmpeg_path).is_file():
             raise MediaError("configured FFmpeg binary was not found")
-        work = Path(tempfile.mkdtemp(prefix="npu-scribe-decode-"))
+        work = Path(tempfile.mkdtemp(prefix="audio-transcriber-decode-"))
         destination = work / "normalized.wav"
         try:
             completed = subprocess.run(  # noqa: S603 - fixed array, no shell

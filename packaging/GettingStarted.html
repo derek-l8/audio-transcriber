@@ -1,24 +1,24 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>NPU Scribe — Getting started</title>
+<title>Audio Transcriber — Getting started</title>
 <style>body{font:16px/1.6 system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#202020}pre{padding:16px;background:#f1f3f5;white-space:pre-wrap;overflow-wrap:anywhere}h1,h2{line-height:1.2}a{color:#1259a7}</style>
 <h1>Getting started</h1>
-<p>NPU Scribe transcribes files and microphone recordings, then optionally cleans up the text locally. Python and Git are not needed for the installed app.</p>
+<p>Audio Transcriber transcribes files and microphone recordings, then optionally cleans up the text locally. Python and Git are not needed for the installed app.</p>
 <h2>1. Download a speech model</h2>
 <p>Open PowerShell and paste this command. It downloads a small English model into your local application-data folder:</p>
-<pre>$Worker = Join-Path $env:LOCALAPPDATA 'Programs\NPU Scribe\npu-scribe-worker.exe'
+<pre>$Worker = Join-Path $env:LOCALAPPDATA 'Programs\Audio Transcriber\audio-transcriber-worker.exe'
 &amp; $Worker models download whisper-tiny.en-int4-ov</pre>
-<p>If you chose another installation folder, set <code>$Worker</code> to its <code>npu-scribe-worker.exe</code>. Wait for <code>model ready</code>. For lectures, you can download <code>whisper-base.en-int4-ov</code> with the same command instead.</p>
+<p>If you chose another installation folder, set <code>$Worker</code> to its <code>audio-transcriber-worker.exe</code>. Wait for <code>model ready</code>. For lectures, you can download <code>whisper-base.en-int4-ov</code> with the same command instead.</p>
 <h2>2. Choose whether to use AI cleanup</h2>
 <p>Cleanup removes filler and fixes grammar. Download its separate model with:</p>
 <pre>&amp; $Worker models download qwen2.5-7b-instruct-int4-ov</pre>
 <p>This download is about 4.5 GB and cleanup uses several GiB of RAM. Choose <strong>Off</strong> for cleanup and formatting if you skip it. Once models are downloaded, transcription and cleanup work offline.</p>
 <h2>3. Use the app</h2>
-<p>Open <strong>NPU Scribe</strong> from the Start menu. Select your speech model and import a recording. Choose Off, Light, or Medium cleanup; file imports start with Light cleanup and Mostly structured formatting. Review the text and export the version you need. Raw stays available.</p>
+<p>Double-click the <strong>Audio Transcriber</strong> desktop shortcut, or open it from the Start menu. Select your speech model and import a recording. Choose Off, Light, or Medium cleanup; file imports start with Light cleanup and Mostly structured formatting. Review the text and export the version you need. Raw stays available.</p>
 <p>For MP3, M4A, or MP4 files, get a Windows executable through the <a href="https://www.ffmpeg.org/download.html">FFmpeg download page</a>, extract it locally, and use <strong>Choose FFmpeg</strong> to select <code>bin\ffmpeg.exe</code>. The decoder executable is separate from this installer.</p>
 <p>Dictation starts with Medium cleanup and Mostly prose formatting. Open <strong>Live dictation</strong>, select your microphone and model, and enable the shortcut. Toggle starts and stops with separate presses; Hold records while the shortcut is held. Wait for <strong>Recording</strong> before speaking. Your text is saved before insertion into the focused app. Processing begins after you stop.</p>
 <h2>Updates and your files</h2>
-<p>Close the app and run the newer installer into the same installation folder. Recordings, models, settings, and transcripts normally live in <code>%LOCALAPPDATA%\npu-scribe</code>; updating or uninstalling the app keeps that folder.</p>
+<p>Close the app and run the newer installer into the same installation folder. Recordings, models, settings, and transcripts normally live in <code>%LOCALAPPDATA%\audio-transcriber</code>; updating or uninstalling the app keeps that folder. Existing libraries from before the rename are reused.</p>
 <p>The installer is unsigned, so Windows may show an unknown-publisher warning. Download release files from <a href="https://github.com/derek-l8/npu-scribe/releases">the project’s GitHub releases</a>. Review important text: transcription and cleanup can make mistakes. Dictation microphone and app compatibility need broader checks.</p>
 <p>The app uses Qt/PySide under LGPLv3 and FFmpeg playback libraries under LGPLv2.1 or later. Their notices are in <a href="../licenses/THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a>, with a <a href="../licenses/LIBRARY_BUILD.md">rebuild guide</a>. Library sources and build instructions accompany binary releases; you may replace those libraries with compatible modified builds.</p>
 <p><a href="https://github.com/derek-l8/npu-scribe/blob/main/docs/USER_GUIDE.md">Full user guide</a> · <a href="https://github.com/derek-l8/npu-scribe/issues">Report a problem</a></p>
