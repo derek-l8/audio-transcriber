@@ -83,13 +83,11 @@ a desktop busy guard.
 through UI Automation, and sends Unicode input after saving the recovery copy.
 Hold mode polls release of the configured keys; no keyboard hook is installed.
 Focus/password checks fail to recovery, and closing unregisters the shortcut.
-A bundled FFmpeg decoder executable remains unimplemented. Earlier PyInstaller bundles and the Inno Setup recipe
-passed [one-host installation and lifecycle checks](host-validation/evidence/2026-10-02/package-validation/README.md)
-and [native frozen review checks](host-validation/evidence/2026-10-02/frozen-review/README.md).
-Those builds predate AI cleanup; the current cleanup-enabled executable and
-installer have not been rebuilt and exercised. Wizard/startup/version-upgrade
-checks and complete redistribution notices also remain pending. See
-[packaging](packaging/README.md).
+FFmpeg is configured separately. The Windows GUI/worker bundle and Inno Setup
+installer passed local transcription, cleanup, formatting, desktop-shortcut,
+reinstall, and uninstall checks with Python 3.14. See the
+[current checkpoint](host-validation/evidence/2026-10-04/audio-transcriber-checkpoint/README.md)
+and [packaging guide](packaging/README.md). These checks cover one Windows host.
 Only explicit acquisition/evaluation commands initiate network downloads.
 
 ## Data directory layout

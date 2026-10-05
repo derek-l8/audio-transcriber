@@ -560,7 +560,6 @@ Required repository documents:
 - `MODEL_EVALUATION.md` — datasets, licenses, methodology, metrics, hardware, and results;
 - `PRIVACY.md` — data handling, retention, network behavior, and limitations;
 - `DECISIONS.md` — architecture decision records or index to them;
-- `LEARNING_GUIDE.md` — concepts mapped to actual code, suggested modifications, debugging exercises, and interview questions;
 - `LICENSE` — MIT for original code;
 - third-party notices and model/dataset license documentation.
 
