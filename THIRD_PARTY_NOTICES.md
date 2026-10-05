@@ -24,12 +24,18 @@ PyInstaller 6.22.3 and hooks 2026.8 build the app; the
 permits distributing the generated application under its own license.
 Inno Setup 7.1.0 is a build tool, not an installed runtime dependency.
 
+Binary releases are accompanied by `npu-scribe-0.1.0-library-sources.zip`, with
+pinned Qt/PySide, FFmpeg and zlib sources, upstream build recipes, and
+[rebuild instructions](packaging/LIBRARY_BUILD.md). The installer includes those
+instructions, the source manifest, and upstream attribution/license files in
+`_internal/licenses/`. You may replace the shared libraries with compatible
+modified builds and reverse-engineer the app to debug those modifications.
+NPU Scribe makes no local changes to the upstream libraries.
+
+The bundle excludes the unused Qt Virtual Keyboard and PDF plugins and the
+software OpenGL renderer. It uses the Widgets interface and native media plugins.
 See [Qt for Python licensing](https://doc.qt.io/qtforpython-6/licenses.html) and
-[FFmpeg's distribution guidance](https://ffmpeg.org/legal.html). Before publishing
-binary releases, make the corresponding Qt/PySide/FFmpeg sources and build
-information available with that release; collecting notices alone does not
-complete those source obligations. The local installer has not been published.
-The recorded FFmpeg configuration is retained in the installer validation report.
+[FFmpeg's distribution guidance](https://ffmpeg.org/legal.html).
 
 ## Separately downloaded files
 

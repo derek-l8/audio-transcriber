@@ -19,7 +19,7 @@ The source package also supports Python 3.11.
 
 The [Windows installer](docs/USER_GUIDE.md#using-the-windows-installer) includes
 the app and a setup guide without requiring Python or Git. It is built locally;
-a prebuilt release is not yet available. See [build instructions and validation](packaging/README.md).
+a prebuilt release is not yet available. See [installer build and release instructions](packaging/README.md).
 
 ## Transcribe and export
 
