@@ -12,6 +12,23 @@ from packaging.requirements import Requirement
 
 
 def collect_notices(root: Path, output: Path) -> list[tuple[str, str]]:
+    source_notices = root / "build/source-materials/qt-third-party-notices.txt"
+    if not source_notices.is_file():
+        raise FileNotFoundError("Run packaging/collect_sources.py before building the bundle")
+    record = json.loads((source_notices.parent / "source-notices.json").read_text(encoding="utf-8"))
+    expected = {
+        "manifest_sha256": hashlib.sha256(
+            (root / "packaging/third-party-sources.json").read_bytes()
+        ).hexdigest(),
+        "notices_sha256": hashlib.sha256(source_notices.read_bytes()).hexdigest(),
+    }
+    if record != expected:
+        raise RuntimeError("Library sources changed; rerun packaging/collect_sources.py")
+    if any(
+        distribution(name).version != "6.11.2"
+        for name in ("PySide6", "PySide6_Essentials", "PySide6_Addons", "shiboken6")
+    ):
+        raise RuntimeError("Update the pinned library sources before changing PySide6")
     output.mkdir(parents=True, exist_ok=True)
     files: list[tuple[str, str]] = []
     inventory = []
@@ -59,6 +76,9 @@ def collect_notices(root: Path, output: Path) -> list[tuple[str, str]]:
         for file in (root / "packaging/licenses").iterdir()
         if file.is_file()
     )
+    files.append((str(source_notices), "licenses"))
+    for name in ("LIBRARY_BUILD.md", "third-party-sources.json"):
+        files.append((str(root / "packaging" / name), "licenses"))
     for name in ("LICENSE", "THIRD_PARTY_NOTICES.md"):
         files.append((str(root / name), "licenses"))
     index = output / "runtime-inventory.json"

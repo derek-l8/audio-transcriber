@@ -1,0 +1,68 @@
+{
+  "checked_at": "2026-10-05T01:56:44.805217+00:00",
+  "source_base_commit": "0223cda94e6389587b9e1740b7967dba0475c19d",
+  "app_source_matches_base": true,
+  "packaging_changes_uncommitted": true,
+  "installer": {
+    "file": "npu-scribe-0.1.0-windows-x64.exe",
+    "bytes": 92075357,
+    "sha256": "88def4307805f044061d424ad5dfa6137c21396fcd259aaea624f8f0343893ad",
+    "signed": false,
+    "published": false
+  },
+  "application_checks": {
+    "compiler_version": "7.1.0",
+    "fresh_install": "passed",
+    "startup_default": "unchecked",
+    "shortcuts_created": false,
+    "installed_worker_cpu_inference": "passed",
+    "installed_worker_cleanup_and_formatting": "passed",
+    "installed_worker_ai_and_formatted_exports": "passed",
+    "installed_lecture_defaults": "light / structured",
+    "reinstall": "passed",
+    "versioned_reinstall": "0.1.0 to 0.1.1; same application payload",
+    "uninstall": "passed",
+    "inside_library_files_preserved": 41,
+    "separate_library_files_preserved": 42,
+    "unknown_nested_file_preserved": true
+  },
+  "gui_checks": {
+    "playback_and_seek": "passed",
+    "editing_and_history": "passed",
+    "search_and_reopen": "passed",
+    "exports": 12,
+    "lecture_defaults": "light / structured",
+    "dictation_defaults": "medium / prose",
+    "microphone_recording_started": false
+  },
+  "documentation_refresh": {
+    "changed_files": [
+      "_internal/help/GettingStarted.html",
+      "_internal/licenses/THIRD_PARTY_NOTICES.md"
+    ],
+    "gui_sha256": "b2e76a7e1b9bf0e3e4edb9823bb963ff35cbce0059bed66f6d5f2f3bbb7770d6",
+    "worker_sha256": "e58bafc1cf059bdd80654239cc7a4c2bfe06723c184b7d58917d30adf7909dea"
+  },
+  "final_payload_check": {
+    "final_installed_payload_files_verified": 1296,
+    "payload_matches_final_bundle": true,
+    "payload_removed": true,
+    "validation_registration_removed": true,
+    "scope": "Silent isolated install and uninstall; application workflows checked before the two documentation files were refreshed."
+  },
+  "library_source_archives_verified": 8,
+  "source_archive": "npu-scribe-0.1.0-library-sources.zip",
+  "excluded_unused_components": [
+    "Qt Virtual Keyboard",
+    "Qt PDF plugin",
+    "Mesa software OpenGL renderer"
+  ],
+  "checks": {
+    "packaging_tests": "18 passed",
+    "ruff_format": "passed",
+    "ruff_lint": "passed",
+    "mypy": "28 source files passed",
+    "wheel_source_contents": "passed"
+  },
+  "scope": "One Windows x64 host; supplied 10-second speech clip for CPU transcription and GPU cleanup/formatting; owned GUI checks used mock transcription. Real microphone capture, visual wizard, another host, and different-application-payload upgrade remain unchecked."
+}
